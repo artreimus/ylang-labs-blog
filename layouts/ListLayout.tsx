@@ -8,6 +8,7 @@ import type { Blog } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
+import EmptyView from '@/components/emptyView'
 
 interface PaginationProps {
   totalPages: number
@@ -111,7 +112,12 @@ export default function ListLayout({
           </div>
         </div>
         <ul>
-          {!filteredBlogPosts.length && 'No posts found.'}
+          {!filteredBlogPosts.length && (
+            <EmptyView
+              title="No Posts Yet"
+              description="The intersection of AI and web development is waiting to be explored. Check back soon for innovative ideas and insights!"
+            />
+          )}
           {displayPosts.map((post) => {
             const { path, date, title, summary, tags } = post
             return (
