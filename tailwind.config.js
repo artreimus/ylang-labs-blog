@@ -95,6 +95,35 @@ module.exports = {
           },
         },
       }),
+      keyframes: {
+        typewriter: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        },
+        blinkCaret: {
+          '0%, 100%': { borderColor: 'transparent' },
+          '50%': { borderColor: 'currentColor' },
+        },
+        typewriterWithCaret: {
+          '0%': {
+            width: '0%',
+            borderRightColor: 'currentColor',
+          },
+          '90%': {
+            width: '100%',
+            borderRightColor: 'currentColor',
+          },
+          '100%': {
+            width: '100%',
+            borderRightColor: 'transparent',
+          },
+        },
+      },
+      animation: {
+        typewriter: 'typewriter 4s steps(40) forwards',
+        blinkCaret: 'blinkCaret 0.75s step-end infinite',
+        typewriterWithCaret: 'typewriterWithCaret 4s steps(40) forwards',
+      },
     },
   },
   plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
