@@ -31,7 +31,9 @@ const EmptyView: React.FC<EmptyViewProps> = ({ title, description }) => {
       </svg>
       <div className="flex flex-col items-center gap-1">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
-        <p className="max-w-[300px] text-sm text-gray-500 dark:text-gray-400">{description} </p>
+        <p className="max-w-[300px] text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+          {description}
+        </p>
       </div>
     </div>
   )
