@@ -5,21 +5,21 @@ import Image from 'next/image'
 import React from 'react'
 
 export default function BlogCard({ post }) {
-  const { slug, date, title, tags, images } = post
+  const { slug, date, title, tags, cardImage } = post
 
   return (
     <Link href={`/blog/${slug}`} className="group block h-[320px] w-[240px]">
       <article className="relative h-full w-full overflow-hidden rounded-lg">
         {/* Image */}
         <Image
-          src={images?.[0] ?? 'https://picsum.photos/seed/picsum/800/400'}
+          src={cardImage}
           alt={title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        {/* <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" /> */}
 
         {/* Upper Content: Tags and Date */}
         <div className="absolute left-0 top-0 p-4">
