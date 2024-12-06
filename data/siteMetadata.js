@@ -5,7 +5,7 @@ const siteMetadata = {
   headerTitle: 'Ylang Labs',
   description: 'Blogs about how AI and web development are shaping the future.',
   language: 'en-us',
-  theme: 'system', // system, dark or light
+  theme: 'light', // system, dark or light
   siteUrl: 'https://ylanglabs.com',
   siteRepo: 'https://github.com/artreimus/ylang-labs',
   siteLogo: `${process.env.BASE_PATH || ''}/static/images/logo.png`,
