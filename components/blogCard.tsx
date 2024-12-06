@@ -1,5 +1,5 @@
 import Link from '@/components/Link'
-import Tag from '@/components/Tag'
+import Tag from '@/components/CardTag'
 import { formatDate } from 'pliny/utils/formatDate'
 import Image from 'next/image'
 import React from 'react'
