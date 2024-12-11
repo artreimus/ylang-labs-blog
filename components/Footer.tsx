@@ -19,11 +19,11 @@ export default function Footer() {
           <SocialIcon kind="medium" href={siteMetadata.medium} size={6} />
         </div>
         <div className="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <div>{siteMetadata.author}</div>
-          <div>{` • `}</div>
-          <div>{`© ${new Date().getFullYear()}`}</div>
-          <div>{` • `}</div>
-          <Link href="/">{siteMetadata.title}</Link>
+          {/* <div>{siteMetadata.author}</div> */}
+          {/* <div>{` • `}</div> */}
+          {/* <Link href="/">{siteMetadata.title}</Link> */}
+          {/* <div>{` • `}</div> */}
+          <div>{`© ${new Date().getFullYear()} ${siteMetadata.title}`}</div>
         </div>
       </div>
     </footer>
