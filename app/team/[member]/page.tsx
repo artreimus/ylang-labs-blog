@@ -12,7 +12,7 @@ interface Props {
 }
 
 // Configuration for team members
-const TEAM_MEMBERS = ['van-panugan', 'arthur-reimus']
+const TEAM_MEMBERS = ['van-panugan', 'arthur-reimus', 'christopher-caysido', 'ezekiel-mariano']
 
 // Helper function to filter team members
 const getTeamAuthors = () => {
