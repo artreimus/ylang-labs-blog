@@ -1,37 +1,34 @@
-# Ylang Labs Blog
+# Ylang Labs
 
 <div align="center">
   <img src="./public/static/images/logo-text-colored.png" alt="Ylang Labs Logo" width="500"/>
-  <h3>Open Source AI & Web Development Hub</h3>
+  <h3>Discover the Best of AI & Web Development</h3>
 </div>
 
 ## About
 
-Welcome to the Ylang Labs blog repository! This is the codebase for our company website where we share knowledge, insights, and practical guides about AI Engineering and web development.
-
-At Ylang Labs, we believe that everyone—no matter their starting point—should have the power to shape the future with AI Engineering. Our blog serves as a platform to democratize access to cutting-edge AI tools and insights, making them accessible to all.
+Welcome to Ylang Labs - a reading platform dedicated to AI and web development. We believe that everyone should have access to quality content that helps them understand and shape the future of technology. Our platform serves as a space where readers can explore, learn, and deepen their understanding of AI engineering and web development.
 
 ## Features
 
-- 📚 In-depth articles about AI Engineering and web development
-- 🔧 Practical project tutorials and guides
-- 🤝 Community-driven content from our team of experts
-- 🎨 Clean, responsive design optimized for reading
+- 📚 In-depth articles and tutorials
+- 🎯 Focused content on AI and web development
+- 📱 Mobile-friendly reading experience
 - 🌙 Light/dark mode for comfortable reading
 - 🔍 Full-text search capabilities
-- 🏷️ Content organized by tags
-- 📱 Mobile-friendly interface
+- 🏷️ Organized content categories
+- 💬 Community discussions
 
 ## Content Focus
 
-Our blog content primarily covers:
+Our platform covers:
 
-- AI Engineering best practices
-- Machine Learning implementations
-- Web development tutorials
-- Open-source AI projects
-- Practical coding guides
+- AI Engineering concepts and applications
+- Web development best practices
+- Programming tutorials and guides
 - Industry insights and trends
+- Open-source projects and tools
+- Learning resources and pathways
 
 ## Contributing Authors
 

@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'Ylang Labs',
   author: 'Ylang Labs',
   headerTitle: 'Ylang Labs',
-  description: 'Blogs about how AI and web development are shaping the future.',
+  description: 'A place to read, write, and deepen your understanding of AI and web development.',
   language: 'en-us',
   theme: 'light', // system, dark or light
   siteUrl: 'https://ylanglabs.com',
