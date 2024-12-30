@@ -1,7 +1,7 @@
 # Ylang Labs Blog
 
 <div align="center">
-  <img src="/images/logo-yellow-bg.jpeg" alt="Ylang Labs Logo" width="200"/>
+  <img src="./public/static/images/logo-text-colored.png" alt="Ylang Labs Logo" width="500"/>
   <h3>Open Source AI & Web Development Hub</h3>
 </div>
 
