@@ -16,7 +16,7 @@ export default function Home({ posts }) {
             Latest Blogs
           </h1>
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-            Discover insightful blogs on AI engineering and web development
+            Discover insightful blogs on AI engineering
           </p>
         </div>
         <div className="relative w-full">

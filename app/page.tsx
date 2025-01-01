@@ -11,12 +11,11 @@ export default async function Page() {
       <div className="mb-24 flex h-[60vh] items-center justify-center sm:mb-32">
         <div className="flex flex-col items-center">
           <h1 className="mb-5 text-center font-serif text-4xl text-secondary-500 dark:text-white sm:text-8xl">
-            Discover the Best of <span className="text-primary-500">AI</span> and{' '}
-            <span className="text-primary-500">Web Development</span>
+            Discover the Best of <span className="text-primary-500">AI Engineering</span>
           </h1>
           <div>
             <p className="mb-10 overflow-hidden whitespace-normal border-r-0 text-center text-sm text-secondary-500 dark:border-white dark:text-white sm:animate-typewriterWithCaret sm:whitespace-nowrap sm:border-r-4 sm:border-secondary-500 sm:text-lg md:text-2xl">
-              A place to read and deepen your understanding of AI and web development.{' '}
+              A place to read and deepen your understanding of AI engineering.{' '}
             </p>
           </div>
           <div>

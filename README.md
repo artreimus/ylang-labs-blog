@@ -2,17 +2,17 @@
 
 <div align="center">
   <img src="./public/static/images/logo-text-colored.png" alt="Ylang Labs Logo" width="500"/>
-  <h3>Discover the Best of AI & Web Development</h3>
+  <h3>Discover the Best of AI Engineering</h3>
 </div>
 
 ## About
 
-Welcome to Ylang Labs - a reading platform dedicated to AI and web development. We believe that everyone should have access to quality content that helps them understand and shape the future of technology. Our platform serves as a space where readers can explore, learn, and deepen their understanding of AI engineering and web development.
+Welcome to Ylang Labs - a reading platform dedicated to AI engineering. We believe that everyone should have access to quality content that helps them understand and shape the future of artificial intelligence. Our platform serves as a space where readers can explore, learn, and deepen their understanding of AI engineering.
 
 ## Features
 
 - 📚 In-depth articles and tutorials
-- 🎯 Focused content on AI and web development
+- 🎯 Focused content on AI engineering
 - 📱 Mobile-friendly reading experience
 - 🌙 Light/dark mode for comfortable reading
 - 🔍 Full-text search capabilities
@@ -24,10 +24,12 @@ Welcome to Ylang Labs - a reading platform dedicated to AI and web development. 
 Our platform covers:
 
 - AI Engineering concepts and applications
-- Web development best practices
-- Programming tutorials and guides
+- Machine Learning fundamentals
+- Deep Learning techniques
+- Natural Language Processing
+- Computer Vision
+- AI Ethics and best practices
 - Industry insights and trends
-- Open-source projects and tools
 - Learning resources and pathways
 
 ## Contributing Authors

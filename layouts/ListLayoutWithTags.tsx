@@ -125,7 +125,7 @@ export default function ListLayoutWithTags({
               {!displayPosts.length && (
                 <EmptyView
                   title="No Posts Yet"
-                  description="The intersection of AI and web development is waiting to be explored. Check back soon for innovative ideas and insights!"
+                  description="The world of AI Engineering is waiting to be explored. Check back soon for cutting-edge insights and practical guides!"
                 />
               )}
               {displayPosts.map((post) => {

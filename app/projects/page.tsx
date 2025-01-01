@@ -19,7 +19,7 @@ export default function Projects() {
             {!projectsData.length && (
               <EmptyView
                 title="No Projects Yet"
-                description="The possibilities of AI and web development are endless. Check back soon for groundbreaking projects!"
+                description="The future of AI Engineering is waiting to be built. Check back soon for innovative projects and tools!"
               />
             )}
             {projectsData.map((d) => (
