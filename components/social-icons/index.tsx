@@ -26,24 +26,22 @@ const components = {
   medium: Medium,
 }
 
-type SocialIconProps = {
+interface Props {
   kind: keyof typeof components
   href: string | undefined
   size?: number
+  className?: string
 }
 
-const SocialIcon = ({ kind, href, size = 8 }: SocialIconProps) => {
-  if (
-    !href ||
-    (kind === 'mail' && !/^mailto:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(href))
-  )
+const SocialIcon = ({ kind, href, size = 8, className = '' }: Props) => {
+  if (!href || (kind === 'mail' && !/^mailto:\w+([.-]?\w+)@\w+([.-]?\w+)(.\w{2,3})+$/.test(href)))
     return null
 
   const SocialSvg = components[kind]
 
   return (
     <a
-      className="text-sm text-gray-500 transition hover:text-gray-600"
+      className={`text-sm text-gray-500 transition hover:text-gray-600 ${className}`}
       target="_blank"
       rel="noopener noreferrer"
       href={href}
