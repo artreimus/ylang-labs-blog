@@ -43,6 +43,20 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
             </div>
             <div className="relative pt-10">
               <PageTitle>{title}</PageTitle>
+              <dl className="mt-4 space-y-10">
+                <div>
+                  <dt className="sr-only">Published on</dt>
+                  <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                    <time dateTime={date}>
+                      {new Date(date).toLocaleDateString(siteMetadata.locale, {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </time>
+                  </dd>
+                </div>
+              </dl>
               <dl className="pt-6">
                 <dt className="sr-only">Authors</dt>
                 <dd>
