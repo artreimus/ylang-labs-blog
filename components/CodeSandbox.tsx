@@ -7,19 +7,15 @@ interface CodeSandboxProps {
 
 const CodeSandbox: React.FC<CodeSandboxProps> = ({ id, title }) => {
   return (
-    <iframe
-      style={{
-        width: '100%',
-        height: 900,
-        outline: '1px solid #252525',
-        border: 0,
-        borderRadius: 8,
-        marginBottom: 16,
-        zIndex: 100,
-      }}
-      title="CodeSandbox"
-      src={`https://codesandbox.io/embed/${id}`}
-    ></iframe>
+    <div className="relative h-0 w-full pb-[56.25%]">
+      <iframe
+        className="absolute left-0 top-0 mb-4 h-full w-full rounded-lg border-[1px] border-gray-800 dark:border-gray-200"
+        title={title}
+        src={`https://codesandbox.io/embed/${id}`}
+        allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+        sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+      ></iframe>
+    </div>
   )
 }
 
