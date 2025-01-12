@@ -47,7 +47,7 @@ const initialNodes = [
   {
     id: '5',
     data: { label: 'Archival Search' },
-    position: { x: 420, y: 200 },
+    position: { x: 420, y: 210 },
     style: nodeStyle,
   },
   {
