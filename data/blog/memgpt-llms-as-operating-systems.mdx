@@ -127,20 +127,9 @@ A key benefit of MemGPT is its ability to edit and update its memory in real tim
 - Incorporating new details immediately
 - Maintaining a personalized, up-to-date knowledge base
 
-```mermaid
-graph TD
-    A[User Input] --> B[Memory Analysis]
-    B --> C{Requires Update?}
-    C -->|Yes| D[Edit Memory]
-    C -->|No| E[Continue]
-    D --> F[Update Core Memory]
-    D --> G[Update External Storage]
-    F --> H[Next Interaction]
-    G --> H
-    E --> H
-```
+<SelfEditingMemoryFlow />
 
-In everyday use—like a personal assistant that suggests beverages—MemGPT seamlessly updates its memory so it can accurately recall “tea” instead of “coffee” in all subsequent exchanges.
+In everyday use—like a personal assistant that suggests beverages—MemGPT seamlessly updates its memory so it can accurately recall "tea" instead of "coffee" in all subsequent exchanges.
 
 ### B. Inner Thoughts
 
@@ -151,42 +140,23 @@ Behind the scenes, MemGPT operates an **internal monologue** that drives more nu
 - Formulate multi-step plans
 - Reflect on its own knowledge gaps and correct them
 
-```mermaid
-graph LR
-    A[Input Processing] --> B[Inner Monologue]
-    B --> C[Memory Check]
-    B --> D[Tool Usage]
-    B --> E[Response Planning]
-    C --> F[Final Response]
-    D --> F
-    E --> F
-```
+<InnerThoughtsFlow />
 
-For instance, upon seeing a user’s birthday, the inner monologue might note: “This is important for personalization. Store it in Core Memory and keep a record for future greetings.”
+For instance, upon seeing a user's birthday, the inner monologue might note: "This is important for personalization. Store it in Core Memory and keep a record for future greetings."
 
 ### C. The Agentic Loop
 
 #### Heartbeat Mechanism
 
-MemGPT’s **heartbeat mechanism** lets it operate continuously, without waiting for explicit user prompts. It:
+MemGPT's **heartbeat mechanism** lets it operate continuously, without waiting for explicit user prompts. It:
 
-```mermaid
-graph TD
-    A[Heartbeat Trigger] --> B[State Evaluation]
-    B --> C[Memory Check]
-    C --> D{Action Needed?}
-    D -->|Yes| E[Execute Action]
-    D -->|No| F[Wait for Next Heartbeat]
-    E --> G[Update State]
-    G --> F
-    F --> A
-```
+<HeartbeatFlow />
 
 This mechanism ensures the agent can autonomously manage its memory, monitor ongoing tasks, or even set reminders for future interactions.
 
 #### Memory Statistics
 
-Like an OS’s resource monitor, MemGPT tracks how it allocates memory across tiers. This includes:
+Like an OS's resource monitor, MemGPT tracks how it allocates memory across tiers. This includes:
 
 - **Context window usage** (how many tokens are in immediate focus)
 - **External storage tracking** (archival and recall usage)
@@ -202,7 +172,7 @@ MemGPT draws on operating system principles to handle large volumes of data acro
 
 ### A. Context Compilation
 
-When it’s time to generate a response, MemGPT compiles the most relevant data into the **context window** for the LLM to process:
+When it's time to generate a response, MemGPT compiles the most relevant data into the **context window** for the LLM to process:
 
 ```mermaid
 graph TD
@@ -250,7 +220,7 @@ graph LR
     F --> G[Context Integration]
 ```
 
-This ensures MemGPT can find the right information—be it a user’s last request or a relevant document—quickly and accurately.
+This ensures MemGPT can find the right information—be it a user's last request or a relevant document—quickly and accurately.
 
 #### 2. Compression and Summarization
 
@@ -269,7 +239,7 @@ graph TD
 
 #### 3. Memory Eviction
 
-When it’s necessary to free up tokens, MemGPT uses **eviction policies** that factor in:
+When it's necessary to free up tokens, MemGPT uses **eviction policies** that factor in:
 
 - **Token pressure** (imminent risk of overflow)
 - **Information lifecycle** (frequency, recency, relevance)
@@ -281,7 +251,7 @@ This ensures that only the most pertinent information remains active while older
 
 #### 1. Session State Management
 
-MemGPT captures the agent’s state at the end of a session and recovers it in future interactions:
+MemGPT captures the agent's state at the end of a session and recovers it in future interactions:
 
 ```mermaid
 graph TD
@@ -313,20 +283,20 @@ Reliability stems from:
 
 ## V. Applications and Benefits
 
-MemGPT’s architecture enables the creation of AI agents that are context-aware, persistent, and resource-efficient—qualities rarely found in standard chatbots. Here’s how that translates into practical advantages:
+MemGPT's architecture enables the creation of AI agents that are context-aware, persistent, and resource-efficient—qualities rarely found in standard chatbots. Here's how that translates into practical advantages:
 
 ### A. Enhanced Interaction Capabilities
 
 #### 1. Personalized User Experiences
 
-By retaining user preferences (e.g., “I prefer tea over coffee”) and facts (like birthdays, location, or past tasks), MemGPT provides responses that feel genuinely personalized. This is invaluable for:
+By retaining user preferences (e.g., "I prefer tea over coffee") and facts (like birthdays, location, or past tasks), MemGPT provides responses that feel genuinely personalized. This is invaluable for:
 
-- **Enterprise customer support**: Retaining a customer’s history, purchase details, or previous interactions for more accurate, empathetic responses
+- **Enterprise customer support**: Retaining a customer's history, purchase details, or previous interactions for more accurate, empathetic responses
 - **Personal assistants**: Remembering dietary restrictions or daily schedules
 
 #### 2. Long-Term Relationship Building
 
-MemGPT’s memory tiers accumulate details across sessions, allowing it to develop a deeper understanding of user behavior and context. Over time, it not only answers questions but also anticipates needs—much like a personal assistant that grows smarter with every conversation.
+MemGPT's memory tiers accumulate details across sessions, allowing it to develop a deeper understanding of user behavior and context. Over time, it not only answers questions but also anticipates needs—much like a personal assistant that grows smarter with every conversation.
 
 #### 3. Multi-Session Continuity
 
@@ -353,7 +323,7 @@ An enterprise example might be an R&D assistant reviewing extensive internal doc
 
 #### 2. Multi-Step Problem Solving
 
-The agent’s internal monologue (inner thoughts) lets it plan, iterate, and refine answers without bombarding the user with intermediate steps. Whether scheduling a trip, debugging code, or summarizing a lengthy policy, MemGPT’s memory management keeps it contextually grounded from start to finish.
+The agent's internal monologue (inner thoughts) lets it plan, iterate, and refine answers without bombarding the user with intermediate steps. Whether scheduling a trip, debugging code, or summarizing a lengthy policy, MemGPT's memory management keeps it contextually grounded from start to finish.
 
 #### 3. Learning from Past Interactions
 
@@ -363,7 +333,7 @@ Over time, MemGPT refines its approach by noticing patterns in user feedback. If
 
 #### 1. Efficient Resource Utilization
 
-MemGPT carefully balances immediate (“hot”) data in the context window with secondary (Recall) and tertiary (Archival) storage, freeing up tokens for the most relevant content. This saves computational costs and preserves fast response times.
+MemGPT carefully balances immediate ("hot") data in the context window with secondary (Recall) and tertiary (Archival) storage, freeing up tokens for the most relevant content. This saves computational costs and preserves fast response times.
 
 #### 2. Large Document Processing
 
@@ -382,7 +352,7 @@ MemGPT chunks and progressively summarizes text, allowing it to maintain a high-
 
 #### 3. Extended Conversation Handling
 
-Long chats are no longer a performance bottleneck. Older messages are summarized and stored, and only the most pertinent details remain in the active context. This avoids the dreaded “lost in the middle” problem.
+Long chats are no longer a performance bottleneck. Older messages are summarized and stored, and only the most pertinent details remain in the active context. This avoids the dreaded "lost in the middle" problem.
 
 #### 4. Cost-Effective Operation
 
@@ -403,7 +373,7 @@ The transition from simple chatbots to truly autonomous AI agents hinges on one 
    Breaking tasks into manageable pieces, retrieving relevant data on demand, and planning multiple steps in advance allows MemGPT to tackle problems with unprecedented sophistication.
 
 3. **Resource Efficiency**  
-   Token budgets no longer limit how “smart” the AI can be. MemGPT optimizes memory usage so the agent remains both highly capable and cost-effective.
+   Token budgets no longer limit how "smart" the AI can be. MemGPT optimizes memory usage so the agent remains both highly capable and cost-effective.
 
 ### Implications for AI Development
 
@@ -416,7 +386,7 @@ The transition from simple chatbots to truly autonomous AI agents hinges on one 
 3. **Development Practices**  
    With MemGPT as a model, developers can incorporate memory tiers and OS-like strategies into AI workflows, enabling more intuitive and powerful user interactions.
 
-As we push the boundaries of AI, MemGPT’s approach underscores how critical memory is to autonomy and learning. By systematically managing what to keep in short-term context and what to store for the long haul, MemGPT sets a new standard for building AI systems that grow, adapt, and form meaningful interactions over time.
+As we push the boundaries of AI, MemGPT's approach underscores how critical memory is to autonomy and learning. By systematically managing what to keep in short-term context and what to store for the long haul, MemGPT sets a new standard for building AI systems that grow, adapt, and form meaningful interactions over time.
 
 ---
 
@@ -434,7 +404,7 @@ As we push the boundaries of AI, MemGPT’s approach underscores how critical me
 4. MemGPT Explained - Weaviate  
    [https://youtu.be/nQmZmFERmrg](https://youtu.be/nQmZmFERmrg)
 
-5. Huyen, C. _AI Engineering: Building Applications with Foundation Models_, O’Reilly Media, 2024  
+5. Huyen, C. _AI Engineering: Building Applications with Foundation Models_, O'Reilly Media, 2024  
    [https://learning.oreilly.com/library/view/ai-engineering/9781098166298/](https://learning.oreilly.com/library/view/ai-engineering/9781098166298/)
 
 6. Agents (Chip Huyen)  

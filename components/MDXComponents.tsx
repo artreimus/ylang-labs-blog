@@ -31,6 +31,27 @@ const MemoryFlowDiagram = dynamic(
   }
 )
 
+const InnerThoughtsFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/InnerThoughtsFlow'),
+  {
+    ssr: false,
+  }
+)
+
+const HeartbeatFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/HeartbeatFlow'),
+  {
+    ssr: false,
+  }
+)
+
+const SelfEditingMemoryFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/SelfEditingMemoryFlow'),
+  {
+    ssr: false,
+  }
+)
+
 export const components: MDXComponents = {
   Image,
   TOCInline,
@@ -44,4 +65,7 @@ export const components: MDXComponents = {
   ChatHistoryFlow,
   MemorySectionsFlow,
   MemoryFlowDiagram,
+  InnerThoughtsFlow,
+  HeartbeatFlow,
+  SelfEditingMemoryFlow,
 }
