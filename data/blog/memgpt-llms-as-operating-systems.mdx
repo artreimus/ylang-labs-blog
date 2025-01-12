@@ -64,13 +64,7 @@ Think of system instructions as the “kernel” of the agent. These are core di
 
 The agent uses a **FIFO (First-In-First-Out) queue**—a standard queue approach where the oldest items get processed or archived first—to manage conversation data:
 
-```mermaid
-graph TD
-    A[New Messages] --> B[Active Context Window]
-    B --> C[Summarization]
-    C --> D[Archival Storage]
-    D --> E[Retrieval When Needed]
-```
+<ChatHistoryFlow />
 
 Key points include:
 
@@ -82,18 +76,7 @@ Key points include:
 
 MemGPT maintains distinct memory sections, each serving a specific function:
 
-```mermaid
-graph LR
-    A[Memory Sections] --> B[Core Memory]
-    A --> C[Recall Memory]
-    A --> D[Archival Memory]
-    B --> E[User Data]
-    B --> F[Agent State]
-    C --> G[Recent History]
-    C --> H[Summaries]
-    D --> I[Long-term Storage]
-    D --> J[Vector Database]
-```
+<MemorySectionsFlow />
 
 ### B. Memory Types
 
@@ -128,17 +111,7 @@ The **Recall Memory** is a secondary layer for data that was recently active but
 
 In practice, data flows between these tiers based on priority and how recently it was accessed:
 
-```mermaid
-graph TD
-    A[User Input] --> B[Core Memory]
-    B --> C[Recall Memory]
-    C --> D[Archival Memory]
-    B --> E[Context Window]
-    C --> E
-    D --> E
-    E --> F[LLM Processing]
-    F --> G[Response]
-```
+<MemoryFlowDiagram />
 
 Just as an operating system prioritizes which applications get immediate RAM, MemGPT decides which information remains “top of mind” (Core Memory) and which information moves to deeper storage (Recall or Archival Memory).
 
