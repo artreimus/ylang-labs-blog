@@ -52,6 +52,34 @@ const SelfEditingMemoryFlow = dynamic(
   }
 )
 
+const ContextCompilationFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/ContextCompilationFlow'),
+  {
+    ssr: false,
+  }
+)
+
+const SearchRetrievalFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/SearchRetrievalFlow'),
+  {
+    ssr: false,
+  }
+)
+
+const CompressionFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/CompressionFlow'),
+  {
+    ssr: false,
+  }
+)
+
+const SessionStateFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/SessionStateFlow'),
+  {
+    ssr: false,
+  }
+)
+
 export const components: MDXComponents = {
   Image,
   TOCInline,
@@ -68,4 +96,8 @@ export const components: MDXComponents = {
   InnerThoughtsFlow,
   HeartbeatFlow,
   SelfEditingMemoryFlow,
+  ContextCompilationFlow,
+  SearchRetrievalFlow,
+  CompressionFlow,
+  SessionStateFlow,
 }

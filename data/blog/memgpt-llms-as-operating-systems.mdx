@@ -174,16 +174,7 @@ MemGPT draws on operating system principles to handle large volumes of data acro
 
 When it's time to generate a response, MemGPT compiles the most relevant data into the **context window** for the LLM to process:
 
-```mermaid
-graph TD
-    A[Agent State] --> B[System Instructions]
-    A --> C[Core Memory]
-    A --> D[Recent Messages]
-    B --> E[Context Window]
-    C --> E
-    D --> E
-    E --> F[LLM Processing]
-```
+- <ContextCompilationFlow />
 
 1. **Priority-based Inclusion**
 
@@ -208,17 +199,7 @@ graph TD
 
 MemGPT conducts **semantic searches** (using **vector embeddings**—numerical representations of text content) combined with keyword matches and time-aware relevance:
 
-```mermaid
-graph LR
-    A[User Query] --> B[Memory Analysis]
-    B --> C[Core Memory Search]
-    B --> D[Recall Memory Search]
-    B --> E[Archival Search]
-    C --> F[Result Compilation]
-    D --> F
-    E --> F
-    F --> G[Context Integration]
-```
+- <SearchRetrievalFlow />
 
 This ensures MemGPT can find the right information—be it a user's last request or a relevant document—quickly and accurately.
 
@@ -226,13 +207,7 @@ This ensures MemGPT can find the right information—be it a user's last request
 
 Because the context window is finite, MemGPT applies **recursive summarization** to older data:
 
-```mermaid
-graph TD
-    A[Original Content] --> B[Initial Summary]
-    B --> C[Compressed Summary]
-    C --> D[Core Points]
-    D --> E[Memory Storage]
-```
+<CompressionFlow />
 
 - **Progressive compression**: Summaries get shorter over time, retaining only the most vital points.
 - **Importance weighting**: MemGPT preserves crucial facts and discards less relevant details.
@@ -253,13 +228,7 @@ This ensures that only the most pertinent information remains active while older
 
 MemGPT captures the agent's state at the end of a session and recovers it in future interactions:
 
-```mermaid
-graph TD
-    A[Active Session] --> B[State Capture]
-    B --> C[Persistence Layer]
-    C --> D[State Recovery]
-    D --> E[New Session]
-```
+<SessionStateFlow />
 
 - **State serialization** (encoding memory structures for storage)
 - **Incremental updates** (only changed portions get saved)
