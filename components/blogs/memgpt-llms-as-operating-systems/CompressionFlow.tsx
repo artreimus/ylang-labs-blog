@@ -29,26 +29,26 @@ const initialNodes = [
   {
     id: '2',
     data: { label: 'Initial Summary' },
-    position: { x: 250, y: 100 },
+    position: { x: 250, y: 125 },
     style: nodeStyle,
   },
   {
     id: '3',
     data: { label: 'Compressed Summary' },
-    position: { x: 250, y: 200 },
+    position: { x: 250, y: 250 },
     style: nodeStyle,
   },
   {
     id: '4',
     data: { label: 'Core Points' },
-    position: { x: 250, y: 300 },
+    position: { x: 250, y: 375 },
     style: nodeStyle,
   },
   {
     id: '5',
     type: 'output',
     data: { label: 'Memory Storage' },
-    position: { x: 250, y: 400 },
+    position: { x: 250, y: 500 },
     style: nodeStyle,
   },
 ]
