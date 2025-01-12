@@ -5,105 +5,14 @@ import type { MDXComponents } from 'mdx/types'
 import Image from './Image'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
+
+// DSPy Blog Components
 import DspyWorkflowDiagram from './blogs/dspy-programming-not-prompting-your-lms/DspyWorkflowDiagram'
 import DspyVsTraditionalDiagram from './blogs/dspy-programming-not-prompting-your-lms/DspyVsTraditionalDiagram'
 import CompleteDspyEcosystemDiagram from './blogs/dspy-programming-not-prompting-your-lms/CompleteDspyEcosystemDiagram'
-import dynamic from 'next/dynamic'
 
-const ChatHistoryFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/ChatHistoryFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const MemorySectionsFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/MemorySectionsFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const MemoryFlowDiagram = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/MemoryFlowDiagram'),
-  {
-    ssr: false,
-  }
-)
-
-const InnerThoughtsFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/InnerThoughtsFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const HeartbeatFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/HeartbeatFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const SelfEditingMemoryFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/SelfEditingMemoryFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const ContextCompilationFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/ContextCompilationFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const SearchRetrievalFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/SearchRetrievalFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const CompressionFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/CompressionFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const SessionStateFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/SessionStateFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const ComplexTaskFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/ComplexTaskFlow'),
-  {
-    ssr: false,
-  }
-)
-
-const ResourceUtilizationFlow = dynamic(
-  () => import('./blogs/memgpt-llms-as-operating-systems/ResourceUtilizationFlow'),
-  {
-    ssr: false,
-  }
-)
-
-export const components: MDXComponents = {
-  Image,
-  TOCInline,
-  a: CustomLink,
-  pre: Pre,
-  table: TableWrapper,
-  BlogNewsletterForm,
-  DspyWorkflowDiagram,
-  DspyVsTraditionalDiagram,
-  CompleteDspyEcosystemDiagram,
+// MemGPT Blog Components
+import {
   ChatHistoryFlow,
   MemorySectionsFlow,
   MemoryFlowDiagram,
@@ -116,4 +25,42 @@ export const components: MDXComponents = {
   SessionStateFlow,
   ComplexTaskFlow,
   ResourceUtilizationFlow,
+} from './blogs/memgpt-llms-as-operating-systems/index'
+
+// Core MDX Components
+const coreMDXComponents = {
+  Image,
+  TOCInline,
+  a: CustomLink,
+  pre: Pre,
+  table: TableWrapper,
+  BlogNewsletterForm,
+}
+
+// Blog-specific Components
+const dspyBlogComponents = {
+  DspyWorkflowDiagram,
+  DspyVsTraditionalDiagram,
+  CompleteDspyEcosystemDiagram,
+}
+
+const memGPTBlogComponents = {
+  ChatHistoryFlow,
+  MemorySectionsFlow,
+  MemoryFlowDiagram,
+  InnerThoughtsFlow,
+  HeartbeatFlow,
+  SelfEditingMemoryFlow,
+  ContextCompilationFlow,
+  SearchRetrievalFlow,
+  CompressionFlow,
+  SessionStateFlow,
+  ComplexTaskFlow,
+  ResourceUtilizationFlow,
+}
+
+export const components: MDXComponents = {
+  ...coreMDXComponents,
+  ...dspyBlogComponents,
+  ...memGPTBlogComponents,
 }
