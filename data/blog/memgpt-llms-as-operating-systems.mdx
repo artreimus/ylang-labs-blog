@@ -277,16 +277,7 @@ Rather than resetting each time, MemGPT transitions seamlessly between sessions.
 
 MemGPT excels at tackling multi-step problems by decomposing them into sub-tasks and retrieving relevant information at each stage. For instance:
 
-```mermaid
-graph TD
-    A[Complex Task] --> B[Task Decomposition]
-    B --> C[Memory Search]
-    B --> D[Tool Usage]
-    B --> E[Context Integration]
-    C --> F[Solution Synthesis]
-    D --> F
-    E --> F
-```
+<ComplexTaskFlow />
 
 An enterprise example might be an R&D assistant reviewing extensive internal documents. MemGPT can summarize older research, pull up new findings, and integrate these results into a cohesive analysis.
 
@@ -308,14 +299,7 @@ MemGPT carefully balances immediate ("hot") data in the context window with seco
 
 When dealing with bulky files or extensive databases:
 
-```mermaid
-graph TD
-    A[Large Document] --> B[Chunking]
-    B --> C[Progressive Processing]
-    C --> D[Memory Management]
-    D --> E[Context Integration]
-    E --> F[Comprehensive Understanding]
-```
+<ResourceUtilizationFlow />
 
 MemGPT chunks and progressively summarizes text, allowing it to maintain a high-level grasp while retaining the ability to dive deeper into details on demand.
 

@@ -80,6 +80,20 @@ const SessionStateFlow = dynamic(
   }
 )
 
+const ComplexTaskFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/ComplexTaskFlow'),
+  {
+    ssr: false,
+  }
+)
+
+const ResourceUtilizationFlow = dynamic(
+  () => import('./blogs/memgpt-llms-as-operating-systems/ResourceUtilizationFlow'),
+  {
+    ssr: false,
+  }
+)
+
 export const components: MDXComponents = {
   Image,
   TOCInline,
@@ -100,4 +114,6 @@ export const components: MDXComponents = {
   SearchRetrievalFlow,
   CompressionFlow,
   SessionStateFlow,
+  ComplexTaskFlow,
+  ResourceUtilizationFlow,
 }
