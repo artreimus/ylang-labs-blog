@@ -2,16 +2,21 @@
 
 import React from 'react'
 import dynamic from 'next/dynamic'
-import { Background, Controls, useNodesState, useEdgesState } from 'reactflow'
+import { Background, Controls, useNodesState, useEdgesState, Position } from 'reactflow'
 import 'reactflow/dist/style.css'
 
 const ReactFlow = dynamic(() => import('reactflow').then((mod) => mod.default), {
   ssr: false,
 })
 
-const nodeClassName =
-  'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md px-4 py-2'
-const edgeClassName = 'stroke-gray-400 dark:stroke-gray-500'
+const nodeStyle = {
+  background: '#fefde8',
+  border: '1px solid #efc003',
+  borderRadius: '8px',
+  padding: '10px',
+  fontSize: '14px',
+  width: 150,
+}
 
 const initialNodes = [
   {
@@ -19,59 +24,59 @@ const initialNodes = [
     type: 'input',
     data: { label: 'Input Processing' },
     position: { x: 0, y: 100 },
-    className: nodeClassName,
-    sourcePosition: 'right',
+    style: nodeStyle,
+    sourcePosition: Position.Right,
   },
   {
     id: '2',
     data: { label: 'Inner Monologue' },
     position: { x: 200, y: 100 },
-    className: nodeClassName,
-    sourcePosition: 'right',
-    targetPosition: 'left',
+    style: nodeStyle,
+    sourcePosition: Position.Right,
+    targetPosition: Position.Left,
   },
   {
     id: '3',
     data: { label: 'Memory Check' },
     position: { x: 400, y: 50 },
-    className: nodeClassName,
-    sourcePosition: 'right',
-    targetPosition: 'left',
+    style: nodeStyle,
+    sourcePosition: Position.Right,
+    targetPosition: Position.Left,
   },
   {
     id: '4',
     data: { label: 'Tool Usage' },
     position: { x: 400, y: 100 },
-    className: nodeClassName,
-    sourcePosition: 'right',
-    targetPosition: 'left',
+    style: nodeStyle,
+    sourcePosition: Position.Right,
+    targetPosition: Position.Left,
   },
   {
     id: '5',
     data: { label: 'Response Planning' },
     position: { x: 400, y: 150 },
-    className: nodeClassName,
-    sourcePosition: 'right',
-    targetPosition: 'left',
+    style: nodeStyle,
+    sourcePosition: Position.Right,
+    targetPosition: Position.Left,
   },
   {
     id: '6',
     type: 'output',
     data: { label: 'Final Response' },
     position: { x: 600, y: 100 },
-    className: nodeClassName,
-    targetPosition: 'left',
+    style: nodeStyle,
+    targetPosition: Position.Left,
   },
 ]
 
 const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', className: edgeClassName },
-  { id: 'e2-3', source: '2', target: '3', className: edgeClassName },
-  { id: 'e2-4', source: '2', target: '4', className: edgeClassName },
-  { id: 'e2-5', source: '2', target: '5', className: edgeClassName },
-  { id: 'e3-6', source: '3', target: '6', className: edgeClassName },
-  { id: 'e4-6', source: '4', target: '6', className: edgeClassName },
-  { id: 'e5-6', source: '5', target: '6', className: edgeClassName },
+  { id: 'e1-2', source: '1', target: '2', style: { stroke: '#efc003' } },
+  { id: 'e2-3', source: '2', target: '3', style: { stroke: '#efc003' } },
+  { id: 'e2-4', source: '2', target: '4', style: { stroke: '#efc003' } },
+  { id: 'e2-5', source: '2', target: '5', style: { stroke: '#efc003' } },
+  { id: 'e3-6', source: '3', target: '6', style: { stroke: '#efc003' } },
+  { id: 'e4-6', source: '4', target: '6', style: { stroke: '#efc003' } },
+  { id: 'e5-6', source: '5', target: '6', style: { stroke: '#efc003' } },
 ]
 
 function InnerThoughtsFlow() {

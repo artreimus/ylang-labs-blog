@@ -2,16 +2,21 @@
 
 import React from 'react'
 import dynamic from 'next/dynamic'
-import { Background, Controls, useNodesState, useEdgesState } from 'reactflow'
+import { Background, Controls, useNodesState, useEdgesState, Position } from 'reactflow'
 import 'reactflow/dist/style.css'
 
 const ReactFlow = dynamic(() => import('reactflow').then((mod) => mod.default), {
   ssr: false,
 })
 
-const nodeClassName =
-  'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md px-4 py-2'
-const edgeClassName = 'stroke-gray-400 dark:stroke-gray-500'
+const nodeStyle = {
+  background: '#fefde8',
+  border: '1px solid #efc003',
+  borderRadius: '8px',
+  padding: '10px',
+  fontSize: '14px',
+  width: 150,
+}
 
 const initialNodes = [
   {
@@ -19,64 +24,50 @@ const initialNodes = [
     type: 'input',
     data: { label: 'User Input' },
     position: { x: 250, y: 0 },
-    className: nodeClassName,
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '2',
     data: { label: 'Memory Analysis' },
     position: { x: 250, y: 100 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '3',
     data: { label: 'Requires Update?' },
     position: { x: 250, y: 200 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '4',
     data: { label: 'Edit Memory' },
     position: { x: 100, y: 300 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '5',
     data: { label: 'Continue' },
     position: { x: 400, y: 300 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '6',
     data: { label: 'Update Core Memory' },
     position: { x: 0, y: 400 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '7',
     data: { label: 'Update External Storage' },
     position: { x: 200, y: 400 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '8',
     type: 'output',
     data: { label: 'Next Interaction' },
     position: { x: 250, y: 500 },
-    className: nodeClassName,
-    targetPosition: 'top',
+    style: nodeStyle,
   },
 ]
 
@@ -86,58 +77,58 @@ const initialEdges = [
     source: '1',
     target: '2',
     animated: true,
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e2-3',
     source: '2',
     target: '3',
     animated: true,
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e3-4',
     source: '3',
     target: '4',
     label: 'Yes',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e3-5',
     source: '3',
     target: '5',
     label: 'No',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e4-6',
     source: '4',
     target: '6',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e4-7',
     source: '4',
     target: '7',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e6-8',
     source: '6',
     target: '8',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e7-8',
     source: '7',
     target: '8',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e5-8',
     source: '5',
     target: '8',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
 ]
 

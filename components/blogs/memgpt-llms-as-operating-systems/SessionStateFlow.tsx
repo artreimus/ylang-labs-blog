@@ -2,16 +2,21 @@
 
 import React from 'react'
 import dynamic from 'next/dynamic'
-import { Background, Controls, useNodesState, useEdgesState } from 'reactflow'
+import { Background, Controls, useNodesState, useEdgesState, Position } from 'reactflow'
 import 'reactflow/dist/style.css'
 
 const ReactFlow = dynamic(() => import('reactflow').then((mod) => mod.default), {
   ssr: false,
 })
 
-const nodeClassName =
-  'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md px-4 py-2'
-const edgeClassName = 'stroke-gray-400 dark:stroke-gray-500'
+const nodeStyle = {
+  background: '#fefde8',
+  border: '1px solid #efc003',
+  borderRadius: '8px',
+  padding: '10px',
+  fontSize: '14px',
+  width: 150,
+}
 
 const initialNodes = [
   {
@@ -19,32 +24,32 @@ const initialNodes = [
     type: 'input',
     data: { label: 'Active Session' },
     position: { x: 250, y: 0 },
-    className: nodeClassName,
+    style: nodeStyle,
   },
   {
     id: '2',
     data: { label: 'State Capture' },
     position: { x: 250, y: 100 },
-    className: nodeClassName,
+    style: nodeStyle,
   },
   {
     id: '3',
     data: { label: 'Persistence Layer' },
     position: { x: 250, y: 200 },
-    className: nodeClassName,
+    style: nodeStyle,
   },
   {
     id: '4',
     data: { label: 'State Recovery' },
     position: { x: 250, y: 300 },
-    className: nodeClassName,
+    style: nodeStyle,
   },
   {
     id: '5',
     type: 'output',
     data: { label: 'New Session' },
     position: { x: 250, y: 400 },
-    className: nodeClassName,
+    style: nodeStyle,
   },
 ]
 
@@ -55,7 +60,7 @@ const initialEdges = [
     target: '2',
     animated: true,
     label: 'Serialize',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e2-3',
@@ -63,7 +68,7 @@ const initialEdges = [
     target: '3',
     animated: true,
     label: 'Store',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e3-4',
@@ -71,7 +76,7 @@ const initialEdges = [
     target: '4',
     animated: true,
     label: 'Load',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e4-5',
@@ -79,7 +84,7 @@ const initialEdges = [
     target: '5',
     animated: true,
     label: 'Initialize',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
 ]
 

@@ -2,16 +2,21 @@
 
 import React from 'react'
 import dynamic from 'next/dynamic'
-import { Background, Controls, useNodesState, useEdgesState } from 'reactflow'
+import { Background, Controls, useNodesState, useEdgesState, Position } from 'reactflow'
 import 'reactflow/dist/style.css'
 
 const ReactFlow = dynamic(() => import('reactflow').then((mod) => mod.default), {
   ssr: false,
 })
 
-const nodeClassName =
-  'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md px-4 py-2'
-const edgeClassName = 'stroke-gray-400 dark:stroke-gray-500'
+const nodeStyle = {
+  background: '#fefde8',
+  border: '1px solid #efc003',
+  borderRadius: '8px',
+  padding: '10px',
+  fontSize: '14px',
+  width: 150,
+}
 
 const initialNodes = [
   {
@@ -19,48 +24,38 @@ const initialNodes = [
     type: 'input',
     data: { label: 'Complex Task' },
     position: { x: 250, y: 0 },
-    className: nodeClassName,
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '2',
     data: { label: 'Task Decomposition' },
     position: { x: 250, y: 100 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '3',
     data: { label: 'Memory Search' },
     position: { x: 100, y: 200 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '4',
     data: { label: 'Tool Usage' },
     position: { x: 250, y: 200 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '5',
     data: { label: 'Context Integration' },
     position: { x: 400, y: 200 },
-    className: nodeClassName,
-    targetPosition: 'top',
-    sourcePosition: 'bottom',
+    style: nodeStyle,
   },
   {
     id: '6',
     type: 'output',
     data: { label: 'Solution Synthesis' },
     position: { x: 250, y: 300 },
-    className: nodeClassName,
-    targetPosition: 'top',
+    style: nodeStyle,
   },
 ]
 
@@ -70,43 +65,43 @@ const initialEdges = [
     source: '1',
     target: '2',
     animated: true,
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e2-3',
     source: '2',
     target: '3',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e2-4',
     source: '2',
     target: '4',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e2-5',
     source: '2',
     target: '5',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e3-6',
     source: '3',
     target: '6',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e4-6',
     source: '4',
     target: '6',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
   {
     id: 'e5-6',
     source: '5',
     target: '6',
-    className: edgeClassName,
+    style: { stroke: '#efc003' },
   },
 ]
 
