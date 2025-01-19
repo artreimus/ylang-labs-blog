@@ -27,6 +27,10 @@ import {
   ResourceUtilizationFlow,
 } from './blogs/memgpt-llms-as-operating-systems/index'
 
+// RAG Triad Blog Components
+import RAGTriad from './blogs/rag-triad-building-trust-in-rag-through-systematic-evaluation/RAGTriad'
+import DiagramSubtitle from './DiagramSubtitle'
+
 // Core MDX Components
 const coreMDXComponents = {
   Image,
@@ -35,6 +39,7 @@ const coreMDXComponents = {
   pre: Pre,
   table: TableWrapper,
   BlogNewsletterForm,
+  DiagramSubtitle,
 }
 
 // Blog-specific Components
@@ -59,8 +64,13 @@ const memGPTBlogComponents = {
   ResourceUtilizationFlow,
 }
 
+const ragTriadBlogComponents = {
+  RAGTriad,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
   ...memGPTBlogComponents,
+  ...ragTriadBlogComponents,
 }
