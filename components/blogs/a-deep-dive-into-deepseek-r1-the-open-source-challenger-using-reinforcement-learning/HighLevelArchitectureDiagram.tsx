@@ -2,7 +2,7 @@
 
 import React from 'react'
 import dynamic from 'next/dynamic'
-import { Background, Controls, useNodesState, useEdgesState, Position } from 'reactflow'
+import { Background, Controls, useNodesState, useEdgesState } from 'reactflow'
 import 'reactflow/dist/style.css'
 import DiagramSubtitle from '@/components/DiagramSubtitle'
 
@@ -12,7 +12,7 @@ const ReactFlow = dynamic(() => import('reactflow').then((mod) => mod.default), 
 })
 
 // Common styles for nodes
-const nodeStyle = {
+const primaryNodeStyle = {
   background: '#fefde8',
   border: '1px solid #efc003',
   borderRadius: '8px',
@@ -21,75 +21,84 @@ const nodeStyle = {
   width: 200,
 }
 
+const secondaryNodeStyle = {
+  background: '#f3f8ed',
+  border: '1px solid #75b34a',
+  borderRadius: '8px',
+  padding: '10px',
+  fontSize: '14px',
+  width: 200,
+}
+
 // Initial nodes configuration
 const initialNodes = [
-  // Traditional Approach (Left Side)
+  // Traditional Approach (Left Side) - using secondary colors
   {
     id: '1',
     type: 'input',
     data: { label: 'Self-Supervised Pre-Training' },
     position: { x: 100, y: 0 },
-    style: nodeStyle,
+    style: secondaryNodeStyle,
   },
   {
     id: '2',
     data: { label: 'Supervised Fine-Tuning (SFT)' },
     position: { x: 100, y: 100 },
-    style: nodeStyle,
+    style: secondaryNodeStyle,
   },
   {
     id: '3',
     type: 'output',
     data: { label: 'RLHF' },
     position: { x: 100, y: 200 },
-    style: nodeStyle,
+    style: secondaryNodeStyle,
   },
 
-  // DeepSeek R1 Approach (Right Side)
+  // DeepSeek R1 Approach (Right Side) - keeping primary colors
   {
     id: '4',
     type: 'input',
     data: { label: 'Self-Supervised Pre-Training' },
     position: { x: 400, y: 0 },
-    style: nodeStyle,
+    style: primaryNodeStyle,
   },
   {
     id: '5',
     data: { label: 'Cold Start Data' },
     position: { x: 400, y: 100 },
-    style: nodeStyle,
+    style: primaryNodeStyle,
   },
   {
     id: '6',
     data: { label: 'Pure RL Training' },
     position: { x: 400, y: 200 },
-    style: nodeStyle,
+    style: primaryNodeStyle,
   },
   {
     id: '7',
     type: 'output',
     data: { label: 'Final RL Alignment' },
     position: { x: 400, y: 300 },
-    style: nodeStyle,
+    style: primaryNodeStyle,
   },
 ]
 
 // Edge configurations
 const initialEdges = [
-  // Traditional Approach Edges
+  // Traditional Approach Edges - using secondary color
   {
     id: 'e1-2',
     source: '1',
     target: '2',
     animated: true,
-    style: { stroke: '#efc003' },
+    style: { stroke: '#75b34a' },
   },
   {
     id: 'e2-3',
     source: '2',
     target: '3',
     animated: true,
-    style: { stroke: '#efc003' },
+    style: { stroke: '#75b34a' },
   },
 
   // DeepSeek R1 Approach Edges
