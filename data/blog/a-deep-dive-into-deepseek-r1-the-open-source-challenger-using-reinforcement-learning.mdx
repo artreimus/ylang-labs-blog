@@ -171,8 +171,8 @@ DeepSeek R1's distillation pipeline produces:
 | R1-Distill-Qwen-7B   | 7B              | Qwen2.5           | Balanced performance vs. cost   |
 | R1-Distill-Qwen-14B  | 14B             | Qwen2.5           | Stronger code & math tasks      |
 | R1-Distill-Qwen-32B  | 32B             | Qwen2.5           | Near top-tier reasoning scores  |
-| R1-Distill-Llama-8B  | 8B              | Llama v3.x        | Similar to the Qwen-7B style    |
-| R1-Distill-Llama-70B | 70B             | Llama v3.x        | High-end tasks, near R1 teacher |
+| R1-Distill-Llama-8B  | 8B              | Llama v3.1 8B     | Similar to the Qwen-7B style    |
+| R1-Distill-Llama-70B | 70B             | Llama v3.3 70B    | High-end tasks, near R1 teacher |
 
 - **Why Distill?** Smaller models are cheaper to run, faster to fine-tune, and easier to deploy. Yet the essential steps in chain-of-thought remain intact.
 - **Performance**: Some 7B or 14B variants can outperform older 30B open models on reasoning tasks—simply because they've inherited R1's meticulously learned logic.
@@ -216,3 +216,25 @@ As the open-source ecosystem embraces these methods, we'll likely see an explosi
 - **Experiment with prompts:** Encourage the model to "explain step by step" for math or code. Observe how the RL training guides it to produce thorough, logically structured solutions.
 - **Watch for half-baked answers:** RL systems can occasionally produce extraneous or repetitive text. Adjust your prompting style or try multiple samples.
 - **Consider your domain:** For tasks beyond math and code—like summarization or creative writing—take advantage of the final alignment stage that merges reasoning with human-friendly outputs.
+
+## References
+
+1. [DeepSeek R1: Scaling Reasoning with Reinforcement Learning (arXiv)](https://arxiv.org/pdf/2501.12948)
+
+2. [DeepSeek R1 Official Repository (GitHub)](https://github.com/deepseek-ai/DeepSeek-R1)
+
+3. [DeepSeek API Pricing Documentation](https://api-docs.deepseek.com/quick_start/pricing)
+
+4. [DeepSeek R1: A Deep Dive into the Open Source Challenger (DataCamp)](https://www.datacamp.com/blog/deepseek-r1)
+
+5. [DeepSeek R1 Performance on EQBench](https://eqbench.com/results/creative-writing-v2/deepseek-ai__DeepSeek-R1.txt)
+
+6. [Humanity's Last Exam: Testing the Limits of AI (AGI Safety)](https://agi.safe.ai/)
+
+7. [Humanity's Last Exam Results Analysis (Scale AI Blog)](https://scale.com/blog/humanitys-last-exam-results)
+
+8. [AI Models Face Their Toughest Test Yet (NY Times)](https://www.nytimes.com/2025/01/23/technology/ai-test-humanitys-last-exam.html)
+
+## Image Attribution
+
+[Blue Water with Water Droplets by Pawel Czerwinski](https://unsplash.com/photos/blue-water-with-water-droplets-h5uMkC-eJjc)
