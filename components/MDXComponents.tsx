@@ -32,6 +32,8 @@ import RAGTriad from './blogs/rag-triad-building-trust-in-rag-through-systematic
 import DiagramSubtitle from './DiagramSubtitle'
 
 // DeepSeek Blog Components
+import HighLevelArchitectureDiagram from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/HighLevelArchitectureDiagram'
+import TrainingPipelineDiagram from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/TrainingPipelineDiagram'
 import KnowledgeDistillationCircles from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/KnowledgeDistillationCircles'
 import BenchmarkChart from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/BenchmarkChart'
 
@@ -74,6 +76,8 @@ const ragTriadBlogComponents = {
 
 // DeepSeek Blog Components
 const deepSeekBlogComponents = {
+  HighLevelArchitectureDiagram,
+  TrainingPipelineDiagram,
   KnowledgeDistillationCircles,
   BenchmarkChart,
 }
