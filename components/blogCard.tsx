@@ -5,7 +5,7 @@ import Image from 'next/image'
 import React from 'react'
 
 export default function BlogCard({ post }) {
-  const { slug, date, title, tags, cardImage } = post
+  const { slug, title, tags, cardImage } = post
 
   return (
     <Link href={`/blog/${slug}`} className="group block h-[320px] w-[240px]">
@@ -29,9 +29,6 @@ export default function BlogCard({ post }) {
               <Tag key={tag} text={tag} />
             ))}
           </div>
-
-          {/* Date */}
-          <time className="text-xs text-gray-200">{formatDate(date)}</time>
         </div>
 
         {/* Bottom Content: Title */}
