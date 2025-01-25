@@ -78,7 +78,7 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
         </CardHeader>
         <CardContent>
           <div className="w-full overflow-x-auto pb-4">
-            <div className="min-w-full" style={{ width: '100%', minWidth: '500px' }}>
+            <div className="min-w-full" style={{ width: '100%', minWidth: '800px' }}>
               <ChartContainer
                 config={{
                   'DeepSeek-R1': {
@@ -102,7 +102,7 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
                     color: 'hsl(230, 80%, 95%)',
                   },
                 }}
-                className="h-[320px] w-full md:h-[460px]"
+                className="h-[400px] w-full md:h-[560px]"
               >
                 <BarChart
                   data={data}
@@ -125,14 +125,20 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
                           x={0}
                           y={0}
                           dy={16}
-                          textAnchor="end"
+                          textAnchor="middle"
                           fill="currentColor"
-                          transform="rotate(-35)"
-                          className="text-[12px] md:text-[14px]"
+                          className="text-[10px] md:text-[12px]"
                         >
                           {payload.value}
                         </text>
-                        <text className="hidden text-[10px] opacity-70 md:inline">
+                        <text
+                          x={0}
+                          y={16}
+                          dy={16}
+                          textAnchor="middle"
+                          fill="currentColor"
+                          className="text-[8px] opacity-70 md:text-[10px]"
+                        >
                           {data.find((item) => item.benchmark === payload.value)?.note}
                         </text>
                       </g>
@@ -196,7 +202,7 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
               </ChartContainer>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-2 md:gap-4">
+          <div className="mt-2 flex flex-wrap justify-center gap-2 md:gap-4">
             {Object.entries({
               'DeepSeek-R1': 'hsl(230, 80%, 70%)',
               'OpenAI-o1-1217': 'hsl(0, 0%, 80%)',
