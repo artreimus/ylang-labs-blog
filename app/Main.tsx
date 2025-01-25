@@ -1,7 +1,4 @@
 import Link from '@/components/Link'
-import siteMetadata from '@/data/siteMetadata'
-import { formatDate } from 'pliny/utils/formatDate'
-import NewsletterForm from 'pliny/ui/NewsletterForm'
 import EmptyView from '@/components/emptyView'
 import BlogCard from '@/components/blogCard'
 
