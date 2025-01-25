@@ -31,6 +31,10 @@ import {
 import RAGTriad from './blogs/rag-triad-building-trust-in-rag-through-systematic-evaluation/RAGTriad'
 import DiagramSubtitle from './DiagramSubtitle'
 
+// DeepSeek Blog Components
+import KnowledgeDistillationCircles from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/KnowledgeDistillationCircles'
+import BenchmarkChart from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/BenchmarkChart'
+
 // Core MDX Components
 const coreMDXComponents = {
   Image,
@@ -68,9 +72,16 @@ const ragTriadBlogComponents = {
   RAGTriad,
 }
 
+// DeepSeek Blog Components
+const deepSeekBlogComponents = {
+  KnowledgeDistillationCircles,
+  BenchmarkChart,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
   ...memGPTBlogComponents,
   ...ragTriadBlogComponents,
+  ...deepSeekBlogComponents,
 }
