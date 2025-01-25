@@ -72,11 +72,13 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
     <>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-center">Benchmark Performance of DeepSeek-R1</CardTitle>
+          <CardTitle className="text-center text-lg md:text-xl">
+            Benchmark Performance of DeepSeek-R1
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-full" style={{ width: '100%', minWidth: '800px' }}>
+          <div className="w-full overflow-x-auto pb-4">
+            <div className="min-w-full" style={{ width: '100%', minWidth: '500px' }}>
               <ChartContainer
                 config={{
                   'DeepSeek-R1': {
@@ -100,21 +102,23 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
                     color: 'hsl(230, 80%, 95%)',
                   },
                 }}
-                className="h-[500px] w-full"
+                className="h-[320px] w-full md:h-[460px]"
               >
                 <BarChart
                   data={data}
                   margin={{
-                    top: 60,
-                    right: 0,
-                    left: 0,
-                    bottom: 100,
+                    top: 20,
+                    right: 10,
+                    left: 10,
+                    bottom: 60,
                   }}
+                  barSize={28}
                 >
                   <XAxis
                     dataKey="benchmark"
                     tickLine={false}
                     axisLine={false}
+                    interval={0}
                     tick={({ x, y, payload }) => (
                       <g transform={`translate(${x},${y})`}>
                         <text
@@ -123,19 +127,12 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
                           dy={16}
                           textAnchor="end"
                           fill="currentColor"
-                          transform="rotate(-45)"
+                          transform="rotate(-35)"
+                          className="text-[12px] md:text-[14px]"
                         >
                           {payload.value}
                         </text>
-                        <text
-                          x={0}
-                          y={15}
-                          dy={16}
-                          textAnchor="end"
-                          fill="currentColor"
-                          transform="rotate(-45)"
-                          className="text-xs opacity-70"
-                        >
+                        <text className="hidden text-[10px] opacity-70 md:inline">
                           {data.find((item) => item.benchmark === payload.value)?.note}
                         </text>
                       </g>
@@ -146,23 +143,26 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
                     axisLine={false}
                     tickFormatter={(value) => `${value}%`}
                     domain={[0, 100]}
+                    className="text-xs md:text-sm"
                   />
                   <ChartTooltip
                     content={({ active, payload }) => {
                       if (!active || !payload) return null
                       return (
-                        <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                          <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                          <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
                             {payload.map((entry) => (
                               <div key={entry.name} className="flex items-center gap-2">
                                 <div
                                   className="h-3 w-3 rounded-full"
                                   style={{ backgroundColor: entry.color }}
                                 />
-                                <span className="text-sm font-medium dark:text-gray-200">
+                                <span className="text-xs font-medium dark:text-gray-200 md:text-sm">
                                   {entry.name}:
                                 </span>
-                                <span className="text-sm dark:text-gray-300">{entry.value}%</span>
+                                <span className="text-xs dark:text-gray-300 md:text-sm">
+                                  {entry.value}%
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -170,68 +170,33 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
                       )
                     }}
                   />
-                  <Bar dataKey="DeepSeek-R1" fill="var(--color-DeepSeek-R1)" radius={[4, 4, 0, 0]}>
-                    <LabelList
-                      dataKey="DeepSeek-R1"
-                      position="top"
-                      formatter={(value) => `${value}%`}
-                      className="fill-current text-[8px] font-medium"
-                      offset={10}
-                    />
-                  </Bar>
-                  <Bar
-                    dataKey="OpenAI-o1-1217"
-                    fill="var(--color-OpenAI-o1-1217)"
-                    radius={[4, 4, 0, 0]}
-                  >
-                    <LabelList
-                      dataKey="OpenAI-o1-1217"
-                      position="top"
-                      formatter={(value) => `${value}%`}
-                      className="fill-current text-[8px] font-medium"
-                      offset={10}
-                    />
-                  </Bar>
-                  <Bar
-                    dataKey="DeepSeek-R1-32B"
-                    fill="var(--color-DeepSeek-R1-32B)"
-                    radius={[4, 4, 0, 0]}
-                  >
-                    <LabelList
-                      dataKey="DeepSeek-R1-32B"
-                      position="top"
-                      formatter={(value) => `${value}%`}
-                      className="fill-current text-[8px] font-medium"
-                      offset={10}
-                    />
-                  </Bar>
-                  <Bar
-                    dataKey="OpenAI-o1-mini"
-                    fill="var(--color-OpenAI-o1-mini)"
-                    radius={[4, 4, 0, 0]}
-                  >
-                    <LabelList
-                      dataKey="OpenAI-o1-mini"
-                      position="top"
-                      formatter={(value) => `${value}%`}
-                      className="fill-current text-[8px] font-medium"
-                      offset={10}
-                    />
-                  </Bar>
-                  <Bar dataKey="DeepSeek-V3" fill="var(--color-DeepSeek-V3)" radius={[4, 4, 0, 0]}>
-                    <LabelList
-                      dataKey="DeepSeek-V3"
-                      position="top"
-                      formatter={(value) => `${value}%`}
-                      className="fill-current text-[8px] font-medium"
-                      offset={10}
-                    />
-                  </Bar>
+                  {[
+                    'DeepSeek-R1',
+                    'OpenAI-o1-1217',
+                    'DeepSeek-R1-32B',
+                    'OpenAI-o1-mini',
+                    'DeepSeek-V3',
+                  ].map((model) => (
+                    <Bar
+                      key={model}
+                      dataKey={model}
+                      fill={`var(--color-${model})`}
+                      radius={[4, 4, 0, 0]}
+                    >
+                      <LabelList
+                        dataKey={model}
+                        position="top"
+                        formatter={(value) => `${value}%`}
+                        className="hidden fill-current text-[10px] font-medium md:inline md:text-[9px]"
+                        offset={12}
+                      />
+                    </Bar>
+                  ))}
                 </BarChart>
               </ChartContainer>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-4">
+          <div className="mt-4 flex flex-wrap justify-center gap-2 md:gap-4">
             {Object.entries({
               'DeepSeek-R1': 'hsl(230, 80%, 70%)',
               'OpenAI-o1-1217': 'hsl(0, 0%, 80%)',
@@ -239,9 +204,12 @@ export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChar
               'OpenAI-o1-mini': 'hsl(0, 0%, 90%)',
               'DeepSeek-V3': 'hsl(230, 80%, 95%)',
             }).map(([model, color]) => (
-              <div key={model} className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: color }} />
-                <span className="text-sm font-medium">{model}</span>
+              <div key={model} className="flex items-center gap-1 md:gap-2">
+                <div
+                  className="h-2 w-2 rounded-full md:h-3 md:w-3"
+                  style={{ backgroundColor: color }}
+                />
+                <span className="text-xs font-medium md:text-sm">{model}</span>
               </div>
             ))}
           </div>
