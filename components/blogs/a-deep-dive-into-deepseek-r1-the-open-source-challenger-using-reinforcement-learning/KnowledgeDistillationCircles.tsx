@@ -31,7 +31,7 @@ const KnowledgeDistillationCircles: React.FC = () => {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="mx-4 h-16 w-16 text-gray-600 dark:text-gray-400"
+            className="mx-4 h-16 w-16 text-black dark:text-white"
           >
             <path d="M5 12h14" />
             <path d="m12 5 7 7-7 7" />

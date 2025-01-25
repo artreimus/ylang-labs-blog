@@ -146,7 +146,7 @@ export default function BenchmarkChart() {
                     content={({ active, payload }) => {
                       if (!active || !payload) return null
                       return (
-                        <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
+                        <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-800">
                           <div className="grid grid-cols-2 gap-2">
                             {payload.map((entry) => (
                               <div key={entry.name} className="flex items-center gap-2">
@@ -154,8 +154,10 @@ export default function BenchmarkChart() {
                                   className="h-3 w-3 rounded-full"
                                   style={{ backgroundColor: entry.color }}
                                 />
-                                <span className="text-sm font-medium">{entry.name}:</span>
-                                <span className="text-sm">{entry.value}%</span>
+                                <span className="text-sm font-medium dark:text-gray-200">
+                                  {entry.name}:
+                                </span>
+                                <span className="text-sm dark:text-gray-300">{entry.value}%</span>
                               </div>
                             ))}
                           </div>
