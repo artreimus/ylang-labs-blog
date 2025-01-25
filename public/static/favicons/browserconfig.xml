@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
->
     <msapplication>
         <tile>
             <square150x150logo src="/web-app-manifest-192x192.png"/>
-            <TileColor>#000000</TileColor>
+            <TileColor>#FFFFFF</TileColor>
         </tile>
     </msapplication>
 </browserconfig>
+
