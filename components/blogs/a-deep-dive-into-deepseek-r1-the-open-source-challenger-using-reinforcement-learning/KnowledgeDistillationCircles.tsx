@@ -1,7 +1,15 @@
 import type React from 'react'
 import DiagramSubtitle from '../../DiagramSubtitle'
 
-const KnowledgeDistillationCircles: React.FC = () => {
+interface KnowledgeDistillationCirclesProps {
+  figureNumber?: number
+  subtitle?: string
+}
+
+const KnowledgeDistillationCircles: React.FC<KnowledgeDistillationCirclesProps> = ({
+  figureNumber,
+  subtitle,
+}) => {
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div className="rounded-xl bg-white/50 p-8 shadow-md backdrop-blur-sm dark:bg-gray-900/50">
@@ -49,11 +57,7 @@ const KnowledgeDistillationCircles: React.FC = () => {
           </div>
         </div>
       </div>
-      <DiagramSubtitle>
-        Figure: Visual representation of the knowledge distillation process, showing how reasoning
-        capabilities transfer from the larger teacher model (left) to the smaller student model
-        (right).
-      </DiagramSubtitle>
+      <DiagramSubtitle figureNumber={figureNumber}>{subtitle}</DiagramSubtitle>
     </div>
   )
 }

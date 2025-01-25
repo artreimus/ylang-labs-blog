@@ -62,7 +62,12 @@ const data = [
   },
 ]
 
-export default function BenchmarkChart() {
+interface BenchmarkChartProps {
+  figureNumber?: number
+  subtitle?: string
+}
+
+export default function BenchmarkChart({ figureNumber, subtitle }: BenchmarkChartProps) {
   return (
     <>
       <Card className="w-full">
@@ -242,10 +247,7 @@ export default function BenchmarkChart() {
           </div>
         </CardContent>
       </Card>
-      <DiagramSubtitle>
-        Figure: Comparison of model performance across different benchmarks. Higher scores indicate
-        better performance.
-      </DiagramSubtitle>
+      <DiagramSubtitle figureNumber={figureNumber}>{subtitle}</DiagramSubtitle>
     </>
   )
 }

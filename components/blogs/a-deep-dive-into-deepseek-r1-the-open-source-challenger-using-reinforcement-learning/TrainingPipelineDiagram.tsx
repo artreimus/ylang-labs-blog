@@ -180,7 +180,15 @@ const initialEdges = [
   },
 ]
 
-export default function TrainingPipelineDiagram() {
+interface TrainingPipelineDiagramProps {
+  figureNumber?: number
+  subtitle?: string
+}
+
+export default function TrainingPipelineDiagram({
+  figureNumber,
+  subtitle,
+}: TrainingPipelineDiagramProps) {
   // Use state hooks for nodes and edges
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
@@ -200,10 +208,7 @@ export default function TrainingPipelineDiagram() {
           <Controls className="border-2 border-gray-200 bg-white fill-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:fill-gray-400" />
         </ReactFlow>
       </div>
-      <DiagramSubtitle>
-        Figure 2: DeepSeek R1's four-stage training pipeline, showing the flow from cold start data
-        through final RL alignment.
-      </DiagramSubtitle>
+      <DiagramSubtitle figureNumber={figureNumber}>{subtitle}</DiagramSubtitle>
     </div>
   )
 }

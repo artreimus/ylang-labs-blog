@@ -13,7 +13,10 @@ images:
 layout: 'PostBanner'
 ---
 
-<BenchmarkChart />
+<BenchmarkChart
+  figureNumber={1}
+  subtitle="Comparison of model performance across different benchmarks. Higher scores indicate better performance."
+/>
 
 ## 1. Setting the Stage: Why Reasoning Matters in Large Language Models
 
@@ -34,7 +37,10 @@ In simpler terms:
 
 ## 2. DeepSeek R1 at a Glance: Key Innovations
 
-<HighLevelArchitectureDiagram />
+<HighLevelArchitectureDiagram
+  figureNumber={2}
+  subtitle="High-level architecture comparison between traditional LLM training (left) and DeepSeek R1's novel approach (right), highlighting the early introduction of RL."
+/>
 
 **Traditional LLM Training**  
 Most large language models follow a well-worn path:
@@ -103,9 +109,10 @@ However, R1-Zero's raw RL approach also had downsides—like mixing languages ra
 
 ## 4. DeepSeek-R1: A Refined Approach Through "Cold Start"
 
-<TrainingPipelineDiagram />
-
-_Figure 2: DeepSeek R1's four-stage training pipeline, showing the flow from cold start data through final RL alignment._
+<TrainingPipelineDiagram
+  figureNumber={3}
+  subtitle="DeepSeek R1's four-stage training pipeline, showing the flow from cold start data through final RL alignment."
+/>
 
 After seeing how R1-Zero discovered advanced reasoning skills, the DeepSeek team asked a practical question: **How do we make these outputs more user-friendly?** The answer was to introduce a small "cold start" dataset before going all-in on RL again.
 
@@ -149,7 +156,10 @@ Below are some of the standout benchmarks and how DeepSeek R1 stacks up against 
 
 ## 6. Distilling Reasoning into Smaller Models
 
-<KnowledgeDistillationCircles />
+<KnowledgeDistillationCircles
+  figureNumber={4}
+  subtitle="Visual representation of the knowledge distillation process, showing how reasoning capabilities transfer from the larger teacher model (left) to the smaller student model (right)."
+/>
 
 ### Available Distilled Models
 
