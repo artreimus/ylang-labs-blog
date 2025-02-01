@@ -11,7 +11,7 @@ layout: 'PostBanner'
 ---
 
 Imagine a system that not only "thinks" through
-problems but also takes real-world actions to verify its ideas—a model that interleaves internal reasoning with external tool use to navigate complex tasks. This is the promise of the **ReAct (Reasoning and Action) agent model**. In this post, we’ll unpack what ReAct is, how it integrates reasoning and acting, and where it stands in today’s rapidly evolving landscape of large language model (LLM) applications. Drawing on recent research (Yao et al., 2022), we’ll dive into its inner workings, core components, benefits, and practical trade-offs.
+problems but also takes real-world actions to verify its ideas—a model that interleaves internal reasoning with external tool use to navigate complex tasks. This is the promise of the **ReAct (Reasoning and Action) agent model**. In this post, we'll unpack what ReAct is, how it integrates reasoning and acting, and where it stands in today's rapidly evolving landscape of large language model (LLM) applications. Drawing on recent research (Yao et al., 2022), we'll dive into its inner workings, core components, benefits, and practical trade-offs.
 
 ---
 
@@ -59,23 +59,41 @@ At its core, the ReAct agent model operates by alternating between generating in
 3. **Observation:**
    Every observation is added to the context, ensuring that subsequent decisions are grounded in both the model's internal logic and real-world data.
 
-### Example Scenario: Apple Remote Question
+### Example Scenario from HotpotQA
 
-To illustrate how ReAct works in practice, consider this question: "What other device can control Front Row besides the Apple Remote?"
+<Image
+  alt="ReAct example scenario: Author's Work History Question"
+  src="/static/images/blogs/react-reasoning-and-acting-in-language-models/react-hotpot-qa-example.png"
+  width={670}
+  height={830}
+  className="mx-auto"
+/>
+<DiagramSubtitle>
+  Figure 2: ReAct example scenario from HotpotQA: Seven Brief Lessons on Physics
+</DiagramSubtitle>
 
-```mermaid
-[PLACEHOLDER: Diagram showing ReAct's thought-action-observation cycle for the Apple Remote example]
-```
+To illustrate how ReAct works in practice, let's analyze how it solves this question: "Seven Brief Lessons on Physics was written by an Italian physicist that has worked in France since what year?"
 
-1. The agent starts with a **thought** to decompose the task: "I need to search Apple Remote and find the program it was originally designed to interact with."
+1. The agent starts with a **thought** to decompose the task: "I need to search Seven Brief Lessons on Physics, find its author, then find when he has worked in France."
 
-2. This leads to an **action**: Search [Apple Remote]
+2. This leads to an **action**: Search[Seven Brief Lessons on Physics]
 
-3. The **observation** reveals: "The Apple Remote was designed to control the Front Row media center program..."
+3. The **observation** reveals: "Seven Brief Lessons on Physics (Italian: Sette brevi lezioni di fisica) is a short book by the Italian physicist Carlo Rovelli. Originally published in Italian in..."
 
-4. A new **thought** processes this information: "Apple Remote was originally designed to control Front Row. I need to search Front Row next to find what other device can control it."
+4. A new **thought** processes this information: "The author of Seven Brief Lessons on Physics is Carlo Rovelli. I need to search Carlo Rovelli next and find when he has worked in France since."
 
-5. The cycle continues with more searches and reasoning until the agent discovers that keyboard function keys can also control Front Row, leading to the final answer.
+5. Another **action**: Search[Carlo Rovelli]
+
+6. The **observation** provides: "Carlo Rovelli is an Italian theoretical physicist and writer who has worked in Italy, the United States and, since 2000, in France. He is also currently a Distinguished Visiting Research Chair at the Perimeter Institute..."
+
+7. Final **thought**: "Carlo Rovelli has worked in France since 2000, so the answer is 2000."
+
+This example demonstrates how ReAct:
+
+- Breaks down the problem into logical steps
+- Uses search actions to gather information
+- Processes observations to inform next steps
+- Arrives at the correct answer through a series of thought-action-observation cycles
 
 ---
 
@@ -239,3 +257,16 @@ Final Answer: 1,800 to 7,000 ft.
 ## 6. Conclusion
 
 The ReAct agent model represents a significant evolution in leveraging LLMs as dynamic agents capable of both reasoning and action. By structuring prompts in an interleaved manner, ReAct enables adaptive decision-making, improved factual grounding, and transparent problem-solving. As AI applications become more complex, leveraging ReAct-style prompting will be key to building intelligent, reliable, and interpretable AI systems.
+
+---
+
+## References
+
+1. [ReAct: Synergizing Reasoning and Acting in Language Models (Yao et al., 2022)](https://arxiv.org/abs/2210.03629)
+2. [ReAct Prompting Guide (Prompting Engineering Institute)](https://www.promptingguide.ai/techniques/react)
+3. [ReAct-LangChain Prompt Template (LangChain Hub)](https://smith.langchain.com/hub/hwchase17/react)
+4. [ReAct: Combining Reasoning and Action (Google Research Blog)](https://research.google/blog/react-synergizing-reasoning-and-acting-in-language-models/)
+
+## Image Attribution
+
+[The River Severn at Shrewsbury, Shropshire, 1770 by Paul Sandby](https://unsplash.com/photos/a-painting-of-people-in-a-boat-on-a-river-HEEvYhNzpEo)
