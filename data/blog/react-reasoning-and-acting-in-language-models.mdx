@@ -15,7 +15,7 @@ problems but also takes real-world actions to verify its ideas—a model that in
 
 ---
 
-## 1. From Chain-of-Thought to Interactive Action
+## 1. Act-Only, Reason-Only, and ReAct
 
 <Image
   alt="ReAct framework showing three approaches: Reason Only, Act Only, and ReAct combining both"
@@ -30,7 +30,15 @@ problems but also takes real-world actions to verify its ideas—a model that in
   (bottom) combines both for enhanced problem-solving.
 </DiagramSubtitle>
 
-Traditional LLM prompting methods like **chain-of-thought (CoT) reasoning** have enabled models to generate detailed, step-by-step explanations. Yet, while CoT improves internal problem solving, it leaves the model isolated from external sources. **ReAct** changes the game by interleaving internal reasoning with concrete actions—allowing the model to not only explain its thought process but also to interact with the external environment to fetch real-time data, verify facts, or complete tasks.
+In the landscape of LLM prompting strategies, three distinct approaches have emerged:
+
+**Act-Only Prompting** focuses on direct action generation without explicit reasoning steps. Models are prompted to interact with tools or environments immediately based on the input. While efficient for straightforward tasks, this approach can struggle with complex scenarios that require careful deliberation or multi-step planning.
+
+**Chain-of-Thought (CoT) Reasoning** enables models to generate detailed, step-by-step explanations of their thinking process. This approach improves problem-solving capabilities but remains isolated from external sources, limiting the model to its training data.
+
+**ReAct** changes the game by combining the strengths of both approaches. It interleaves internal reasoning with concrete actions—allowing the model to not only explain its thought process but also to interact with the external environment to fetch real-time data, verify facts, or complete tasks.
+
+Research has shown that ReAct significantly outperforms both Act-Only and Chain-of-Thought approaches across various tasks. In question-answering benchmarks, ReAct achieved up to 30% higher accuracy compared to Act-Only methods and showed more reliable fact verification than pure reasoning approaches. The synergy between reasoning and acting enhances both interpretability and reliability, enabling more dynamic and human-like problem-solving processes.
 
 ReAct augments the action space of an LLM by enabling it to produce both free-form reasoning traces and actionable steps. This synergy enhances interpretability and allows the model to leverage external tools, resulting in a more dynamic and human-like problem-solving process.
 
