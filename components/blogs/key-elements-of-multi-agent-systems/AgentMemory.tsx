@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card'
 
 interface Message {
-  type: 'human' | 'ai'
+  type: 'human' | 'ai' | 'system'
   content: string
 }
 
