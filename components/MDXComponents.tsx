@@ -37,6 +37,11 @@ import TrainingPipelineDiagram from './blogs/a-deep-dive-into-deepseek-r1-the-op
 import KnowledgeDistillationCircles from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/KnowledgeDistillationCircles'
 import BenchmarkChart from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/BenchmarkChart'
 
+// Multi-Agent Systems Blog Components
+import AgentToolsFlow from './blogs/key-elements-of-multi-agent-systems/AgentToolsFlows'
+import MultiAgentCollaboration from './blogs/key-elements-of-multi-agent-systems/MultiAgentCollaboration'
+import AgentMemory from './blogs/key-elements-of-multi-agent-systems/AgentMemory'
+
 // Core MDX Components
 const coreMDXComponents = {
   Image,
@@ -82,10 +87,17 @@ const deepSeekBlogComponents = {
   BenchmarkChart,
 }
 
+const multiAgentBlogComponents = {
+  AgentToolsFlow,
+  MultiAgentCollaboration,
+  AgentMemory,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
   ...memGPTBlogComponents,
   ...ragTriadBlogComponents,
   ...deepSeekBlogComponents,
+  ...multiAgentBlogComponents,
 }
