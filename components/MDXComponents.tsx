@@ -37,6 +37,9 @@ import TrainingPipelineDiagram from './blogs/a-deep-dive-into-deepseek-r1-the-op
 import KnowledgeDistillationCircles from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/KnowledgeDistillationCircles'
 import BenchmarkChart from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/BenchmarkChart'
 
+// Multi-Agent Systems Blog Components
+import AgentToolsFlow from './blogs/key-elements-of-multi-agent-systems/AgentToolsFlows'
+
 // Core MDX Components
 const coreMDXComponents = {
   Image,
@@ -82,10 +85,15 @@ const deepSeekBlogComponents = {
   BenchmarkChart,
 }
 
+const multiAgentBlogComponents = {
+  AgentToolsFlow,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
   ...memGPTBlogComponents,
   ...ragTriadBlogComponents,
   ...deepSeekBlogComponents,
+  ...multiAgentBlogComponents,
 }
