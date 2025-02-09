@@ -14,7 +14,7 @@ interface AgentMemoryProps {
 
 export default function AgentMemory({
   messages = [
-    { type: 'system', content: 'You are a helpful assistant.' },
+    { type: 'system', content: 'System Message.' },
     { type: 'human', content: 'Human message' },
     { type: 'ai', content: 'AI message' },
     { type: 'human', content: 'Human message' },
@@ -39,7 +39,9 @@ export default function AgentMemory({
                     className={`rounded-lg p-2 transition-all duration-200 hover:scale-[1.02] sm:p-3 ${
                       message.type === 'human'
                         ? 'border border-primary-200 bg-primary-50 text-primary-700'
-                        : 'border border-secondary-200 bg-secondary-50 text-secondary-700'
+                        : message.type === 'system'
+                          ? 'border border-secondary-600 bg-secondary-100 text-secondary-700'
+                          : 'border border-secondary-200 bg-secondary-50 text-secondary-700'
                     }`}
                   >
                     <p className="text-sm font-medium">{message.content}</p>
