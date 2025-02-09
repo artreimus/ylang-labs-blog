@@ -39,6 +39,8 @@ import BenchmarkChart from './blogs/a-deep-dive-into-deepseek-r1-the-open-source
 
 // Multi-Agent Systems Blog Components
 import AgentToolsFlow from './blogs/key-elements-of-multi-agent-systems/AgentToolsFlows'
+import MultiAgentCollaboration from './blogs/key-elements-of-multi-agent-systems/MultiAgentCollaboration'
+import AgentMemory from './blogs/key-elements-of-multi-agent-systems/AgentMemory'
 
 // Core MDX Components
 const coreMDXComponents = {
@@ -87,6 +89,8 @@ const deepSeekBlogComponents = {
 
 const multiAgentBlogComponents = {
   AgentToolsFlow,
+  MultiAgentCollaboration,
+  AgentMemory,
 }
 
 export const components: MDXComponents = {
