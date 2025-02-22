@@ -1,6 +1,6 @@
 import Link from '@/components/Link'
-import EmptyView from '@/components/emptyView'
-import BlogCard from '@/components/blogCard'
+import EmptyView from '@/components/EmptyView'
+import BlogCard from '@/components/BlogCard'
 
 const MAX_DISPLAY = 5
 
