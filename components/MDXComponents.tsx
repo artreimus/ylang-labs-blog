@@ -5,6 +5,7 @@ import type { MDXComponents } from 'mdx/types'
 import Image from './Image'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
+import DiagramDisplay from './DiagramDisplay'
 
 // DSPy Blog Components
 import DspyWorkflowDiagram from './blogs/dspy-programming-not-prompting-your-lms/DspyWorkflowDiagram'
@@ -51,6 +52,7 @@ const coreMDXComponents = {
   table: TableWrapper,
   BlogNewsletterForm,
   DiagramSubtitle,
+  DiagramDisplay,
 }
 
 // Blog-specific Components
