@@ -4,6 +4,7 @@ import 'remark-github-blockquote-alert/alert.css'
 
 import { Analytics, AnalyticsConfig } from 'pliny/analytics'
 import { SearchProvider, SearchConfig } from 'pliny/search'
+import { Toaster } from '@/components/ui/toaster'
 import Header from '@/components/Header'
 import SectionContainer from '@/components/SectionContainer'
 import Footer from '@/components/Footer'
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
               <Header />
               <main className="mb-auto">{children}</main>
+              <Toaster />
             </SearchProvider>
             <Footer />
           </SectionContainer>

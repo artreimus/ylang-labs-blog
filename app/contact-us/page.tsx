@@ -11,7 +11,6 @@ import formSchema from 'utils/validation/formschema'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useToast } from '@/components/hooks/use-toast'
-import { Toaster } from '@/components/ui/toaster'
 import {
   Form,
   FormControl,
@@ -21,7 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { z } from 'zod'
-import { PhoneInput } from '@/components/phoneInput'
+import { PhoneInput } from '@/components/PhoneInput'
 
 type formSchemaType = z.infer<typeof formSchema>
 
@@ -103,7 +102,6 @@ export default function ContactPage() {
             <div>
               <div className="mb-6 space-y-2">
                 <p>ylangslabs@gmail.com</p>
-                <p>+0 012 3456 789</p>
               </div>
               <div className="flex gap-4">
                 <SocialIcon kind="x" href={siteMetadata.x} size={6} className="" />
@@ -245,7 +243,6 @@ export default function ContactPage() {
           </Form>
         </div>
       </div>
-      <Toaster />
     </div>
   )
 }
