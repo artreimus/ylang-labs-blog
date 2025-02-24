@@ -48,6 +48,7 @@
     "react-phone-number-input": "^3.4.12",
     "reactflow": "^11.11.4",
     "reading-time": "1.5.0",
+    "recharts": "^2.15.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-citation": "^2.0.0",
     "rehype-katex": "^7.0.0",

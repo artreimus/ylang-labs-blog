@@ -1,0 +1,240 @@
+---
+title: 'A Deep Dive into DeepSeek R1: The Open Source Challenger Using Reinforcement Learning'
+date: '2025-01-25'
+tags: ['AI/ML', 'Generative-AI']
+draft: false
+summary: 'DeepSeek R1 is an open-source LLM that uses reinforcement learning to achieve reasoning capabilities comparable to leading closed models like o1, but at a fraction of the cost. This post explores its novel training approach, benchmarks, and implications for the future of AI reasoning.'
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/cardImage.png'
+images:
+  [
+    '/static/images/blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/blogHeader.png',
+  ]
+layout: 'PostBanner'
+---
+
+<BenchmarkChart
+  figureNumber={1}
+  subtitle="Comparison of model performance across different benchmarks. Higher scores indicate better performance."
+/>
+
+## 1. Setting the Stage: Why Reasoning Matters in Large Language Models
+
+In the rapidly evolving world of Large Language Models (LLMs), we're witnessing a shift from models that merely produce fluent text to those that reason. Reasoning refers to the ability to solve complex problems step by step—like how a student methodically tackles a math puzzle or debugs a piece of code. Traditionally, these capabilities have been locked behind large, closed-source models that come with hefty price tags. That's where DeepSeek R1 steps in, showing how a purely open-source approach, powered by reinforcement learning (RL), can match top proprietary systems in reasoning tasks at a fraction of the cost.
+
+DeepSeek R1 claims to be **27x cheaper than OpenAI's o1**, with input tokens at \$0.55/M (vs. o1's \$15/M) and output tokens at \$2.19/M (vs. o1's \$60/M).
+
+Why does that matter? Because open-source AI doesn't just push the frontier of research—it democratizes advanced capabilities. And if DeepSeek R1 truly matches o1's performance on tasks like AIME 2024 (79.8% vs. o1's 79.2%) while being so much cheaper, the playing field could shift dramatically. Even more impressively, on Humanity's Last Exam—considered one of the hardest AI benchmarks ever created—DeepSeek R1 achieved 9.4% accuracy, outperforming o1's 9.1% and other leading models like Claude 3.5 Sonnet (4.3%) and GPT-4o (3.3%).
+
+**Thesis**: This post takes a closer look at DeepSeek R1, dissecting its RL-driven approach, multi-stage training pipeline, and validated benchmarks. More than a model, DeepSeek R1 represents an inflection point for open-source AI and advanced reasoning.
+
+In simpler terms:
+
+- Reasoning means going beyond guesswork. It's about the model saying: "Here's how I got from point A to point B."
+- DeepSeek R1 claims near-equal performance to a leading closed model (often called o1) on advanced math and coding benchmarks—yet at a fraction of the cost.
+
+---
+
+## 2. DeepSeek R1 at a Glance: Key Innovations
+
+<HighLevelArchitectureDiagram
+  figureNumber={2}
+  subtitle="High-level architecture comparison between traditional LLM training (left) and DeepSeek R1's novel approach (right), highlighting the early introduction of RL."
+/>
+
+**Traditional LLM Training**  
+Most large language models follow a well-worn path:
+
+1. **Pre-Training**: Learn language basics from massive amounts of text data
+2. **Fine-Tuning**: Adapt the model using supervised learning (SFT) or reinforcement learning from human feedback (RLHF)
+
+**DeepSeek R1's Novel Approach**  
+Instead of this conventional route, DeepSeek R1 introduces several key innovations:
+
+1. **Reinforcement Learning First**  
+   Instead of starting with mountains of supervised training data, DeepSeek R1 uses **pure RL** to uncover advanced reasoning capabilities.
+
+2. **Multi-Stage Pipeline**  
+   Small curated datasets help the model produce more readable solutions and avoid messy outputs. The approach blends both **RL** and **supervised** fine-tuning.
+
+3. **Distilled Variants**  
+   Large models are notoriously expensive to run. DeepSeek R1 offers smaller, distilled versions (1.5B, 7B, 14B, 32B, 70B parameters) that preserve core reasoning skills in more efficient packages.
+
+4. **Open-Source Availability**  
+   Everything—raw models, distilled versions, training details—are open for the global community, fueling new experiments and improvements.
+
+---
+
+## 3. Inside DeepSeek-R1-Zero: Pure RL from a Base Model
+
+This is where the magic happens, and it's what really sets DeepSeek R1 apart. To appreciate R1, let's first explore how **DeepSeek-R1-Zero** (its initial variant) learns purely via reinforcement learning.
+
+### 3.1 The Reinforcement Learning Algorithm (GRPO)
+
+**What is RL?**  
+In RL, you don't spoon-feed the model correct answers. Instead, the model tries different responses, and you give it a "reward" when it does the right thing. Over many trials, the model figures out how to maximize these rewards—like a video-game character learning how to jump, duck, and dodge to reach the highest score.
+
+**What is GRPO?**  
+DeepSeek-R1-Zero uses a technique called **Group Relative Policy Optimization (GRPO)**. Here's how it differs from more familiar RL approaches (like PPO):
+
+- Instead of training a big "critic" network to evaluate each response, GRPO works by sampling multiple outputs in **groups** from the old policy, then scoring them among themselves.
+- This simplifies the pipeline—no giant critic model is required—and speeds up training for large language models.
+
+**Why it matters for reasoning**  
+Most RL research in LLMs focuses on short completion tasks (e.g., aligning text to user preferences). In DeepSeek-R1-Zero, RL is tasked with making the model systematically explore multi-step solutions (think: multi-line code or multi-part math). Every correct final answer yields a **positive reward**—a strong incentive to produce robust step-by-step reasoning.
+
+> In typical supervised learning, the model sees correct solutions from humans. In RL, the model must "discover" solutions on its own. This discovery fosters creativity and can produce surprising behaviors—like spontaneously verifying its own answers.
+
+### 3.2 Reward Modeling: How the Model Knows It's Right
+
+**Two Key Reward Types**
+
+1. **Accuracy Rewards**: If the model is solving a math problem, it must place the final answer inside a specific format (for example, `\(\boxed{42}\)` or `<answer>42</answer>`). You can then check if that's correct. For code tasks, you compile or run tests—if they pass, the model receives a high reward.
+2. **Format Rewards**: The model is nudged to separate its "thinking" (chain-of-thought) from its final answer. This way, it can produce a clearly labeled internal reasoning segment (like `<think>` ... `</think>`) and a final concise answer. The reward ensures it follows that structure consistently.
+
+> **Why not a massive neural reward model?**  
+> Large reward models can be hacked—where the model learns to fool the reward system rather than genuinely improving. By relying on code compilation tests or numeric solutions, the model is judged on straightforward correctness, making it harder to "cheat."
+
+### 3.3 Self-Evolution and the "Aha" Moment
+
+One of the most fascinating outcomes of purely RL-based training is how **DeepSeek-R1-Zero** learned to reflect on its own answers—even though no one explicitly coded that in. After a few thousand RL steps:
+
+- **Longer Reasoning**: The model started producing more thorough solutions and automatically tried re-checking tricky steps.
+- **Spontaneous "Reflection"**: In some transcripts, the model paused to say: "Wait, let me reevaluate." This is sometimes called the "aha moment," when the RL incentives push the model to debug itself.
+- **Strong Math & Code Gains**: Pass@1 on advanced math problems rocketed up from around 15% to over 70%. With multiple answer sampling, it reached the mid-80s—competitive with strong closed-source models.
+
+However, R1-Zero's raw RL approach also had downsides—like mixing languages randomly or producing text that was difficult to read. This is where the next variant, simply called **DeepSeek-R1**, steps in.
+
+---
+
+## 4. DeepSeek-R1: A Refined Approach Through "Cold Start"
+
+<TrainingPipelineDiagram
+  figureNumber={3}
+  subtitle="DeepSeek R1's four-stage training pipeline, showing the flow from cold start data through final RL alignment."
+/>
+
+After seeing how R1-Zero discovered advanced reasoning skills, the DeepSeek team asked a practical question: **How do we make these outputs more user-friendly?** The answer was to introduce a small "cold start" dataset before going all-in on RL again.
+
+1. **Cold Start Data**  
+   A small set (thousands of samples) was curated to teach better readability. The model learns how to format math solutions clearly, keep a single language in chain-of-thought, etc.
+
+2. **Reasoning-Oriented RL**  
+   From this improved baseline, the team repeated large-scale RL for math, coding, and logic tasks. Now the model is both smart and more coherent.
+
+3. **Rejection Sampling + SFT**  
+   When the RL model churns out many responses, you only keep the correct and well-formatted outputs. This new "high-quality dataset" is used for an extra round of supervised fine-tuning.
+
+4. **RL for All Scenarios**  
+   Finally, a second RL pass merges helpfulness, harmlessness, and advanced reasoning. Think of it as layering alignment (good behavior) on top of top-tier problem-solving skills.
+
+With these four stages, **DeepSeek-R1** overcame R1-Zero's limitations without sacrificing raw reasoning power.
+
+---
+
+## 5. Breaking Down the Results
+
+Below are some of the standout benchmarks and how DeepSeek R1 stacks up against leading solutions. We'll highlight math, coding, and general knowledge—where the model really shines.
+
+| Benchmark                | DeepSeek-R1 (Pass@1) | o1 (Pass@1) | Notable Achievement            |
+| ------------------------ | -------------------- | ----------- | ------------------------------ |
+| **Humanity's Last Exam** | **9.4%**             | 9.1%        | Top score on hardest AI test   |
+| **AIME 2024**            | **79.8%**            | 79.2%       | Surpassed o1 at advanced math  |
+| **MATH-500**             | **97.3%**            | ~96.4%      | Matches or edges out top-tier  |
+| **Codeforces**           | ~96.3% percentile    | ~96.6%      | Near tie with o1 at coding     |
+| **MMLU**                 | ~90–92%              | ~91–92%     | Competitive on knowledge tasks |
+| **LiveCodeBench**        | 65.9%                | ~63–64%     | Edges out o1 in code pass rate |
+
+**Key Observations**
+
+- On Humanity's Last Exam, a new benchmark designed to be the hardest AI test ever created, DeepSeek-R1 achieved the highest score (9.4%) among all models tested, including closed-source leaders like o1 (9.1%) and Claude 3.5 Sonnet (4.3%). While these scores may seem low, they reflect the extreme difficulty of the test, which features expert-level questions across over 100 academic subjects.
+- On math-heavy tasks (AIME, MATH-500), DeepSeek-R1 is neck-and-neck or slightly above o1.
+- Code tasks (Codeforces, LiveCodeBench) show R1's chain-of-thought approach pays dividends; it can self-correct logic errors by systematically exploring solutions.
+- For educational knowledge tasks (like MMLU), R1 is in the same league as o1, proving that open-source RL can scale beyond just math and code.
+
+---
+
+## 6. Distilling Reasoning into Smaller Models
+
+<KnowledgeDistillationCircles
+  figureNumber={4}
+  subtitle="Visual representation of the knowledge distillation process, showing how reasoning capabilities transfer from the larger teacher model (left) to the smaller student model (right)."
+/>
+
+### Available Distilled Models
+
+DeepSeek R1's distillation pipeline produces:
+
+| Distilled Model      | Parameter Count | Base Architecture | Typical Use Case                |
+| -------------------- | --------------- | ----------------- | ------------------------------- |
+| R1-Distill-Qwen-1.5B | 1.5B            | Qwen2.5           | Quick, low-resource scenarios   |
+| R1-Distill-Qwen-7B   | 7B              | Qwen2.5           | Balanced performance vs. cost   |
+| R1-Distill-Qwen-14B  | 14B             | Qwen2.5           | Stronger code & math tasks      |
+| R1-Distill-Qwen-32B  | 32B             | Qwen2.5           | Near top-tier reasoning scores  |
+| R1-Distill-Llama-8B  | 8B              | Llama v3.1 8B     | Similar to the Qwen-7B style    |
+| R1-Distill-Llama-70B | 70B             | Llama v3.3 70B    | High-end tasks, near R1 teacher |
+
+- **Why Distill?** Smaller models are cheaper to run, faster to fine-tune, and easier to deploy. Yet the essential steps in chain-of-thought remain intact.
+- **Performance**: Some 7B or 14B variants can outperform older 30B open models on reasoning tasks—simply because they've inherited R1's meticulously learned logic.
+
+---
+
+## 7. Discussion & Lessons Learned
+
+**Distillation vs. RL**
+
+- For large models: RL fosters emergent phenomena like self-reflection and complex problem-solving.
+- For smaller models: Distillation is often cheaper and simpler, letting them "inherit" advanced reasoning from a bigger teacher.
+
+**Handling Real-World Challenges**
+
+- **Longer Output**: Models that reason deeply tend to produce more tokens. If you're a junior engineer building an app, be mindful of output token limits and possible higher costs.
+- **Reward Hacking**: RL can be tricky. If you choose the wrong reward signals, your model might learn shortcuts. Clear correctness checks—like code compiling or numeric match—help keep the model honest.
+- **Cost-Performance Balance**: While DeepSeek R1's pricing (\$0.55/M input, \$2.19/M output) is dramatically lower than o1 (\$15/M input, \$60/M output), remember that reasoning models often produce longer outputs. Even at these reduced rates, costs can add up if your application requires extensive step-by-step explanations.
+
+---
+
+## 8. Conclusion: A New Era for Open-Source Reasoning
+
+DeepSeek R1 proves that open-source large language models—armed with a smart reinforcement learning framework—can **reach or exceed** the performance of big, closed solutions on math, coding, and more. Even better, it does so at a fraction of the cost per token.
+
+Here's the big-picture takeaway for junior engineers:
+
+1. **Reinforcement learning** can teach an LLM to reason without massive supervised datasets, unlocking emergent abilities such as self-reflection.
+2. **Cold-start data + multi-stage RL** yields a more polished, user-friendly model without sacrificing raw problem-solving.
+3. **Distilled variants** let you harness these capabilities on smaller hardware—whether for robotics tasks, specialized code generation, or a class project on advanced math.
+
+As the open-source ecosystem embraces these methods, we'll likely see an explosion of specialized, reason-focused models. DeepSeek R1's journey is just the beginning, offering a blueprint for others to push AI's boundaries on their own terms.
+
+**What can you build with it?** The ball's in your court—try the smaller distilled models, fine-tune them on your specific domain, or simply experiment with the chain-of-thought prompts. This is your invitation to join the community shaping the future of AI reasoning. Good luck and happy hacking!
+
+---
+
+### Final Note
+
+- **If you want to get hands-on:** Start by downloading one of the smaller distilled models, like the **R1-Distill-Qwen-7B**, on a single GPU.
+- **Experiment with prompts:** Encourage the model to "explain step by step" for math or code. Observe how the RL training guides it to produce thorough, logically structured solutions.
+- **Watch for half-baked answers:** RL systems can occasionally produce extraneous or repetitive text. Adjust your prompting style or try multiple samples.
+- **Consider your domain:** For tasks beyond math and code—like summarization or creative writing—take advantage of the final alignment stage that merges reasoning with human-friendly outputs.
+
+## References
+
+1. [DeepSeek R1: Scaling Reasoning with Reinforcement Learning (arXiv)](https://arxiv.org/pdf/2501.12948)
+
+2. [DeepSeek R1 Official Repository (GitHub)](https://github.com/deepseek-ai/DeepSeek-R1)
+
+3. [DeepSeek API Pricing Documentation](https://api-docs.deepseek.com/quick_start/pricing)
+
+4. [DeepSeek R1: A Deep Dive into the Open Source Challenger (DataCamp)](https://www.datacamp.com/blog/deepseek-r1)
+
+5. [DeepSeek R1 Performance on EQBench](https://eqbench.com/results/creative-writing-v2/deepseek-ai__DeepSeek-R1.txt)
+
+6. [Humanity's Last Exam: Testing the Limits of AI (AGI Safety)](https://agi.safe.ai/)
+
+7. [Humanity's Last Exam Results Analysis (Scale AI Blog)](https://scale.com/blog/humanitys-last-exam-results)
+
+8. [AI Models Face Their Toughest Test Yet (NY Times)](https://www.nytimes.com/2025/01/23/technology/ai-test-humanitys-last-exam.html)
+
+## Image Attribution
+
+[Blue Water with Water Droplets by Pawel Czerwinski](https://unsplash.com/photos/blue-water-with-water-droplets-h5uMkC-eJjc)
