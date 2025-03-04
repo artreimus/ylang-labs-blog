@@ -6,12 +6,7 @@ export const formSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   phone: z.string().refine(isValidPhoneNumber, 'Invalid phone number').optional(),
-  inquiries: z.object({
-    general: z.boolean(),
-    technical: z.boolean(),
-    support: z.boolean(),
-    misc: z.boolean(),
-  }),
+  inquiries: z.enum(['general', 'technical', 'support', 'misc']).optional(),
   message: z.string().min(10, 'Message must be atleast 10 characters long'),
 })
 

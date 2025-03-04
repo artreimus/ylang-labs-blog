@@ -7,7 +7,7 @@ import LogoIcon from '@/data/logo-icon.svg'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
-import formSchema from 'utils/validation/formschema'
+import formSchema from 'app/validators/formschema'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useToast } from '@/components/hooks/use-toast'
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form'
 import { z } from 'zod'
 import { PhoneInput } from '@/components/PhoneInput'
+import { submitForm } from 'scripts/submitform.mjs'
 
 type formSchemaType = z.infer<typeof formSchema>
 
@@ -35,32 +36,31 @@ export default function ContactPage() {
       lastName: '',
       email: '',
       phone: '',
-      inquiries: {
-        general: false,
-        technical: false,
-        support: false,
-        misc: false,
-      },
+      inquiries: undefined,
       message: '',
     },
   })
 
   const onSubmit = async (values: formSchemaType) => {
+    /*
     const selectedInquiries = Object.keys(values.inquiries)
       .filter((key) => values.inquiries[key])
       .join(', ')
-
+    */
     try {
+      /*
       const response = await fetch('/api/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
-          inquiries: selectedInquiries,
+          // inquiries: selectedInquiries,
         }),
       })
+      */
+      const data = await submitForm(values)
 
-      const data = await response.json()
+      //const data = await response.json()
       console.log(data)
 
       if (data.success) {
@@ -191,15 +191,17 @@ export default function ContactPage() {
                           <FormField
                             key={type}
                             control={form.control}
-                            name={`inquiries.${type}`}
+                            name="inquiries"
                             render={({ field }) => (
                               <FormItem className="flex items-center space-x-2">
                                 <FormControl>
                                   <div className="flex items-center space-x-2">
                                     <Checkbox
                                       id={type}
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
+                                      checked={field.value == type}
+                                      onCheckedChange={(checked) => {
+                                        field.onChange(checked ? type : undefined)
+                                      }}
                                     />
                                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                       {type.charAt(0).toUpperCase() + type.slice(1)}
