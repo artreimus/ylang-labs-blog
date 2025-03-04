@@ -22,6 +22,7 @@ import {
 import { z } from 'zod'
 import { PhoneInput } from '@/components/PhoneInput'
 import { submitForm } from 'scripts/submitform.mjs'
+import { Button } from '@/components/ui/button'
 
 type formSchemaType = z.infer<typeof formSchema>
 
@@ -42,25 +43,9 @@ export default function ContactPage() {
   })
 
   const onSubmit = async (values: formSchemaType) => {
-    /*
-    const selectedInquiries = Object.keys(values.inquiries)
-      .filter((key) => values.inquiries[key])
-      .join(', ')
-    */
     try {
-      /*
-      const response = await fetch('/api/form', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...values,
-          // inquiries: selectedInquiries,
-        }),
-      })
-      */
       const data = await submitForm(values)
 
-      //const data = await response.json()
       console.log(data)
 
       if (data.success) {
@@ -235,11 +220,12 @@ export default function ContactPage() {
               </div>
 
               <div className="flex justify-end">
-                <input
+                <Button
                   type="submit"
                   className="w-32 rounded-md bg-[#7AB55C] px-6 py-2 text-white hover:bg-[#6AA54C] md:w-auto"
-                  value="Send Inquiry"
-                ></input>
+                >
+                  Send Inquiry
+                </Button>
               </div>
             </form>
           </Form>
