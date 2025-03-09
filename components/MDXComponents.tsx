@@ -6,6 +6,7 @@ import Image from './Image'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import DiagramDisplay from './DiagramDisplay'
+import Callout from './Callout'
 
 // DSPy Blog Components
 import DspyWorkflowDiagram from './blogs/dspy-programming-not-prompting-your-lms/DspyWorkflowDiagram'
@@ -53,6 +54,7 @@ const coreMDXComponents = {
   BlogNewsletterForm,
   DiagramSubtitle,
   DiagramDisplay,
+  Callout,
 }
 
 // Blog-specific Components
