@@ -7,7 +7,7 @@ import LogoIcon from '@/data/logo-icon.svg'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
-import formSchema from 'app/validators/formschema'
+import ContactUsFormSchema from 'app/validators/formschema'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useToast } from '@/components/hooks/use-toast'
@@ -21,17 +21,17 @@ import {
 } from '@/components/ui/form'
 import { z } from 'zod'
 import { PhoneInput } from '@/components/PhoneInput'
-import { submitForm } from 'scripts/submitform.mjs'
 import { Button } from '@/components/ui/button'
+import { env } from 'app/env.mjs'
 
-type formSchemaType = z.infer<typeof formSchema>
+type formSchemaType = z.infer<typeof ContactUsFormSchema>
 
 // Convert to SHADCN
 export default function ContactPage() {
   const { toast } = useToast()
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(ContactUsFormSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -44,9 +44,27 @@ export default function ContactPage() {
 
   const onSubmit = async (values: formSchemaType) => {
     try {
-      const data = await submitForm(values)
+      // Create form data object for Web3Forms
+      const formData = {
+        ...values,
+        name: `${values.firstName} ${values.lastName}`, // Combined name for Web3Forms
+        access_key: env.NEXT_PUBLIC_WEB3_FORMS_ACCESS_KEY, // Add access key from environment variables
+      }
 
-      console.log(data)
+      // Convert to JSON
+      const json = JSON.stringify(formData)
+
+      // Submit to Web3Forms API
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: json,
+      })
+
+      const data = await response.json()
 
       if (data.success) {
         toast({
@@ -59,7 +77,7 @@ export default function ContactPage() {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: data.message,
+          description: data.message || 'Something went wrong',
           className: 'bg-white',
         })
       }
@@ -68,7 +86,7 @@ export default function ContactPage() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'An error ',
+        description: 'An error occurred while submitting the form',
         className: 'bg-white',
       })
     }
