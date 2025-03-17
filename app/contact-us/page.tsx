@@ -23,6 +23,9 @@ import { z } from 'zod'
 import { PhoneInput } from '@/components/PhoneInput'
 import { Button } from '@/components/ui/button'
 import { env } from 'app/env.mjs'
+import Image from 'next/image'
+import { MdEmail } from 'react-icons/md'
+import InlineLoader from '@/components/InlineLoader'
 
 type formSchemaType = z.infer<typeof ContactUsFormSchema>
 
@@ -93,120 +96,149 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="">
-      <div className="max-w-7x1 mx-auto px-4 pb-4 text-center">
-        <h1 className="font-serif text-4xl">Contact Us</h1>
-        <p className="text-gray-500">Any Questions? Feel free to contact us!</p>
+    <div className="py-10">
+      <div className="max-w-7x1 mx-auto px-4 pb-8 text-center">
+        <h1 className="mb-3 text-4xl font-bold">Contact Us</h1>
+        <p className="mx-auto max-w-lg text-gray-600">
+          Any questions? We'd love to hear from you. Fill out the form below and we'll get back to
+          you shortly.
+        </p>
       </div>
-      <div className="grid items-start gap-8 rounded-2xl bg-gray-100 p-6 md:grid-cols-2">
-        <div className="relative h-[62vh] overflow-hidden rounded-2xl bg-gradient-to-br from-[#B4D661] to-[#7AB55C] p-8 text-white">
-          <div className="relative z-10 flex h-full flex-col justify-between">
-            <h2 className="text-2xl">Contact Information</h2>
-            <div>
-              <div className="mb-6 space-y-2">
-                <p>ylangslabs@gmail.com</p>
+      <div className="mx-auto max-w-6xl">
+        <div className="grid items-stretch gap-8 overflow-hidden rounded-2xl shadow-lg md:grid-cols-2">
+          <div className="relative bg-gradient-to-br from-[#B4D661] to-[#7AB55C] p-10 text-white">
+            <div className="relative z-10 flex h-full flex-col justify-between">
+              <div>
+                <h2 className="mb-6 text-3xl font-bold">Contact Information</h2>
+                <p className="mb-4 text-white/80">
+                  We're here to help and answer any questions you might have. We look forward to
+                  hearing from you.
+                </p>
               </div>
-              <div className="flex gap-4">
-                <SocialIcon kind="x" href={siteMetadata.x} size={6} className="" />
+              <div>
+                <div className="mb-8 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <MdEmail className="h-5 w-5" />
+                    <p>{siteMetadata.email}</p>
+                  </div>
+                </div>
               </div>
             </div>
+            <div className="absolute inset-0 z-0 flex items-center justify-center opacity-40">
+              <Image
+                src="/static/images/logo-yellow.svg"
+                alt="Ylang Labs Logo"
+                width={500}
+                height={500}
+                className="h-full w-full object-contain md:h-3/4 md:w-3/4 lg:h-2/3 lg:w-2/3"
+              />
+            </div>
           </div>
-          <div className="absolute inset-0 z-0 flex items-center justify-center opacity-20">
-            <LogoIcon />
-          </div>
-        </div>
-        <div className="space-y-6 pt-8">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="grid gap-4 pb-10 md:grid-cols-2">
-                <div className="space-y-2">
+          <div className="bg-white p-8 md:p-10">
+            <h3 className="mb-6 text-2xl font-semibold">Send us a message</h3>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>First Name</FormLabel>
+                        <FormLabel className="text-sm font-medium">First Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Jane" {...field} />
+                          <Input
+                            placeholder="Jane"
+                            {...field}
+                            className="rounded-md border-gray-300 bg-gray-50 px-4 py-3 transition-all focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                          />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="mt-1 text-xs text-red-500" />
                       </FormItem>
                     )}
                   />
-                </div>
-                <div className="space-y-2">
                   <FormField
                     control={form.control}
                     name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Name</FormLabel>
+                        <FormLabel className="text-sm font-medium">Last Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Doe" {...field} />
+                          <Input
+                            placeholder="Doe"
+                            {...field}
+                            className="rounded-md border-gray-300 bg-gray-50 px-4 py-3 transition-all focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                          />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="mt-1 text-xs text-red-500" />
                       </FormItem>
                     )}
                   />
                 </div>
-              </div>
-              <div className="grid gap-4 pb-10 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="grid gap-6 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel className="text-sm font-medium">Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="example@email.com" {...field} />
+                          <Input
+                            placeholder="example@email.com"
+                            {...field}
+                            className="rounded-md border-gray-300 bg-gray-50 px-4 py-3 transition-all focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                          />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="mt-1 text-xs text-red-500" />
                       </FormItem>
                     )}
                   />
-                </div>
-                <div className="space-y-2">
                   <FormField
                     control={form.control}
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                        <FormLabel className="text-sm font-medium">Phone Number</FormLabel>
                         <FormControl>
-                          <PhoneInput defaultCountry="PH" placeholder="Enter Number" {...field} />
+                          <PhoneInput
+                            defaultCountry="PH"
+                            placeholder="Enter Number"
+                            {...field}
+                            className="rounded-md border-gray-300 bg-gray-50 transition-all focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                          />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="mt-1 text-xs text-red-500" />
                       </FormItem>
                     )}
                   />
                 </div>
-              </div>
-              <div className="space-y-2 pb-10">
                 <FormField
                   control={form.control}
                   name="inquiries"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Types of Inqury</FormLabel>
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                      <FormLabel className="text-sm font-medium">Type of Inquiry</FormLabel>
+                      <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-4">
                         {(['general', 'technical', 'support', 'misc'] as const).map((type) => (
                           <FormField
                             key={type}
                             control={form.control}
                             name="inquiries"
                             render={({ field }) => (
-                              <FormItem className="flex items-center space-x-2">
+                              <FormItem className="flex h-full items-start rounded-md border border-gray-200 bg-gray-50 p-3 transition-colors hover:border-green-500">
                                 <FormControl>
-                                  <div className="flex items-center space-x-2">
+                                  <div className="flex items-start gap-2">
                                     <Checkbox
                                       id={type}
                                       checked={field.value == type}
                                       onCheckedChange={(checked) => {
                                         field.onChange(checked ? type : undefined)
                                       }}
+                                      className="mt-0.5 h-4 w-4 text-green-500 focus:ring-green-500"
                                     />
-                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    <label
+                                      htmlFor={type}
+                                      className="cursor-pointer select-none text-sm font-medium leading-tight"
+                                    >
                                       {type.charAt(0).toUpperCase() + type.slice(1)}
                                     </label>
                                   </div>
@@ -216,37 +248,45 @@ export default function ContactPage() {
                           />
                         ))}
                       </div>
+                      <FormMessage className="mt-1 text-xs text-red-500" />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="space-y-2 pb-8">
                 <FormField
                   control={form.control}
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Message</FormLabel>
+                      <FormLabel className="text-sm font-medium">Message</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Write your message..." {...field} />
+                        <Textarea
+                          placeholder="Please tell us how we can help you..."
+                          {...field}
+                          className="min-h-[120px] rounded-md border-gray-300 bg-gray-50 px-4 py-3 transition-all focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                        />
                       </FormControl>
-                      <FormMessage className="text-red-500" />
+                      <FormMessage className="mt-1 text-xs text-red-500" />
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  className="w-32 rounded-md bg-[#7AB55C] px-6 py-2 text-white hover:bg-[#6AA54C] md:w-auto"
-                >
-                  Send Inquiry
-                </Button>
-              </div>
-            </form>
-          </Form>
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    className="w-full rounded-md bg-[#7AB55C] px-6 py-3 font-medium text-white transition-colors hover:bg-[#6AA54C] focus:outline-none focus:ring-2 focus:ring-[#7AB55C] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? (
+                      <InlineLoader text="Sending..." size={20} color="text-white" />
+                    ) : (
+                      'Send Message'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
         </div>
       </div>
     </div>
