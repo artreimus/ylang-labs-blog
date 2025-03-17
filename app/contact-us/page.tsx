@@ -226,18 +226,18 @@ export default function ContactPage() {
                             render={({ field }) => (
                               <FormItem className="flex h-full items-start rounded-md border border-gray-200 bg-gray-50 p-3 transition-colors hover:border-green-500">
                                 <FormControl>
-                                  <div className="flex items-start gap-2">
+                                  <div className="flex items-center gap-2">
                                     <Checkbox
                                       id={type}
                                       checked={field.value == type}
                                       onCheckedChange={(checked) => {
                                         field.onChange(checked ? type : undefined)
                                       }}
-                                      className="mt-0.5 h-4 w-4 text-green-500 focus:ring-green-500"
+                                      className="h-4 w-4 text-green-500 focus:ring-green-500"
                                     />
                                     <label
                                       htmlFor={type}
-                                      className="cursor-pointer select-none text-sm font-medium leading-tight"
+                                      className="max-w-[80%] cursor-pointer select-none truncate text-xs font-medium leading-tight"
                                     >
                                       {type.charAt(0).toUpperCase() + type.slice(1)}
                                     </label>
@@ -263,7 +263,7 @@ export default function ContactPage() {
                         <Textarea
                           placeholder="Please tell us how we can help you..."
                           {...field}
-                          className="min-h-[120px] rounded-md border-gray-300 bg-gray-50 px-4 py-3 transition-all focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50"
+                          className="min-h-[120px] rounded-md border-gray-300 bg-gray-50 px-4 py-3 transition-all hover:border-green-500 focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50"
                         />
                       </FormControl>
                       <FormMessage className="mt-1 text-xs text-red-500" />
