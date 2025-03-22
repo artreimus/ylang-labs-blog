@@ -11,7 +11,7 @@ const siteMetadata = {
   siteLogo: `${process.env.BASE_PATH || ''}/static/images/logo-white.png`,
   socialBanner: `${process.env.BASE_PATH || ''}/static/images/social-banner.png`,
   // mastodon: 'https://mastodon.social/@mastodonuser',
-  email: 'ylang.labs@gmail.com',
+  email: 'hello@ylanglabs.com',
   github: 'https://github.com/Ylang-Labs',
   x: 'https://x.com/ylanglabs',
   // twitter: 'https://twitter.com/Twitter',
