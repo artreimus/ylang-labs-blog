@@ -13,7 +13,9 @@ const ContentSecurityPolicy = `
   media-src *.s3.amazonaws.com;
   connect-src *;
   font-src 'self';
-  frame-src giscus.app
+  frame-src giscus.app;
+  frame-src 'self' https://codesandbox.io; 
+  child-src https://codesandbox.io;
 `
 
 const securityHeaders = [
@@ -51,6 +53,11 @@ const securityHeaders = [
   {
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=()',
+  },
+  // Coding Sandbox
+  {
+    key: 'Content-Security-Policy',
+    value: "frame-ancestors 'self' https://codesandbox.io https://*.codesandbox.io",
   },
 ]
 
