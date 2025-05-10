@@ -13,6 +13,7 @@ import Tag from '@/components/Tag'
 import Tags from '@/components/Tags'
 import PostNavigation from '@/components/PostNavigation'
 import Author from '@/components/Author'
+import Callout from '@/components/Callout'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -23,7 +24,7 @@ interface LayoutProps {
 }
 
 export default function PostBanner({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { slug, title, images, tags, date, path, filePath } = content
+  const { slug, title, images, tags, date, path, filePath, summary } = content
   const basePath = path.split('/')[0]
   const displayImage =
     images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
@@ -75,7 +76,14 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
           </div>
           <div className="divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:divide-y-0">
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
-              <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">{children}</div>
+              <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">
+                {summary && (
+                  <Callout type="info" title="TLDR">
+                    {summary}
+                  </Callout>
+                )}
+                {children}
+              </div>
               {/* <PostNavigation path={path} filePath={filePath} className="pb-6 pt-6" /> */}
               {siteMetadata.comments && (
                 <div className="py-6 text-center text-gray-700 dark:text-gray-300" id="comment">

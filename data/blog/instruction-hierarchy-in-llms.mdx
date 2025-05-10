@@ -7,20 +7,8 @@ summary: Some Large Language Models (LLMs) are vulnerable to security attacks be
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/instruction-hierarchy-in-llms/cardImage.png'
 images: ['/static/images/blogs/instruction-hierarchy-in-llms/blogHeader.png']
-layout: 'PostBanner'
+layout: 'PostSimple'
 ---
-
-<Callout type="info" title="TLDR">
-  Some Large Language Models (LLMs) are vulnerable to security attacks because they treat all
-  instructions equally. Implementing a clear instruction hierarchy—where developer instructions
-  (highest priviledge) override user queries (medium priviledge), which override model outputs
-  (lower priviledge), which override third-party content (lowest priviledge)—significantly improves
-  security and enables more effective prompt engineering. OpenAI's research shows models trained
-  with hierarchical instruction awareness demonstrate up to 63% better resistance to attacks while
-  maintaining functionality. This approach not only mirrors traditional security models in operating
-  systems and organizations, creating more trustworthy AI systems, but also provides prompt
-  engineers with a more predictable framework for crafting reliable prompts that work as intended.
-</Callout>
 
 Imagine asking your AI email assistant to read your latest email. Instead of simply reading it, the assistant is tricked into forwarding all your private emails to an unauthorized address because of a cleverly disguised malicious instruction hidden in a message ([Wallace et al., 2024](https://arxiv.org/abs/2404.13208)). Scary, right? Unfortunately, such vulnerabilities exist because some Large Language Models (LLMs) today treat instructions from trusted developers, end-users, and third-party content equally. To fix this, a clear instruction hierarchy must be established—not just for security, but also to give prompt engineers a reliable framework for creating predictable AI behaviors.
 

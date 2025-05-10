@@ -12,6 +12,7 @@ import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import Tags from '@/components/Tags'
 import PostNavigation from '@/components/PostNavigation'
 import Author from '@/components/Author'
+import Callout from '@/components/Callout'
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -29,7 +30,7 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { filePath, path, slug, date, title, tags } = content
+  const { filePath, path, slug, date, title, tags, summary } = content
   const basePath = path.split('/')[0]
 
   return (
@@ -66,7 +67,14 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               </dd>
             </dl>
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
-              <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">{children}</div>
+              <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">
+                {summary && (
+                  <Callout type="info" title="TLDR">
+                    {summary}
+                  </Callout>
+                )}
+                {children}
+              </div>
               {/* <PostNavigation path={path} filePath={filePath} className="pb-6 pt-6" /> */}
               {siteMetadata.comments && (
                 <div
