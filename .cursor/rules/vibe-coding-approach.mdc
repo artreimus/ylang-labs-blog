@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Coding Approach Guidelines
+
+This rule outlines a structured approach to coding to ensure clarity, robustness, and correctness.
+
+## Principles
+
+1.  **Explain Approach Before Coding**:
+    *   **Decompose Tasks**: Break down large features or complex problems into smaller, manageable functions, modules, or steps before generating code. This helps in understanding the scope and implementing incrementally.
+    *   **Clarifying Questions**: If the requirements are ambiguous, incomplete, or unclear, ask follow-up questions to ensure all aspects, including edge cases and constraints, are fully understood before proceeding with implementation.
+    *   **Prompt as Debugging (Evaluate and Revise)**: Before finalizing code, mentally run through test cases or scenarios. Highlight potential issues, and encourage an iterative "evaluate and revise" loop to catch bugs early.
+
+2.  **Understand Documentation**:
+    *   Before implementing any feature that involves external libraries, APIs, or unfamiliar parts of a codebase, read and understand the relevant documentation thoroughly. This ensures correct usage and adherence to best practices.

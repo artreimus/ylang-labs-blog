@@ -1,0 +1,87 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Follow the following rules when doing web development with Next.js 14 with TypeScript and React 18.
+
+---
+
+## Rules for React Hooks
+
+1. **Call hooks only at the top level** of functional components and custom hooks.
+2. **Array‐destructuring** naming convention for `useState`:
+
+   ```ts
+   const [value, setValue] = useState<string>(initialValue);
+   ```
+3. **Lazy initialization** for expensive initial state with `useState`:
+
+   ```ts
+   const [data, setData] = useState(() => expensiveComputation());
+   ```
+4. **Specify dependency arrays** and perform cleanup in `useEffect`:
+
+   ```ts
+   useEffect(() => {
+     const timer = setTimeout(doSomething, 1000);
+     return () => clearTimeout(timer);
+   }, [doSomething]);
+   ```
+5. **Name custom hooks** with a `use` prefix and a capitalized descriptor (e.g. `useFetchData`).
+6. **Extract stateful logic** into custom hooks for single responsibility.
+7. **Use `useReducer`** for complex state management with typed action enums:
+
+   ```ts
+   enum ActionType { Increment, Decrement }
+   type State = { count: number };
+   type Action = { type: ActionType };
+
+   function reducer(state: State, action: Action): State {
+     switch (action.type) {
+       case ActionType.Increment:
+         return { count: state.count + 1 };
+       case ActionType.Decrement:
+         return { count: state.count - 1 };
+       default:
+         return state;
+     }
+   }
+
+   const [state, dispatch] = useReducer(reducer, { count: 0 });
+   ```
+8. **Use `useContext`** or a typed state library (e.g. Zustand, Redux Toolkit) for global state management.
+9. **Only use client-specific hooks** in files marked with:
+
+   ```js
+   "use client";
+   ```
+10. **Annotate hook return types** and parameters with explicit TypeScript types:
+
+    ```ts
+    function useFetchData(url: string): { data: DataType | null; loading: boolean } {
+      // ...
+    }
+    ```
+11. **Memoize expensive computations** with `useMemo`, always listing all dependencies:
+
+    ```ts
+    const memoizedValue = useMemo(() => computeExpensive(value), [value]);
+    ```
+12. **Memoize callbacks** with `useCallback` only when needed and include every dependency:
+
+    ```ts
+    const handleClick = useCallback(() => {
+      doSomething(id);
+    }, [doSomething, id]);
+    ```
+13. **Wrap pure components** with `React.memo`, avoiding it for components whose props change often:
+
+    ```tsx
+    const PureComponent = React.memo(function Pure({ prop }: PureProps) {
+      return <div>{prop}</div>;
+    });
+    ```
+14. **Ensure props and callbacks are immutable or memoized** to get the most out of `React.memo`.
+15. **Use `useCallback` and `useMemo` judiciously** to optimize rendering performance.
+16. **Apply `React.memo`** to components with stable props and high rendering cost.

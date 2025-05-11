@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+You will always follow coding best practices. 
+
+## General Coding Best Practices
+
+1. **Follow the DRY principle** (Don't Repeat Yourself): abstract repeated code into functions or modules.
+2. **KISS** (Keep It Simple, Stupid): favor simple, straightforward solutions over complex ones.
+3. **YAGNI** (You Aren't Gonna Need It): don't implement features until they're actually required.
+4. **Single Responsibility Principle**: functions, classes, and modules should have one clear purpose.
+5. **SOLID Principles**: apply SOLID design principles to create maintainable and extensible code.
+6. **Meaningful Naming**: use descriptive, consistent names for variables, functions, and components.
+7. **Clean Code**: write readable, well-organized code; follow consistent formatting and style guides.
+8. **Comment and Document**: document non-obvious logic; keep comments up to date and avoid redundancy.
+9. **Optimize Performance**: understand and analyze algorithmic complexity (Big O time and space).
+10. **Modularity and Reusability**: design code as interchangeable modules with clear interfaces.
+12. **Error Handling**: validate inputs, handle exceptions gracefully, and provide clear error messages.
+13. **Version Control Best Practices**: use meaningful commit messages, feature branches, and code reviews.
+14. **Security Awareness**: validate inputs, sanitize outputs, and follow best practices to prevent vulnerabilities.
+15. **Logging and Monitoring**: implement logging for debugging and production monitoring.
+16. **Minimal Dependencies**: keep external libraries to a minimum and regularly update them.
+17. **Accessibility**: ensure UI components adhere to accessibility standards (ARIA, semantic HTML).
+18. **Scalability**: design systems that can grow in functionality and capacity over time.

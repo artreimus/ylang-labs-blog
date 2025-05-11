@@ -1,0 +1,41 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Ylang Labs Blog Project Overview
+
+This is the codebase for Ylang Labs, a reading platform dedicated to AI engineering. The platform serves as a space where readers can explore, learn, and deepen their understanding of AI engineering.
+
+## Tech Stack
+- **Framework**: [Next.js 14](mdc:next.config.js) with Appa Router
+- **Content Management**: [Contentlayer](mdc:contentlayer.config.ts) for MDX content
+  - Schemas for content types (Blog, Authors, Project, Company) are defined in [contentlayer.config.ts](mdc:contentlayer.config.ts).
+- **Styling**: [Tailwind CSS](mdc:tailwind.config.js)
+- **UI Components**: Custom components with Radix UI primitives in [components/ui](mdc:components/ui)
+
+## Key Directories
+- **app/**: Next.js app router structure with pages and routing
+- **components/**: Reusable React components
+- **data/**: Content files (blog posts, author info, company info) managed by Contentlayer
+- **layouts/**: Layout components for different page types
+- **public/**: Static assets like images and fonts
+
+## Content Structure
+- Blog posts are stored in @data/blogs/ as MDX files
+- Authors information in @data/authors/
+- Project showcases in [data/projects/](mdc:data/projects)
+- Site metadata configured in [data/siteMetadata.js](mdc:data/siteMetadata.js)
+- Content schemas (defining the structure and fields for Blogs, Authors, Projects, etc.) are located in [contentlayer.config.ts](mdc:contentlayer.config.ts).
+
+## Main Features
+- Blog posts with rich MDX content
+- Projects with rich MDX content
+- Tags and categories for content organization
+- Light/dark mode theme support
+- Author profiles and team information
+- Contact form
+- Projects showcase
+- SEO optimization
+
+When working with this codebase, ensure you understand how Contentlayer processes MDX files and how the Next.js App Router works with the layout structure.

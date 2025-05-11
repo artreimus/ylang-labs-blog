@@ -1,0 +1,101 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Content Management with Contentlayer and MDX
+
+This rule provides guidance for working with content in the Ylang Labs blog using Contentlayer and MDX.
+
+## Content Types Overview
+The blog uses the following content types defined in [contentlayer.config.ts](mdc:contentlayer.config.ts):
+- **Blog**: Blog posts in data/blogs/
+- **Authors**: Author profiles in data/authors/
+- **Company**: Company information in data/company/
+- **Project**: Project showcases in data/projects/
+
+Each content type has its own specific set of frontmatter fields and conventions.
+
+## Blog Posts
+### Creating a New Blog Post
+When creating a new blog post:
+1. Create a new .mdx file in `data/blogs/` with kebab-case naming.
+2. Include the required frontmatter:
+   ```md
+   ---
+   title: 'Post Title'
+   date: 'YYYY-MM-DD'
+   tags: ['Tag1', 'Tag2']
+   draft: false
+   summary: 'A brief summary of the post'
+   authors: ['author-id']
+   cardImage: '/static/images/blogs/post-slug/cardImage.png'
+   images: ['/static/images/blogs/post-slug/blogHeader.png']
+   layout: 'PostLayout' # or 'PostBanner' for banner layout
+   ---
+   ```
+3. Add the blog content in MDX format.
+
+### Blog Images
+- Store blog images in `/public/static/images/blogs/{post-slug}/`
+- Use relative paths in MDX content: `![Alt text](mdc:static/images/blogs/{post-slug}/image.png)`
+- Always include cardImage (thumbnail) and blogHeader (banner) images.
+
+### Tag System
+- Tags are auto-generated from blog posts.
+- Tag counts are processed and stored in `app/tag-data.json`.
+- Tag pages are generated at build time.
+
+## Projects
+### Creating a New Project Showcase
+When creating a new project showcase:
+1. Create a new .mdx file in `data/projects/` with kebab-case naming.
+2. Include the required and optional frontmatter:
+   ```md
+   ---
+   title: 'Project Title'
+   date: 'YYYY-MM-DD'
+   tags: ['OptionalTag1', 'OptionalTag2'] # Optional
+   draft: false  # Set to true if it's a draft
+   description: 'A brief description of the project.' # Summary of the project
+   authors: ['author-id'] # Optional, if relevant
+   image: '/static/images/projects/project-slug/mainProjectImage.png' # Main display image
+   layout: 'ProjectLayout' # Optional, specify if a custom layout is used
+   ---
+   ```
+3. Add the project content in MDX format.
+
+### Project Images
+- Store project images in `/public/static/images/projects/{project-slug}/`
+- Use relative paths in MDX content: `![Alt text](mdc:static/images/projects/{project-slug}/image.png)`
+- The `image` field in the frontmatter should point to the main display image for the project.
+
+## Authors
+### Author Management
+- Author profiles are in `data/authors/` 
+- The format includes:
+  ```md
+  ---
+  name: 'Author Name'
+  avatar: '/static/images/authors/author-id.png'
+  occupation: 'Role'
+  company: 'Company Name'
+  email: 'email@example.com'
+  twitter: 'https://twitter.com/username'
+  linkedin: 'https://linkedin.com/in/username'
+  github: 'https://github.com/username'
+  ---
+  Author bio in markdown...
+  ```
+
+## Shared MDX Components
+Custom MDX components are defined in [components/MDXComponents.tsx](mdc:components/MDXComponents.tsx) and can be used in both Blog posts and Project showcases.
+
+## Contentlayer Processing
+- Contentlayer processes MDX files at build time for all content types.
+- It extracts frontmatter, processes content, and generates TypeScript types.
+- The processed content is cached in `.contentlayer`.
+- Access content via imports:
+  - For blogs: `import { allBlogs } from 'contentlayer/generated'`
+  - For projects: `import { allProjects } from 'contentlayer/generated'`
+  - For all content types: `import { allBlogs, allProjects, allAuthors, allCompany } from 'contentlayer/generated'`
