@@ -1,9 +1,9 @@
 {
-  "evals": 2,
   "aiml": 9,
   "generative-ai": 9,
   "security": 1,
   "prompt-engineering": 1,
+  "evals": 2,
   "agents": 2,
   "rag": 1
 }

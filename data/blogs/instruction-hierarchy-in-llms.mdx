@@ -7,7 +7,7 @@ summary: Some Large Language Models (LLMs) are vulnerable to security attacks be
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/instruction-hierarchy-in-llms/cardImage.png'
 images: ['/static/images/blogs/instruction-hierarchy-in-llms/blogHeader.png']
-layout: 'PostSimple'
+layout: 'PostLayout'
 ---
 
 Imagine asking your AI email assistant to read your latest email. Instead of simply reading it, the assistant is tricked into forwarding all your private emails to an unauthorized address because of a cleverly disguised malicious instruction hidden in a message ([Wallace et al., 2024](https://arxiv.org/abs/2404.13208)). Scary, right? Unfortunately, such vulnerabilities exist because some Large Language Models (LLMs) today treat instructions from trusted developers, end-users, and third-party content equally. To fix this, a clear instruction hierarchy must be established—not just for security, but also to give prompt engineers a reliable framework for creating predictable AI behaviors.
