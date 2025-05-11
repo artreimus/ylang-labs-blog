@@ -140,6 +140,8 @@ export const Project = defineDocumentType(() => ({
     image: { type: 'string' },
     authors: { type: 'list', of: { type: 'string' } },
     layout: { type: 'string' },
+    github: { type: 'string' },
+    demo: { type: 'string' },
   },
   computedFields,
 }))

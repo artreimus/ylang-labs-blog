@@ -1,15 +1,19 @@
 import ProjectListLayout from '@/layouts/ProjectListLayout'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allProjects } from 'contentlayer/generated'
-import { genPageMetadata } from 'app/seo'
 
 const PROJECTS_PER_PAGE = 6
 
-export const metadata = genPageMetadata({ title: 'Projects' })
+export const generateStaticParams = async () => {
+  const totalPages = Math.ceil(allProjects.length / PROJECTS_PER_PAGE)
+  const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
 
-export default function ProjectsPage() {
+  return paths
+}
+
+export default function Page({ params }: { params: { page: string } }) {
   const projects = allCoreContent(sortPosts(allProjects))
-  const pageNumber = 1
+  const pageNumber = parseInt(params.page as string)
   const initialDisplayProjects = projects.slice(
     PROJECTS_PER_PAGE * (pageNumber - 1),
     PROJECTS_PER_PAGE * pageNumber
