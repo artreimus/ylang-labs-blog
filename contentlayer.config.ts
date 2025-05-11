@@ -126,6 +126,24 @@ export const Blog = defineDocumentType(() => ({
   },
 }))
 
+export const Project = defineDocumentType(() => ({
+  name: 'Project',
+  filePathPattern: 'projects/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+    tags: { type: 'list', of: { type: 'string' }, default: [] },
+    lastmod: { type: 'date' },
+    draft: { type: 'boolean' },
+    description: { type: 'string' },
+    image: { type: 'string' },
+    authors: { type: 'list', of: { type: 'string' } },
+    layout: { type: 'string' },
+  },
+  computedFields,
+}))
+
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
   filePathPattern: 'authors/**/*.mdx',
@@ -164,7 +182,7 @@ export const Company = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Company],
+  documentTypes: [Blog, Authors, Company, Project],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
