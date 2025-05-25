@@ -43,7 +43,8 @@ When creating a new blog post:
 
 ### Tag System
 - Tags are auto-generated from blog posts.
-- Tag counts are processed and stored in `app/tag-data.json`.
+- Tag counts are processed and stored in `app/blog-tag-data.json` and `app/project-tag-data.json`.
+
 - Tag pages are generated at build time.
 
 ## Projects

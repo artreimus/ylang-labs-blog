@@ -7,7 +7,9 @@ import { sortPosts } from 'pliny/utils/contentlayer.js'
 import { allBlogs } from '../.contentlayer/generated/index.mjs'
 
 // Read tag data file directly since we can't use assert syntax
-const tagData = JSON.parse(readFileSync(new URL('../app/tag-data.json', import.meta.url), 'utf-8'))
+const tagData = JSON.parse(
+  readFileSync(new URL('../app/blog-tag-data.json', import.meta.url), 'utf-8')
+)
 
 const outputFolder = process.env.EXPORT ? 'out' : 'public'
 
