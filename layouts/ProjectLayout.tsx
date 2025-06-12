@@ -59,7 +59,7 @@ export default function ProjectLayout({
 
               {/* Project description for small screens - shown below title */}
               {description && (
-                <div className="mx-auto mb-2 mt-4 max-w-2xl text-center text-sm leading-6 text-gray-700 dark:text-gray-300 xl:hidden">
+                <div className="text-dark-500 dark:text-white-500 mx-auto mb-2 mt-4 max-w-2xl text-center text-sm leading-6 xl:hidden">
                   <p>{description}</p>
                 </div>
               )}
@@ -107,8 +107,10 @@ export default function ProjectLayout({
               {/* Project description for large screens */}
               <div className="mt-8 hidden xl:block">
                 {description && (
-                  <div className="prose">
-                    <p className="text-sm leading-6">{description}</p>
+                  <div>
+                    <p className="dark:text-white-500 light:text-gray-700 text-sm leading-6">
+                      {description}
+                    </p>
                   </div>
                 )}
               </div>
