@@ -128,7 +128,8 @@ export default function ProjectListLayout({
             </div>
           )}
           {displayProjects.map((project) => {
-            const { path, title, description, image, github, demo, authors } = project
+            const { path, title, description, image, cardImage, github, demo, authors } = project
+            const displayImage = cardImage || image
             return (
               <div
                 key={path}
@@ -136,10 +137,10 @@ export default function ProjectListLayout({
               >
                 <div className="flex h-full flex-col">
                   <Link href={`/${path}`} className="group flex flex-1 flex-col">
-                    {image && (
+                    {displayImage && (
                       <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <Image
-                          src={image}
+                          src={displayImage}
                           alt={title}
                           width={800}
                           height={450}
