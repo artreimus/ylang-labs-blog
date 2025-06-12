@@ -155,7 +155,7 @@ export const Project = defineDocumentType(() => ({
     draft: { type: 'boolean' },
     description: { type: 'string' },
     image: { type: 'string' },
-    cardImage: { type: 'string' },
+    cardImage: { type: 'string', required: false },
     authors: { type: 'list', of: { type: 'string' } },
     layout: { type: 'string' },
     github: { type: 'string' },
