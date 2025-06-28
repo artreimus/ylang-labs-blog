@@ -20,7 +20,7 @@ export default async function Page() {
           </div>
           <div>
             <Link
-              href="/blog"
+              href="/blogs"
               className="w-full rounded-md bg-primary-500 px-4 py-3 text-base font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:ring-offset-black dark:hover:bg-primary-400 sm:px-5 sm:py-4 sm:text-lg"
             >
               Start Reading

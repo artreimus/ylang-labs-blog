@@ -38,7 +38,7 @@ export default function Home({ posts }) {
       {posts.length > MAX_DISPLAY && (
         <div className="mt-1 flex justify-end text-base font-medium leading-6">
           <Link
-            href="/blog"
+            href="/blogs"
             className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
             aria-label="All posts"
           >
