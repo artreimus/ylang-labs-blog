@@ -123,7 +123,7 @@ export default function ContactPage() {
               />
             </div>
           </div>
-          <div className="bg-background p-8 md:p-12">
+          <div className="bg-background p-2 md:p-6">
             <h3 className="text-foreground mb-8 text-3xl font-semibold">Send us a message</h3>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
