@@ -1,11 +1,13 @@
 import { sortPosts, allCoreContent } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
+import { allBlogs, allProjects } from 'contentlayer/generated'
 import Main from './Main'
 import Link from 'next/link'
 
 export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
   const posts = allCoreContent(sortedPosts)
+  const sortedProjects = sortPosts(allProjects)
+  const projects = allCoreContent(sortedProjects)
   return (
     <>
       <div className="mb-24 flex h-[60vh] items-center justify-center sm:mb-32">
@@ -29,7 +31,7 @@ export default async function Page() {
         </div>
       </div>
 
-      <Main posts={posts} />
+      <Main posts={posts} projects={projects} />
     </>
   )
 }
