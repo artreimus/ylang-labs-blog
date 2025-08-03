@@ -1,1 +1,10 @@
-{ "aiml": 2, "langgraph": 2, "react": 1, "agents": 2, "mcp": 1, "langchain": 1, "generative-ai": 1 }
+{
+  "aiml": 3,
+  "nextjs": 1,
+  "langgraph": 2,
+  "react": 1,
+  "agents": 2,
+  "mcp": 1,
+  "langchain": 1,
+  "generative-ai": 1
+}
