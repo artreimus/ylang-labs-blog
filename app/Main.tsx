@@ -1,14 +1,23 @@
+'use client'
+
 import Link from '@/components/Link'
 import EmptyView from '@/components/EmptyView'
 import BlogCard from '@/components/BlogCard'
 import ProjectCard from '@/components/ProjectCard'
+import { motion } from 'framer-motion'
 
 const MAX_DISPLAY = 5
 
 export default function Home({ posts, projects }) {
   return (
     <>
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      <motion.div
+        className="divide-y divide-gray-200 dark:divide-gray-700"
+        initial={{ opacity: 0, y: 80 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+      >
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
           <h1 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
             Latest Blogs
@@ -35,7 +44,7 @@ export default function Home({ posts, projects }) {
             })}
           </div>
         </div>
-      </div>
+      </motion.div>
       {posts.length > MAX_DISPLAY && (
         <div className="mt-1 flex justify-end text-base font-medium leading-6">
           <Link
@@ -49,7 +58,13 @@ export default function Home({ posts, projects }) {
       )}
 
       {/* Projects Section */}
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      <motion.div
+        className="divide-y divide-gray-200 dark:divide-gray-700"
+        initial={{ opacity: 0, y: 80 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+      >
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
           <h1 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
             Latest Projects
@@ -76,7 +91,7 @@ export default function Home({ posts, projects }) {
             })}
           </div>
         </div>
-      </div>
+      </motion.div>
       {projects?.length > 0 && (
         <div className="mt-1 flex justify-end text-base font-medium leading-6">
           <Link
