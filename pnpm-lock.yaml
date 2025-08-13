@@ -41,6 +41,9 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.3)(zod@3.24.4)
+      '@tabler/icons-react':
+        specifier: ^3.34.1
+        version: 3.34.1(react@18.3.1)
       '@tailwindcss/forms':
         specifier: ^0.5.7
         version: 0.5.10(tailwindcss@3.4.17)
@@ -2167,6 +2170,14 @@ packages:
         optional: true
       zod:
         optional: true
+
+  '@tabler/icons-react@3.34.1':
+    resolution: {integrity: sha512-Ld6g0NqOO05kyyHsfU8h787PdHBm7cFmOycQSIrGp45XcXYDuOK2Bs0VC4T2FWSKZ6bx5g04imfzazf/nqtk1A==}
+    peerDependencies:
+      react: '>= 16'
+
+  '@tabler/icons@3.34.1':
+    resolution: {integrity: sha512-9gTnUvd7Fd/DmQgr3MKY+oJLa1RfNsQo8c/ir3TJAWghOuZXodbtbVp0QBY2DxWuuvrSZFys0HEbv1CoiI5y6A==}
 
   '@tailwindcss/forms@0.5.10':
     resolution: {integrity: sha512-utI1ONF6uf/pPNO68kmN1b8rEwNXv3czukalo8VtJH8ksIkZXr3Q3VYudZLkCsDd4Wku120uF02hYK25XGPorw==}
@@ -8006,6 +8017,13 @@ snapshots:
     optionalDependencies:
       typescript: 5.8.3
       zod: 3.24.4
+
+  '@tabler/icons-react@3.34.1(react@18.3.1)':
+    dependencies:
+      '@tabler/icons': 3.34.1
+      react: 18.3.1
+
+  '@tabler/icons@3.34.1': {}
 
   '@tailwindcss/forms@0.5.10(tailwindcss@3.4.17)':
     dependencies:
