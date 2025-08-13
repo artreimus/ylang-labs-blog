@@ -7,7 +7,7 @@ export default function BlogCard({ post }) {
   const { slug, title, tags, cardImage } = post
 
   return (
-    <Link href={`/blog/${slug}`} className="group block h-[320px] w-[240px]">
+    <Link href={`/blogs/${slug}`} className="group block h-[320px] w-[240px]">
       <article className="relative h-full w-full overflow-hidden rounded-lg">
         {/* Image */}
         <Image
