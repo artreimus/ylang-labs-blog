@@ -1,45 +1,90 @@
+'use client'
 import siteMetadata from '@/data/siteMetadata'
 import headerNavLinks from '@/data/headerNavLinks'
-import Link from './Link'
-import MobileNav from './MobileNav'
 import ThemeSwitch from './ThemeSwitch'
 import SearchButton from './SearchButton'
 import DynamicLogo from './DynamicLogo'
+import Link from './Link'
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from '@/components/ui/resizable-navbar'
+import { useState } from 'react'
+
+const CustomNavbarLogo = () => {
+  return (
+    <Link href="/" aria-label={siteMetadata.headerTitle}>
+      <div className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 font-sans text-base font-normal text-black dark:text-white">
+        <DynamicLogo />
+      </div>
+    </Link>
+  )
+}
 
 const Header = () => {
-  let headerClass = 'flex items-center w-full bg-white dark:bg-gray-950 justify-between py-10'
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const navItems = headerNavLinks
+    .filter((link) => link.href !== '/')
+    .map((link) => ({
+      name: link.title,
+      link: link.href,
+    }))
+
+  let navbarClass = ''
   if (siteMetadata.stickyNav) {
-    headerClass += ' sticky top-0 z-50'
+    navbarClass = 'sticky top-0 z-50'
   }
 
   return (
-    <header className={headerClass}>
-      <Link href="/" aria-label={siteMetadata.headerTitle}>
-        <div className="flex items-center justify-between">
-          <div className="mr-3">
-            <DynamicLogo />
+    <div className="relative w-full">
+      <Navbar className={navbarClass}>
+        {/* Desktop Navigation */}
+        <NavBody>
+          <CustomNavbarLogo />
+          <NavItems items={navItems} />
+          <div className="relative z-[70] flex items-center gap-4">
+            <SearchButton />
+            <ThemeSwitch />
           </div>
-        </div>
-      </Link>
-      <div className="flex items-center space-x-4 leading-5 sm:space-x-6">
-        <div className="no-scrollbar hidden max-w-40 items-center space-x-4 overflow-x-auto sm:flex sm:space-x-6 md:max-w-72 lg:max-w-96">
-          {headerNavLinks
-            .filter((link) => link.href !== '/')
-            .map((link) => (
-              <Link
-                key={link.title}
-                href={link.href}
-                className="block font-medium text-gray-900 hover:text-primary-500 dark:text-gray-100 dark:hover:text-primary-400"
-              >
-                {link.title}
-              </Link>
-            ))}
-        </div>
-        <SearchButton />
-        <ThemeSwitch />
-        <MobileNav />
-      </div>
-    </header>
+        </NavBody>
+
+        {/* Mobile Navigation */}
+        <MobileNav>
+          <MobileNavHeader>
+            <CustomNavbarLogo />
+            <div className="relative z-[70] flex items-center gap-2">
+              <SearchButton />
+              <ThemeSwitch />
+              <MobileNavToggle
+                isOpen={isMobileMenuOpen}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              />
+            </div>
+          </MobileNavHeader>
+
+          <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
+            <div className="flex w-full flex-col space-y-6">
+              {navItems.map((item, idx) => (
+                <Link
+                  key={`mobile-link-${idx}`}
+                  href={item.link}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="font-sans text-lg font-medium text-black transition-colors duration-200 hover:text-gray-600 dark:text-white dark:hover:text-gray-300"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </MobileNavMenu>
+        </MobileNav>
+      </Navbar>
+    </div>
   )
 }
 
