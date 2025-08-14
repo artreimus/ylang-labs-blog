@@ -2,12 +2,10 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Project } from 'contentlayer/generated'
 import { allAuthors } from 'contentlayer/generated'
 import Link from '@/components/Link'
-import siteMetadata from '@/data/siteMetadata'
 import EmptyView from '@/components/EmptyView'
 import Image from '@/components/Image'
 
@@ -118,7 +116,7 @@ export default function ProjectListLayout({
             </svg>
           </div>
         </div>
-        <div className="grid gap-6 pt-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 pt-6 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
           {!filteredProjects.length && (
             <div className="col-span-full">
               <EmptyView
@@ -133,10 +131,10 @@ export default function ProjectListLayout({
             return (
               <div
                 key={path}
-                className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-950"
+                className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary-500/10 dark:border-gray-800 dark:bg-gray-950"
               >
                 <div className="flex h-full flex-col">
-                  <Link href={`/${path}`} className="group flex flex-1 flex-col">
+                  <Link href={`/${path}`} className="flex flex-1 flex-col">
                     {displayImage && (
                       <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <Image
@@ -144,16 +142,16 @@ export default function ProjectListLayout({
                           alt={title}
                           width={800}
                           height={450}
-                          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                          className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                         />
                       </div>
                     )}
                     <div className="flex flex-1 flex-col p-4 pb-0">
                       <div>
-                        <h3 className="text-md mb-2 font-bold leading-tight tracking-tight text-gray-900 dark:text-gray-100">
+                        <h3 className="mb-2 text-base font-bold leading-tight tracking-tight text-gray-900 transition-colors duration-200 group-hover:text-primary-600 dark:text-gray-100 dark:group-hover:text-primary-400">
                           {title}
                         </h3>
-                        <div className="prose mb-4 line-clamp-3 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                        <div className="prose mb-3 line-clamp-2 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
                           {description}
                         </div>
                       </div>
