@@ -1,7 +1,6 @@
 'use client'
 
 import siteMetadata from '@/data/siteMetadata'
-import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,12 +24,25 @@ import Image from 'next/image'
 import { MdEmail } from 'react-icons/md'
 import InlineLoader from '@/components/InlineLoader'
 
-type formSchemaType = z.infer<typeof ContactUsFormSchema>
+type FormSchemaType = z.infer<typeof ContactUsFormSchema>
+
+const INQUIRY_TYPES = ['general', 'technical', 'support', 'misc'] as const
+
+const INPUT_STYLES =
+  'h-10 rounded-lg border-gray-200 bg-gray-50 transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-400 dark:focus:bg-gray-900'
+
+const GRID_CONFIG = {
+  ROWS: 8,
+  COLS: 6,
+  ROW_SPACING: 12,
+  COL_SPACING: 15,
+  BASE_OFFSET: 5,
+} as const
 
 export default function ContactPage() {
   const { toast } = useToast()
 
-  const form = useForm<formSchemaType>({
+  const form = useForm<FormSchemaType>({
     resolver: zodResolver(ContactUsFormSchema),
     defaultValues: {
       firstName: '',
@@ -42,7 +54,7 @@ export default function ContactPage() {
     },
   })
 
-  const onSubmit = async (values: formSchemaType) => {
+  const onSubmit = async (values: FormSchemaType) => {
     try {
       const formData = {
         ...values,
@@ -121,13 +133,12 @@ export default function ContactPage() {
                 </div>
               </div>
             </div>
-            {/* Packed grid pattern of ylang-ylang flowers - DRY approach */}
+            {/* Packed grid pattern of ylang-ylang flowers */}
             <div className="absolute inset-0 z-0 overflow-hidden">
-              {/* Generate 8x6 dense flower grid */}
-              {Array.from({ length: 8 }, (_, row) =>
-                Array.from({ length: 6 }, (_, col) => {
-                  const left = 5 + col * 15 // 5%, 20%, 35%, 50%, 65%, 80%
-                  const top = 5 + row * 12 // 5%, 17%, 29%, 41%, 53%, 65%, 77%, 89%
+              {Array.from({ length: GRID_CONFIG.ROWS }, (_, row) =>
+                Array.from({ length: GRID_CONFIG.COLS }, (_, col) => {
+                  const left = GRID_CONFIG.BASE_OFFSET + col * GRID_CONFIG.COL_SPACING
+                  const top = GRID_CONFIG.BASE_OFFSET + row * GRID_CONFIG.ROW_SPACING
                   const isCenter = row >= 2 && row <= 5 && col >= 2 && col <= 3
 
                   return (
@@ -177,7 +188,7 @@ export default function ContactPage() {
                           <Input
                             placeholder="What should we call you?"
                             {...field}
-                            className="h-10 rounded-lg border-gray-200 bg-gray-50 transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-400 dark:focus:bg-gray-900"
+                            className={INPUT_STYLES}
                           />
                         </FormControl>
                         <FormMessage className="text-sm" />
@@ -196,7 +207,7 @@ export default function ContactPage() {
                           <Input
                             placeholder="And your family name?"
                             {...field}
-                            className="h-10 rounded-lg border-gray-200 bg-gray-50 transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-400 dark:focus:bg-gray-900"
+                            className={INPUT_STYLES}
                           />
                         </FormControl>
                         <FormMessage className="text-sm" />
@@ -220,7 +231,7 @@ export default function ContactPage() {
                             type="email"
                             placeholder="your.email@example.com"
                             {...field}
-                            className="h-10 rounded-lg border-gray-200 bg-gray-50 transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-400 dark:focus:bg-gray-900"
+                            className={INPUT_STYLES}
                           />
                         </FormControl>
                         <FormMessage className="text-sm" />
@@ -240,7 +251,7 @@ export default function ContactPage() {
                             defaultCountry="PH"
                             placeholder="Your phone number"
                             {...field}
-                            className="h-10 rounded-lg border-gray-200 bg-gray-50 transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-400 dark:focus:bg-gray-900"
+                            className={INPUT_STYLES}
                           />
                         </FormControl>
                         <FormMessage className="text-sm" />
@@ -260,7 +271,7 @@ export default function ContactPage() {
                       </FormLabel>
                       <FormControl>
                         <div className="grid grid-cols-2 gap-4">
-                          {(['general', 'technical', 'support', 'misc'] as const).map((type) => (
+                          {INQUIRY_TYPES.map((type) => (
                             <FormItem key={type} className="flex items-center space-x-3 space-y-0">
                               <FormControl>
                                 <Checkbox
