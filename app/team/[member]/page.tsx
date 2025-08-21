@@ -6,9 +6,9 @@ import { genPageMetadata } from 'app/seo'
 import { notFound } from 'next/navigation'
 
 interface Props {
-  params: {
+  params: Promise<{
     member: string
-  }
+  }>
 }
 
 // Configuration for team members
@@ -26,7 +26,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props) {
-  const author = getTeamAuthors().find((p) => p.slug === params.member)
+  const resolvedParams = await params
+  const author = getTeamAuthors().find((p) => p.slug === resolvedParams.member)
   if (!author) {
     return genPageMetadata({
       title: 'Not Found',
@@ -40,8 +41,9 @@ export async function generateMetadata({ params }: Props) {
   })
 }
 
-export default function Page({ params }: Props) {
-  const author = getTeamAuthors().find((p) => p.slug === params.member) as Authors
+export default async function Page({ params }: Props) {
+  const resolvedParams = await params
+  const author = getTeamAuthors().find((p) => p.slug === resolvedParams.member) as Authors
 
   if (!author) {
     notFound()
