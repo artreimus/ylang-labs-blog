@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import type { Company } from 'contentlayer/generated'
 import SocialIcon from '@/components/social-icons'
 import Image from '@/components/Image'
+import Link from 'next/link'
 
 interface Props {
   children: ReactNode
@@ -195,18 +196,18 @@ export default function CompanyLayout({ children, content }: Props) {
               Join thousands of developers who are already building the future of AI
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <a
+              <Link
                 href="/blogs"
                 className="inline-flex items-center rounded-full bg-white px-8 py-3 text-lg font-semibold text-primary-600 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl"
               >
                 Explore Our Blogs
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/projects"
                 className="inline-flex items-center rounded-full border-2 border-white px-8 py-3 text-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-white hover:text-primary-600"
               >
                 View Projects
-              </a>
+              </Link>
             </div>
           </div>
         </div>
