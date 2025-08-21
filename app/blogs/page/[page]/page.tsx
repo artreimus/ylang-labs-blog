@@ -1,8 +1,8 @@
-import ListLayout from '@/layouts/ListLayout'
+import BlogGridLayout from '@/layouts/BlogGridLayout'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 
-const POSTS_PER_PAGE = 5
+const POSTS_PER_PAGE = 9
 
 export const generateStaticParams = async () => {
   const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: Promise<{ page: string 
   }
 
   return (
-    <ListLayout
+    <BlogGridLayout
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
