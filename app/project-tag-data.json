@@ -1,11 +1,11 @@
 {
-  "aiml": 4,
-  "nextjs": 1,
-  "langgraph": 3,
-  "react": 1,
-  "agents": 3,
+  "aiml": 5,
+  "nextjs": 3,
+  "langgraph": 4,
+  "langchain": 3,
+  "agents": 4,
+  "react": 3,
   "mcp": 1,
-  "langchain": 2,
   "generative-ai": 1,
   "web-app": 1
 }
