@@ -2,6 +2,7 @@ import Link from '@/components/Link'
 import SocialIcon from '@/components/social-icons'
 import headerNavLinks from '@/data/headerNavLinks'
 import siteMetadata from '@/data/siteMetadata'
+import DynamicLogo from '@/components/DynamicLogo'
 
 type FooterLink = {
   label: string
@@ -60,7 +61,7 @@ export default function Footer() {
 
   return (
     <footer className="relative mt-24">
-      <div className="-mx-4 bg-gray-100 px-6 py-16 text-gray-700 shadow-lg shadow-gray-900/5 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:shadow-black/20 dark:ring-white/10 sm:-mx-6 sm:px-10 md:py-20 xl:mx-0">
+      <div className="-mx-4 bg-gray-100 px-10 py-14 text-gray-700 shadow-lg shadow-gray-900/5 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:shadow-black/20 dark:ring-white/10 sm:-mx-6 sm:px-8 sm:py-16 md:rounded-[40px] md:px-12 md:py-20 xl:mx-0">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-12">
           <div className="space-y-6">
             <h2 className="font-serif text-3xl italic leading-tight text-gray-900 dark:text-white sm:text-4xl">
@@ -103,9 +104,14 @@ export default function Footer() {
             ))}
           </div>
 
-          <div className="flex flex-col gap-6 border-t border-gray-200 pt-8 text-sm text-gray-500 dark:border-white/10 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-gray-200 pt-8 text-sm text-gray-500 dark:border-white/10 md:flex-nowrap md:justify-between">
+            <div className="flex items-center text-gray-600 dark:text-gray-500">
+              <div className="w-24 text-left md:w-auto">
+                <DynamicLogo />
+              </div>
+            </div>
             <div className="text-gray-600 dark:text-gray-500">{`© ${currentYear} ${siteMetadata.title}. All rights reserved.`}</div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 text-gray-600 dark:text-gray-500">
               {socialIconLinks.map(({ kind, href }) => (
                 <SocialIcon
                   key={kind}
