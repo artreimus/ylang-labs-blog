@@ -85,8 +85,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="mb-auto">{children}</main>
               <Toaster />
             </SearchProvider>
-            <Footer />
           </SectionContainer>
+          <Footer />
         </ThemeProviders>
       </body>
     </html>
