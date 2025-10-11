@@ -61,7 +61,7 @@ export default function Footer() {
 
   return (
     <footer className="relative mt-24">
-      <div className="-mx-4 bg-gray-100 px-10 py-14 text-gray-700 shadow-lg shadow-gray-900/5 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:shadow-black/20 dark:ring-white/10 sm:-mx-6 sm:px-8 sm:py-16 md:rounded-[40px] md:px-12 md:py-20 xl:mx-0">
+      <div className="-mx-4 bg-gray-100 px-10 py-14 text-gray-700 shadow-lg shadow-gray-900/5 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:shadow-black/20 dark:ring-white/10 sm:-mx-6 sm:px-8 sm:py-16 md:px-12 md:py-20 xl:mx-0">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-12">
           <div className="space-y-6">
             <h2 className="font-serif text-3xl italic leading-tight text-gray-900 dark:text-white sm:text-4xl">
