@@ -33,6 +33,9 @@ import {
 import RAGTriad from './blogs/rag-triad-building-trust-in-rag-through-systematic-evaluation/RAGTriad'
 import DiagramSubtitle from './DiagramSubtitle'
 
+// Pydantic Blog Components
+import SchemasAsAPIDialectsDiagram from './blogs/building-reliable-llm-workflows-with-pydantic/SchemasAsAPIDialectsDiagram'
+
 // DeepSeek Blog Components
 import HighLevelArchitectureDiagram from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/HighLevelArchitectureDiagram'
 import TrainingPipelineDiagram from './blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/TrainingPipelineDiagram'
@@ -83,6 +86,10 @@ const ragTriadBlogComponents = {
   RAGTriad,
 }
 
+const pydanticBlogComponents = {
+  SchemasAsAPIDialectsDiagram,
+}
+
 // DeepSeek Blog Components
 const deepSeekBlogComponents = {
   HighLevelArchitectureDiagram,
@@ -102,6 +109,7 @@ export const components: MDXComponents = {
   ...dspyBlogComponents,
   ...memGPTBlogComponents,
   ...ragTriadBlogComponents,
+  ...pydanticBlogComponents,
   ...deepSeekBlogComponents,
   ...multiAgentBlogComponents,
 }
