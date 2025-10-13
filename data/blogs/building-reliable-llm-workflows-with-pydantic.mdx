@@ -163,8 +163,7 @@ The moment you allow an LLM to call a tool, you inherit the risks of malformed a
 
 ```python
 import re
-from pydantic import field_validator
-
+from pydantic import BaseModel, Field, field_validator
 
 class CheckOrderStatusArgs(BaseModel):
     order_id: str = Field(..., description="Order identifier in format ABC-12345")
@@ -175,6 +174,7 @@ class CheckOrderStatusArgs(BaseModel):
         if not re.fullmatch(r"[A-Z]{3}-\d{5}", value):
             raise ValueError("order_id must match pattern ABC-12345")
         return value
+
 ```
 
 Every tool schema deserves the same scrutiny: strict patterns, enums for known options, optional fields annotated clearly. When GPT-5 suggests a tool call, you validate the arguments before hitting live systems. If validation fails, you hand the error back to the LLM for repair or fallback to a human.
