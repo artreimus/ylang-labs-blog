@@ -16,13 +16,6 @@ Pydantic is the contract that restores trust. It helps teams rescue flaky agents
 
 ---
 
-## Prerequisites
-
-- Python `3.10+`
-- Pydantic `>= 2.0`
-- Access to at least one LLM provider (e.g., OpenAI, Anthropic, Gemini) capable of JSON‑like outputs
-- Basic familiarity with JSON and HTTP APIs
-
 ## When Friendly LLMs Break Production
 
 Every LLM integration begins with optimism. You design a form so customers can report missing parts, pass their input to a model, and expect a tidy JSON response you can pump into ticketing workflows. Then reality bites: the model adds pleasantries before the JSON, forgets a closing brace, or improvises field names. Without guardrails, a single malformed field can ripple through billing, analytics, and customer care.
