@@ -4,7 +4,8 @@ import Image from 'next/image'
 import React from 'react'
 
 export default function BlogCard({ post, variant = 'default' }) {
-  const { slug, title, tags, cardImage, summary, readingTime } = post
+  const { slug, title, tags, cardImage, summary, readingTime, images } = post
+  const displayImage = (Array.isArray(images) && images.length > 0 && images[0]) || cardImage
 
   if (variant === 'grid') {
     return (
@@ -13,10 +14,10 @@ export default function BlogCard({ post, variant = 'default' }) {
           {/* Image Container */}
           <div className="relative aspect-[16/10] overflow-hidden">
             <Image
-              src={cardImage}
+              src={displayImage}
               alt={title}
               fill
-              className="object-cover transition-all duration-500 ease-out group-hover:scale-110"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             />
           </div>
 
