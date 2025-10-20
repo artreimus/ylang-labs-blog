@@ -104,11 +104,9 @@ export default function Footer() {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-gray-200 pt-8 text-sm text-gray-500 dark:border-white/10 md:flex-nowrap md:justify-between">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-gray-200 pt-8 text-sm text-gray-500 dark:border-white/10 lg:justify-between">
             <div className="flex items-center text-gray-600 dark:text-gray-500">
-              <div className="w-24 text-left md:w-auto">
-                <DynamicLogo />
-              </div>
+              <DynamicLogo />
             </div>
             <div className="text-gray-600 dark:text-gray-500">{`© ${currentYear} ${siteMetadata.title}. All rights reserved.`}</div>
             <div className="flex flex-wrap items-center gap-3 text-gray-600 dark:text-gray-500">
