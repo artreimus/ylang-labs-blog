@@ -1,12 +1,9 @@
 {
-  "aiml": 11,
-  "ocr": 1,
+  "aiml": 10,
   "generative-ai": 10,
-  "pydantic": 1,
-  "llm": 1,
   "security": 1,
   "prompt-engineering": 1,
-  "agents": 2,
   "evals": 2,
+  "agents": 2,
   "rag": 1
 }
