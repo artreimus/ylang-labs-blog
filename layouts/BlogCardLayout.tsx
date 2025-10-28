@@ -79,7 +79,7 @@ export default function BlogCardLayout({
             type="search"
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search announcements, features, or guides…"
+            placeholder="Search blogs..."
             className="w-full rounded-full border border-gray-200 bg-white px-5 py-3 text-sm text-gray-900 shadow-sm transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-primary-400"
           />
           <svg
