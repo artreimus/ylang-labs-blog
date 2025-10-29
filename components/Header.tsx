@@ -69,13 +69,13 @@ const Header = () => {
           </MobileNavHeader>
 
           <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
-            <div className="flex w-full flex-col space-y-6">
+            <div className="flex w-full flex-col">
               {navItems.map((item, idx) => (
                 <Link
                   key={`mobile-link-${idx}`}
                   href={item.link}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="font-sans text-lg font-medium text-black transition-colors duration-200 hover:text-gray-600 dark:text-white dark:hover:text-gray-300"
+                  className="block w-full font-sans text-base font-medium leading-[64px] text-gray-900 transition-colors duration-200 hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300"
                 >
                   {item.name}
                 </Link>

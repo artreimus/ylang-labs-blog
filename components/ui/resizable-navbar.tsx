@@ -65,7 +65,7 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     <motion.div
       ref={ref}
       // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
-      className={cn('sticky inset-x-0 top-20 z-40 w-full', className)}
+      className={cn('sticky inset-x-0 top-20 z-80 w-full', className)}
     >
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
@@ -96,7 +96,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         minWidth: '800px',
       }}
       className={cn(
-        'relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 dark:bg-transparent lg:flex',
+        'relative z-70 mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 dark:bg-transparent lg:flex',
         visible && 'bg-white/80 dark:bg-neutral-950/80',
         className
       )}
@@ -204,7 +204,7 @@ export const MobileNavMenu = ({ children, className, isOpen, onClose }: MobileNa
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className={cn(
-            'absolute inset-x-0 top-20 z-50 mx-4 flex w-[calc(100%-2rem)] flex-col items-start justify-start rounded-lg bg-white px-6 py-8 shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset] dark:bg-gray-900',
+            'absolute left-1/2 top-full z-[1000] -mt-px flex w-screen max-w-none -translate-x-1/2 flex-col items-start justify-start border-t border-gray-200 border-t-transparent bg-white px-5 pb-8 pt-4 shadow-[0_14px_28px_-10px_rgba(15,23,42,0.18)] dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-[0_16px_32px_-10px_rgba(0,0,0,0.45)]',
             className
           )}
         >
