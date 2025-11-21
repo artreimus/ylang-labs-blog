@@ -5,10 +5,11 @@ import { genPageMetadata } from 'app/seo'
 
 const PROJECTS_PER_PAGE = 6
 
-export const metadata = genPageMetadata({ title: 'Projects' })
+export const metadata = genPageMetadata({ title: 'Projects', url: '/projects' })
 
 export default function ProjectsPage() {
-  const projects = allCoreContent(sortPosts(allProjects))
+  const publishedProjects = allProjects.filter((project) => !project.draft)
+  const projects = allCoreContent(sortPosts(publishedProjects))
   const pageNumber = 1
   const initialDisplayProjects = projects.slice(
     PROJECTS_PER_PAGE * (pageNumber - 1),

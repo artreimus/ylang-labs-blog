@@ -11,6 +11,8 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 
+const publishedProjects = allProjects.filter((project) => !project.draft)
+
 export async function generateMetadata({
   params,
 }: {
@@ -18,7 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const resolvedParams = await params
   const slug = decodeURI(resolvedParams.slug.join('/'))
-  const project = allProjects.find((p) => p.slug === slug)
+  const project = publishedProjects.find((p) => p.slug === slug)
   const authorList = project?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
@@ -41,9 +43,14 @@ export async function generateMetadata({
     }
   })
 
+  const projectUrl = `${siteMetadata.siteUrl}/${project.path}`
+
   return {
     title: project.title,
     description: project.description,
+    alternates: {
+      canonical: projectUrl,
+    },
     openGraph: {
       title: project.title,
       description: project.description,
@@ -52,7 +59,7 @@ export async function generateMetadata({
       type: 'article',
       publishedTime: publishedAt,
       modifiedTime: modifiedAt,
-      url: './',
+      url: projectUrl,
       images: ogImages,
       authors: authors.length > 0 ? authors : [siteMetadata.author],
     },
@@ -66,14 +73,14 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  return allProjects.map((p) => ({ slug: p.slug.split('/').map((name) => decodeURI(name)) }))
+  return publishedProjects.map((p) => ({ slug: p.slug.split('/').map((name) => decodeURI(name)) }))
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string[] }> }) {
   const resolvedParams = await params
   const slug = decodeURI(resolvedParams.slug.join('/'))
   // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allProjects))
+  const sortedCoreContents = allCoreContent(sortPosts(publishedProjects))
   const projectIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
   if (projectIndex === -1) {
     return notFound()
@@ -81,7 +88,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
 
   const prev = sortedCoreContents[projectIndex + 1]
   const next = sortedCoreContents[projectIndex - 1]
-  const project = allProjects.find((p) => p.slug === slug) as Project
+  const project = publishedProjects.find((p) => p.slug === slug) as Project
   const authorList = project?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)

@@ -7,9 +7,12 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 export default function Page() {
-  const sortedPosts = sortPosts(allBlogs)
+  const publishedBlogs = allBlogs.filter((post) => !post.draft)
+  const sortedPosts = sortPosts(publishedBlogs)
   const posts = allCoreContent(sortedPosts)
-  const sortedProjects = sortPosts(allProjects)
+
+  const publishedProjects = allProjects.filter((project) => !project.draft)
+  const sortedProjects = sortPosts(publishedProjects)
   const projects = allCoreContent(sortedProjects)
   return (
     <>

@@ -3,9 +3,10 @@ import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allProjects } from 'contentlayer/generated'
 
 const PROJECTS_PER_PAGE = 6
+const publishedProjects = allProjects.filter((project) => !project.draft)
 
 export const generateStaticParams = async () => {
-  const totalPages = Math.ceil(allProjects.length / PROJECTS_PER_PAGE)
+  const totalPages = Math.ceil(publishedProjects.length / PROJECTS_PER_PAGE)
   const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
 
   return paths
@@ -13,7 +14,7 @@ export const generateStaticParams = async () => {
 
 export default async function Page({ params }: { params: Promise<{ page: string }> }) {
   const resolvedParams = await params
-  const projects = allCoreContent(sortPosts(allProjects))
+  const projects = allCoreContent(sortPosts(publishedProjects))
   const pageNumber = parseInt(resolvedParams.page as string)
   const initialDisplayProjects = projects.slice(
     PROJECTS_PER_PAGE * (pageNumber - 1),
