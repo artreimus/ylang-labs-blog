@@ -4,15 +4,13 @@ import AuthorLayout from '@/layouts/AuthorLayout'
 import { coreContent } from 'pliny/utils/contentlayer'
 import { genPageMetadata } from 'app/seo'
 import { notFound } from 'next/navigation'
+import TEAM_MEMBERS from '@/data/teamMembers'
 
 interface Props {
   params: Promise<{
     member: string
   }>
 }
-
-// Configuration for team members
-const TEAM_MEMBERS = ['van-panugan', 'arthur-reimus', 'christopher-caysido', 'ezekiel-mariano']
 
 // Helper function to filter team members
 const getTeamAuthors = () => {
@@ -38,6 +36,7 @@ export async function generateMetadata({ params }: Props) {
   return genPageMetadata({
     title: author.name,
     description: `About ${author.name}`,
+    url: `/team/${author.slug}`,
   })
 }
 
