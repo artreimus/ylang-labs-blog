@@ -4,7 +4,7 @@ import CompanyLayout from '@/layouts/CompanyLayout'
 import { coreContent } from 'pliny/utils/contentlayer'
 import { genPageMetadata } from 'app/seo'
 
-export const metadata = genPageMetadata({ title: 'About' })
+export const metadata = genPageMetadata({ title: 'About', url: '/about' })
 
 export default function Page() {
   const company = allCompanies.find((p) => p.slug === 'default') as Company
