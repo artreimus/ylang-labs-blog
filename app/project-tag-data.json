@@ -1,6 +1,7 @@
 {
-  "aiml": 5,
-  "nextjs": 3,
+  "aiml": 6,
+  "nextjs": 4,
+  "image-generation": 1,
   "langgraph": 4,
   "langchain": 3,
   "agents": 4,

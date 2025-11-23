@@ -1,9 +1,10 @@
 {
-  "aiml": 10,
+  "aiml": 11,
   "generative-ai": 10,
   "security": 1,
   "prompt-engineering": 1,
-  "evals": 2,
   "agents": 2,
-  "rag": 1
+  "evals": 2,
+  "rag": 1,
+  "ocr": 1
 }
