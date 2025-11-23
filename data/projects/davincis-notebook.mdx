@@ -1,0 +1,75 @@
+---
+title: "DaVinci's Notebook"
+date: '2025-11-24'
+tags: ['AI/ML', 'Next.js', 'Image Generation']
+lastmod: '2025-11-24'
+draft: false
+description: 'A DaVinci-style inventor notebook renderer built on Next.js App Router that turns prompts or images into parchment illustrations with ink annotations using Gemini.'
+image: '/static/images/projects/davincis-notebook/demo.gif'
+cardImage: '/static/images/projects/davincis-notebook/taipei-101.png'
+authors: ['arthur-reimus']
+layout: 'ProjectLayout'
+github: 'https://github.com/Ylang-Labs/davincis-notebook'
+---
+
+# DaVinci's Notebook Image Generator
+
+_Built with ❤️ by [@artreimus](https://github.com/artreimus) from [Ylang Labs](https://github.com/ylang-labs)_
+
+DaVinci-style inventor notebook renderer built on Next.js App Router. Provide a topic (or image), and the backend asks Gemini to craft a parchment illustration with ink annotations.
+
+## 📸 App
+
+![Animated demo](/static/images/projects/davincis-notebook/demo.gif)
+
+![Ferrari F1](/static/images/projects/davincis-notebook/ferrari-f1.png)
+![iPhone sketch](/static/images/projects/davincis-notebook/iphone.png)
+![Taipei 101](/static/images/projects/davincis-notebook/taipei-101.png)
+
+## Prerequisites
+
+- Node.js 18+ and `pnpm` (preferred for lockfile consistency).
+- `GEMINI_API_KEY` available in your environment (see `.env.example`).
+
+## Getting Started
+
+```bash
+pnpm install
+pnpm dev
+# then open http://localhost:3000
+```
+
+To run a production build: `pnpm build` then `pnpm start`.
+
+## Usage
+
+1. Enter a topic such as “Clockwork orchard pollination rig.”
+2. Click **Generate** to request a parchment-styled image. The prompt is trimmed server-side to keep outputs concise.
+3. Regenerate or download the PNG once it renders.
+4. Optionally supply an image; the API will transform it into the notebook style.
+
+## Environment
+
+- Copy `.env.example` to `.env.local` and set `GEMINI_API_KEY`.
+- Do not commit secrets; use local env files or deployment-specific secret stores.
+
+## Development Commands
+
+- `pnpm dev` — run the dev server.
+- `pnpm build` — production bundle.
+- `pnpm start` — serve the production build.
+- `pnpm lint` — ESLint (Next.js/TypeScript).
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**⭐ If you find this project useful, please give it a star! ⭐**
+
+Built with ❤️ by [@artreimus](https://github.com/artreimus) from [Ylang Labs](https://github.com/ylang-labs)
+
+</div>
