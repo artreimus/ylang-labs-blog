@@ -12,7 +12,7 @@ export const ContactUsFormSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   phone: phoneSchema,
-  inquiries: z.enum(['general', 'technical', 'support', 'misc']).optional(),
+  inquiries: z.enum(['general', 'technical', 'support', 'miscellaneous']).optional(),
   message: z.string().min(1, 'Message is required'),
 })
 

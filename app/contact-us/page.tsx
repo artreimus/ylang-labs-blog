@@ -26,7 +26,7 @@ import InlineLoader from '@/components/InlineLoader'
 
 type FormSchemaType = z.infer<typeof ContactUsFormSchema>
 
-const INQUIRY_TYPES = ['general', 'technical', 'support', 'misc'] as const
+const INQUIRY_TYPES = ['general', 'technical', 'support', 'miscellaneous'] as const
 
 const INPUT_STYLES =
   'h-10 rounded-lg border-gray-200 bg-gray-50 transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-400 dark:focus:bg-gray-900'
