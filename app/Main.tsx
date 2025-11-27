@@ -4,53 +4,101 @@ import Link from '@/components/Link'
 import EmptyView from '@/components/EmptyView'
 import BlogCard from '@/components/BlogCard'
 import ProjectCard from '@/components/ProjectCard'
-import { motion } from 'framer-motion'
+import { motion, Variants } from 'framer-motion'
 import NextLink from 'next/link'
 
 const MAX_DISPLAY = 5
 
+const container: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+}
+
+const item: Variants = {
+  hidden: { opacity: 0, y: 20, filter: 'blur(10px)' },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.8,
+      ease: [0.2, 0.65, 0.3, 0.9] as [number, number, number, number], // "Crispy" bezier
+    },
+  },
+}
+
 export default function Home({ posts, projects }) {
   return (
     <>
+      {/* Hero Section */}
       <motion.div
-        className="mb-24 flex h-[60vh] items-center justify-center sm:mb-32"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        className="relative flex min-h-[70vh] flex-col items-center justify-center text-center"
+        variants={container}
+        initial="hidden"
+        animate="show"
       >
-        <div className="flex flex-col items-center">
-          <motion.h1
-            className="mb-5 text-center font-serif text-4xl text-secondary-500 dark:text-white sm:text-8xl"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            Discover the Best of <span className="text-primary-500">AI Engineering</span>
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <p className="mb-10 overflow-hidden whitespace-normal border-r-0 text-center text-sm text-secondary-500 dark:border-white dark:text-white sm:animate-typewriterWithCaret sm:whitespace-nowrap sm:border-r-4 sm:border-secondary-500 sm:text-lg md:text-2xl">
-              A place to read and deepen your understanding of AI engineering.{' '}
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
+        <motion.div variants={item} className="max-w-4xl space-y-6 px-4">
+          <h1 className="font-serif text-5xl tracking-tighter text-secondary-500 dark:text-white sm:text-7xl md:text-8xl">
+            Discover the Best of <br className="hidden sm:block" />
+            <span className="text-primary-400">AI Engineering</span>
+          </h1>
+
+          <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-secondary-500 sm:text-xl md:text-2xl">
+            A curated space to deepen your understanding of artificial intelligence. Simplicity in
+            thought, precision in code.
+          </p>
+
+          <div className="flex flex-col items-center justify-center gap-4 pt-8 sm:flex-row">
             <NextLink
               href="/blogs"
-              className="w-full rounded-md bg-primary-500 px-4 py-3 text-base font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:ring-offset-black dark:hover:bg-primary-400 sm:px-5 sm:py-4 sm:text-lg"
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-primary-500 px-8 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 dark:bg-primary-400 dark:text-secondary-950 dark:hover:bg-primary-500"
             >
-              Start Reading
+              <span className="mr-2">Start Reading</span>
+              <svg
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
             </NextLink>
-          </motion.div>
-        </div>
+
+            <NextLink
+              href="/projects"
+              className="group inline-flex items-center justify-center rounded-full border border-secondary-300 bg-secondary-500 px-8 py-3 font-medium text-white transition-transform duration-300 hover:scale-105 hover:bg-secondary-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:ring-offset-2 dark:border-secondary-700 dark:bg-secondary-400 dark:text-secondary-950 dark:hover:bg-secondary-500 dark:focus:ring-secondary-700"
+            >
+              <span className="mr-2">View Projects</span>
+              <svg
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0-7 7m7-7H3"
+                />
+              </svg>
+            </NextLink>
+          </div>
+        </motion.div>
       </motion.div>
 
+      {/* Latest Blogs */}
       <motion.div
         className="divide-y divide-gray-200 dark:divide-gray-700"
         initial={{ opacity: 0, y: 80 }}
