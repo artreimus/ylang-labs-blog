@@ -49,7 +49,7 @@ export default function Home({ posts, projects }) {
             <span className="text-primary-400">AI Engineering</span>
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-secondary-500 sm:text-xl md:text-2xl">
+          <p className="dark:text-whitemd:text-2xl mx-auto max-w-2xl text-lg font-medium leading-relaxed text-secondary-500 dark:text-white sm:text-xl">
             A curated space to deepen your understanding of artificial intelligence. Simplicity in
             thought, precision in code.
           </p>
@@ -57,7 +57,7 @@ export default function Home({ posts, projects }) {
           <div className="flex flex-col items-center justify-center gap-4 pt-8 sm:flex-row">
             <NextLink
               href="/blogs"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-primary-500 px-8 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 dark:bg-primary-400 dark:text-secondary-950 dark:hover:bg-primary-500"
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-primary-500 px-8 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2"
             >
               <span className="mr-2">Start Reading</span>
               <svg
@@ -77,7 +77,7 @@ export default function Home({ posts, projects }) {
 
             <NextLink
               href="/projects"
-              className="group inline-flex items-center justify-center rounded-full border border-secondary-300 bg-secondary-500 px-8 py-3 font-medium text-white transition-transform duration-300 hover:scale-105 hover:bg-secondary-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:ring-offset-2 dark:border-secondary-700 dark:bg-secondary-400 dark:text-secondary-950 dark:hover:bg-secondary-500 dark:focus:ring-secondary-700"
+              className="group inline-flex items-center justify-center rounded-full border border-secondary-300 bg-secondary-500 px-8 py-3 font-medium text-white transition-transform duration-300 hover:scale-105 hover:bg-secondary-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:ring-offset-2"
             >
               <span className="mr-2">View Projects</span>
               <svg
