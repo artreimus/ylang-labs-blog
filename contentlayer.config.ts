@@ -94,14 +94,16 @@ function createProjectTagCount(allProjects) {
   writeFileSync('./app/project-tag-data.json', JSON.stringify(tagCount))
 }
 
-function createSearchIndex(allBlogs) {
+function createSearchIndex(allBlogs, allProjects) {
   if (
     siteMetadata?.search?.provider === 'kbar' &&
     siteMetadata.search.kbarConfig.searchDocumentsPath
   ) {
+    const searchableContent = allCoreContent(sortPosts([...allBlogs, ...allProjects]))
+
     writeFileSync(
       `public/${path.basename(siteMetadata.search.kbarConfig.searchDocumentsPath)}`,
-      JSON.stringify(allCoreContent(sortPosts(allBlogs)))
+      JSON.stringify(searchableContent)
     )
     console.log('Local search index generated...')
   }
@@ -235,6 +237,6 @@ export default makeSource({
     const { allBlogs, allProjects } = await importData()
     createTagCount(allBlogs)
     createProjectTagCount(allProjects)
-    createSearchIndex(allBlogs)
+    createSearchIndex(allBlogs, allProjects)
   },
 })
