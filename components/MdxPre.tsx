@@ -6,7 +6,8 @@ function extractText(node: React.ReactNode): string {
   if (node == null || typeof node === 'boolean') return ''
   if (typeof node === 'string' || typeof node === 'number') return String(node)
   if (Array.isArray(node)) return node.map(extractText).join('')
-  if (React.isValidElement(node)) return extractText(node.props.children)
+  if (React.isValidElement<{ children?: React.ReactNode }>(node))
+    return extractText(node.props.children)
   return ''
 }
 
@@ -22,16 +23,18 @@ function isMermaidClassName(className: unknown): boolean {
 
 export default function MdxPre(props: React.ComponentProps<typeof Pre>) {
   const childrenArray = React.Children.toArray(props.children)
-  const codeEl = childrenArray.find((child) => React.isValidElement(child)) as
-    | React.ReactElement
-    | undefined
+  type CodeProps = { className?: string; children?: React.ReactNode }
+  const codeEl = childrenArray.find((child): child is React.ReactElement<CodeProps> =>
+    React.isValidElement<CodeProps>(child)
+  )
 
   if (!codeEl) return <Pre {...props} />
 
-  const combinedClassName = `${props.className ?? ''} ${codeEl.props?.className ?? ''}`
+  const preClassName = (props as unknown as { className?: string }).className ?? ''
+  const combinedClassName = `${preClassName} ${codeEl.props.className ?? ''}`
   if (!isMermaidClassName(combinedClassName)) return <Pre {...props} />
 
-  const code = extractText(codeEl.props?.children).trim()
+  const code = extractText(codeEl.props.children).trim()
   if (!code) return <Pre {...props} />
 
   return <MermaidDiagram code={code} />
