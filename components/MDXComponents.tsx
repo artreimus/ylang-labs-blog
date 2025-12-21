@@ -1,5 +1,4 @@
 import TOCInline from 'pliny/ui/TOCInline'
-import Pre from 'pliny/ui/Pre'
 import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
 import type { MDXComponents } from 'mdx/types'
 import Image from './Image'
@@ -7,6 +6,8 @@ import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import DiagramDisplay from './DiagramDisplay'
 import Callout from './Callout'
+import MdxPre from './MdxPre'
+import MermaidDiagram from './MermaidDiagram'
 
 // DSPy Blog Components
 import DspyWorkflowDiagram from './blogs/dspy-programming-not-prompting-your-lms/DspyWorkflowDiagram'
@@ -52,12 +53,13 @@ const coreMDXComponents = {
   Image,
   TOCInline,
   a: CustomLink,
-  pre: Pre,
+  pre: MdxPre,
   table: TableWrapper,
   BlogNewsletterForm,
   DiagramSubtitle,
   DiagramDisplay,
   Callout,
+  MermaidDiagram,
 }
 
 // Blog-specific Components
