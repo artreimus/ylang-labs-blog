@@ -5,8 +5,8 @@ tags: ['AI/ML', 'OCR']
 draft: false
 summary: 'A practical context engineering playbook: persist durable state, retrieve only what matters, compress tool noise, and isolate context to avoid poisoning, distraction, and clashes.'
 authors: ['arthur-reimus']
-cardImage: '/static/images/blogs/unlocking-enterprise-pdfs-with-docling/cardImage.png'
-images: ['/static/images/blogs/unlocking-enterprise-pdfs-with-docling/blogHeader.png']
+cardImage: '/static/images/blogs/context-engineering-for-ai-agents/cardImage.png'
+images: ['/static/images/blogs/context-engineering-for-ai-agents/blogHeader.png']
 layout: 'PostBanner'
 ---
 
@@ -93,6 +93,8 @@ flowchart LR
     I_OK --> I_CTX
   end
 ```
+
+<DiagramSubtitle>The four pillars of context engineering</DiagramSubtitle>
 
 ## Bucket 1: Write context (persist outside the prompt)
 
@@ -184,6 +186,8 @@ flowchart LR
   end
 ```
 
+<DiagramSubtitle>Synchronous vs. asynchronous memory writes</DiagramSubtitle>
+
 #### The write decision
 
 After each agent step, make the persistence decision explicit. Most context bloat comes from skipping this and letting everything leak into the next prompt by default.
@@ -204,6 +208,8 @@ flowchart TD
   MEM -->|retrieve later| A
   ART -->|reference later| A
 ```
+
+<DiagramSubtitle>The persistence decision flow</DiagramSubtitle>
 
 ## Bucket 2: Select context (retrieve only what matters now)
 
@@ -252,6 +258,8 @@ flowchart TB
 
   PAY --> LLM["LLM call"]:::primary
 ```
+
+<DiagramSubtitle>Context selection from multiple sources</DiagramSubtitle>
 
 ### Retrieve relevant tools
 
@@ -335,6 +343,8 @@ flowchart LR
   PACK --> LLM["LLM call"]:::primary
 ```
 
+<DiagramSubtitle>Hybrid retrieval scoring</DiagramSubtitle>
+
 ### Where you inject retrieved context matters
 
 Three placement choices come up often:
@@ -358,6 +368,8 @@ flowchart TD
   TOOL --> PAY
   PAY --> LLM["LLM call"]:::primary
 ```
+
+<DiagramSubtitle>Context injection strategies</DiagramSubtitle>
 
 Many production systems use a hybrid: stable facts in system instructions, episodic memories retrieved on demand.
 
@@ -406,6 +418,8 @@ flowchart TD
   SUM --> NEXT
 ```
 
+<DiagramSubtitle>Context compaction lifecycle</DiagramSubtitle>
+
 ### Compaction triggers should be explicit
 
 Three trigger types come up often:
@@ -450,6 +464,8 @@ flowchart LR
   SBX --> ART["Artifacts"]:::secondary
   ART --> PAY
 ```
+
+<DiagramSubtitle>Isolation boundaries across sessions and agents</DiagramSubtitle>
 
 ### 1) Session isolation (security and privacy)
 
@@ -506,6 +522,8 @@ flowchart LR
 
   WRITE --> OUT["Final output"]:::primary
 ```
+
+<DiagramSubtitle>Parallel read and single write pattern for multi-agent synthesis</DiagramSubtitle>
 
 ### Sandboxing: isolate big artifacts from the prompt
 
