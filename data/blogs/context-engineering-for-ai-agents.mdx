@@ -38,47 +38,80 @@ In production, long contexts tend to fail in five recurring ways:
 - **Context clash**: new tools, facts, or instructions conflict with what is already there.
 - **Context rot**: performance degrades as context grows, even when the task is unchanged, especially as distractors accumulate and the relevant evidence is less directly aligned with the query.
 
-I like these labels because they are levers. When an agent starts to drift, you can usually recover by doing one of four things: **write** important state somewhere durable, **select** only the evidence needed for the next step, **compress** what you keep so signal fits in the window, or **isolate** different kinds of context so they do not collide.
+When an agent starts to drift, you can usually recover by doing one of four things: **write** important state somewhere durable, **select** only the evidence needed for the next step, **compress** what you keep so signal fits in the window, or **isolate** different kinds of context so they do not collide.
 
+<div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
+<div>
 ```mermaid
-flowchart LR
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
+flowchart TB
+  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
   classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
   classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
-  subgraph W["Write Context"]
-    direction TB
-    W_CTX["LLM Context"]:::ctx
-    W_LTM["Long-term memories<br/>(across sessions)"]:::secondary
-    W_SP["Scratchpad<br/>(within session)"]:::secondary
-    W_STATE["State<br/>(within session)"]:::secondary
-    W_CTX -->|write out| W_LTM
-    W_CTX -->|write out| W_SP
-    W_CTX -->|write out| W_STATE
-  end
+subgraph W["Write Context"]
+direction TB
+W_CTX["LLM Context"]:::ctx
+W_LTM["Long-term memories<br/>(across sessions)"]:::secondary
+W_SP["Scratchpad<br/>(within session)"]:::secondary
+W_STATE["State<br/>(within session)"]:::secondary
+W_CTX -->|write out| W_LTM
+W_CTX -->|write out| W_SP
+W_CTX -->|write out| W_STATE
+end
+
+````
+</div>
+
+<div>
+```mermaid
+%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
+flowchart TB
+  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
   subgraph S["Select Context"]
     direction TB
     S_CTX["LLM Context"]:::ctx
-    S_TOOLS["Retrieve relevant tools"]:::secondary
-    S_SP["Retrieve from scratchpad"]:::secondary
-    S_LTM["Retrieve long-term memory"]:::secondary
-    S_KNOW["Retrieve relevant knowledge"]:::secondary
+    S_TOOLS["Relevant tools"]:::secondary
+    S_SP["Scratchpad"]:::secondary
+    S_LTM["Long-term memory"]:::secondary
+    S_KNOW["Knowledge base"]:::secondary
     S_TOOLS -->|retrieve| S_CTX
     S_SP -->|retrieve| S_CTX
     S_LTM -->|retrieve| S_CTX
     S_KNOW -->|retrieve| S_CTX
   end
+````
 
-  subgraph C["Compress Context"]
-    direction TB
-    C_RAW["Context (before)"]:::secondary
-    C_SUM["Summarize<br/>(retain relevant tokens)"]:::primary
-    C_TRIM["Trim<br/>(remove irrelevant tokens)"]:::primary
-    C_CTX["LLM Context (after)"]:::ctx
-    C_RAW --> C_SUM --> C_CTX
-    C_RAW --> C_TRIM --> C_CTX
-  end
+</div>
+
+<div>
+```mermaid
+flowchart TB
+  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
+
+subgraph C["Compress Context"]
+direction TB
+C_RAW["Context (before)"]:::secondary
+C_SUM["Summarize<br/>(retain relevant tokens)"]:::primary
+C_TRIM["Trim<br/>(remove irrelevant tokens)"]:::primary
+C_CTX["LLM Context (after)"]:::ctx
+C_RAW --> C_SUM --> C_CTX
+C_RAW --> C_TRIM --> C_CTX
+end
+
+````
+</div>
+
+<div>
+```mermaid
+flowchart TB
+  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
   subgraph I["Isolate Context"]
     direction TB
@@ -92,7 +125,10 @@ flowchart LR
     I_MA --> I_OK
     I_OK --> I_CTX
   end
-```
+````
+
+</div>
+</div>
 
 <DiagramSubtitle>The four pillars of context engineering</DiagramSubtitle>
 
@@ -167,9 +203,10 @@ In the background, memory creation is decoupled from the main flow. This keeps t
 | Hot path   | During the step loop  | Immediate recall, easier to explain to users  | More latency, more cognitive load |
 | Background | Outside the step loop | Lower latency, cleaner separation of concerns | Needs triggers, can lag behind    |
 
-<div className="mx-auto max-w-2xl">
+<div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
+<div>
 ```mermaid
-flowchart LR
+flowchart TB
   classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
   classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
 
@@ -179,17 +216,27 @@ H1["User message"]:::primary --> H2["Update memory<br/>(tool call)"]:::secondary
 H3 -. repeat per message .-> H1
 end
 
-subgraph BG["In the background (async)"]
-direction TB
-B1["User message"]:::primary --> B2["Respond to user"]:::primary
-B2 -. repeat per message .-> B1
-B2 --> B3["Memory write scheduled<br/>(timer, cron, event)"]:::secondary --> B4["Update memory"]:::secondary
-end
+````
+</div>
 
+<div>
+```mermaid
+flowchart TB
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+
+  subgraph BG["In the background (async)"]
+    direction TB
+    B1["User message"]:::primary --> B2["Respond to user"]:::primary
+    B2 -. repeat per message .-> B1
+    B2 --> B3["Memory write scheduled<br/>(timer, cron, event)"]:::secondary --> B4["Update memory"]:::secondary
+  end
 ````
 
-<DiagramSubtitle>Synchronous vs. asynchronous memory writes</DiagramSubtitle>
 </div>
+</div>
+
+<DiagramSubtitle>Synchronous vs. asynchronous memory writes</DiagramSubtitle>
 
 #### The write decision
 
@@ -210,7 +257,7 @@ flowchart TD
   SP -->|read later| A
   MEM -->|retrieve later| A
   ART -->|reference later| A
-````
+```
 
 <DiagramSubtitle>The persistence decision flow</DiagramSubtitle>
 
@@ -410,19 +457,20 @@ flowchart TD
   classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
   classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
 
-  HIST["Long session history"]:::secondary --> TRIG{Compaction trigger}:::primary
-  TRIG -->|count-based| COMP["Compaction job"]:::secondary
-  TRIG -->|time-based| COMP
-  TRIG -->|event-based| COMP
+HIST["Long session history"]:::secondary --> TRIG{Compaction trigger}:::primary
+TRIG -->|count-based| COMP["Compaction job"]:::secondary
+TRIG -->|time-based| COMP
+TRIG -->|event-based| COMP
 
-  COMP --> CHOICE{Compression move}:::primary
-  CHOICE -->|prune| PRUNE["Keep recent turns"]:::secondary
-  CHOICE -->|offload| OFF["Store raw as artifacts"]:::secondary
-  CHOICE -->|summarize| SUM["State summary<br/>goal, constraints, decisions,<br/>open questions, next steps"]:::secondary
+COMP --> CHOICE{Compression move}:::primary
+CHOICE -->|prune| PRUNE["Keep recent turns"]:::secondary
+CHOICE -->|offload| OFF["Store raw as artifacts"]:::secondary
+CHOICE -->|summarize| SUM["State summary<br/>goal, constraints, decisions,<br/>open questions, next steps"]:::secondary
 
-  PRUNE --> NEXT["Next prompt payload"]:::primary
-  OFF --> NEXT
-  SUM --> NEXT
+PRUNE --> NEXT["Next prompt payload"]:::primary
+OFF --> NEXT
+SUM --> NEXT
+
 ````
 
 <DiagramSubtitle>Context compaction lifecycle</DiagramSubtitle>
@@ -563,3 +611,5 @@ If you build agents for real workflows, treat context as a first-class product. 
 7. [LangChain: Memory overview](https://docs.langchain.com/oss/python/concepts/memory)
 8. [Manage Claude's memory](https://code.claude.com/docs/en/memory)
 9. [Don't Build Multi-Agents](https://cognition.ai/blog/dont-build-multi-agents)
+10. [Advance Tool Use in Claude](https://www.anthropic.com/engineering/advanced-tool-use)
+11. [Agent Skills](https://agentskills.io/home)
