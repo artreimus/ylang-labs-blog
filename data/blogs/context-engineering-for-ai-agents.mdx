@@ -610,39 +610,13 @@ The counterweight is that parallel “writing” is fragile. Actions carry impli
 - Use parallel agents to read, search, and summarize.
 - Use a single agent to synthesize the final artifact.
 
-```mermaid
-flowchart LR
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
-  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
-
-  GOAL["User goal + constraints"]:::primary --> ORCH["Lead agent<br/>(orchestrator)"]:::primary
-
-  subgraph READ["Parallel read phase"]
-    direction TB
-    R1["Reader agent A<br/>scan docs"]:::secondary
-    R2["Reader agent B<br/>search + extract"]:::secondary
-    R3["Reader agent C<br/>inspect repo + logs"]:::secondary
-  end
-
-  ORCH --> R1
-  ORCH --> R2
-  ORCH --> R3
-
-  R1 --> S1["Condensed findings<br/>with pointers"]:::secondary
-  R2 --> S2["Condensed findings<br/>with pointers"]:::secondary
-  R3 --> S3["Condensed findings<br/>with pointers"]:::secondary
-
-  S1 --> MERGE["Synthesis draft"]:::primary
-  S2 --> MERGE
-  S3 --> MERGE
-
-  MERGE --> GATE{"Write gate"}:::primary
-  GATE -->|approve| WRITE["Single writer<br/>update artifact or memory"]:::secondary
-  GATE -->|conflict| RECON["Reconcile conflicts<br/>choose one source of truth"]:::secondary --> MERGE
-
-  WRITE --> OUT["Final output"]:::primary
-```
+<Image
+  alt="Parallel read and single write pattern for multi-agent synthesis"
+  src="/static/images/blogs/context-engineering-for-ai-agents/anthropic-multi-agent-system.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
 
 <DiagramSubtitle>Parallel read and single write pattern for multi-agent synthesis</DiagramSubtitle>
 
