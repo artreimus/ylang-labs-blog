@@ -44,7 +44,7 @@ When an agent starts to drift, you can usually recover by doing one of four thin
 <div>
 ```mermaid
 flowchart TB
-  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
   classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
   classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
@@ -66,7 +66,7 @@ end
 ```mermaid
 %%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
-  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
   classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
   classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
@@ -89,7 +89,7 @@ flowchart TB
 <div>
 ```mermaid
 flowchart TB
-  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
   classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
   classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
@@ -109,7 +109,7 @@ end
 <div>
 ```mermaid
 flowchart TB
-  classDef primary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
   classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
   classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
@@ -320,6 +320,61 @@ The practical technique is a tool loadout:
 - Maintain a catalog of tools with short, crisp descriptions.
 - Retrieve only the small subset of tools relevant to the current step.
 - Hide the rest, not because they are “bad”, but because they are not earning their keep right now.
+
+### Retrieve relevant skills
+
+Skills are modular, filesystem-based bundles of instructions, scripts, and reference material. Like tools, they are part of context selection: load only the skills that help with the current step, and keep the rest out of the prompt. Skill selection is a retrieval step in its own right: query the skill catalog by metadata (name + description), rank by task fit, and load only the smallest set that covers the current goal.
+
+Selection heuristics that keep skill loadouts tight:
+
+- Trigger on strong signals: explicit user mention, file type (PDF, PPTX), or a domain task the skill is built for.
+- Prefer the narrowest skill that fully covers the task; avoid broad "do-everything" skills when a specific one exists.
+- Cap the loadout (often 1 primary + 0-1 supporting skills) to prevent conflicting instructions.
+- Defer loading if unsure; you can always pull a skill mid-run when the need becomes clear.
+
+Skills support progressive disclosure:
+
+- Level 1: metadata (name + description) is always available for discovery.
+- Level 2: the `SKILL.md` instructions load only when a skill is triggered.
+- Level 3+: additional resources or scripts load only when referenced.
+
+Once a skill is loaded, treat its instructions like a mini playbook: follow the workflow it defines, and only open deeper resources (guides, templates, scripts) when the current step requires them. This keeps the prompt lean while still letting you tap into richer, domain-specific guidance on demand.
+
+Sample skill structure:
+
+```
+pdf-skill/
+├── SKILL.md
+├── FORMS.md
+├── REFERENCE.md
+└── scripts/
+    ├── extract_text.py
+    └── fill_form.py
+```
+
+Example `SKILL.md` skeleton:
+
+````markdown
+---
+name: pdf-processing
+description: Extract text and tables from PDFs, fill forms, and merge documents. Use when the user mentions PDFs or document extraction.
+---
+
+# PDF Processing
+
+## Quick start
+
+Use pdfplumber to extract text:
+
+```python
+import pdfplumber
+
+with pdfplumber.open("document.pdf") as pdf:
+    text = pdf.pages[0].extract_text()
+```
+````
+
+For advanced form filling, see [FORMS.md](FORMS.md).
 
 ### Retrieve from scratchpad
 
