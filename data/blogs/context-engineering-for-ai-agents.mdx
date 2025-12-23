@@ -588,20 +588,7 @@ flowchart LR
 
 <DiagramSubtitle>Isolation boundaries across sessions and agents</DiagramSubtitle>
 
-### 1) Session isolation (security and privacy)
-
-In production, sessions are not a convenience. They are a security boundary.
-
-At minimum:
-
-- Sessions are owned by a single user and enforced via ACLs.
-- Events are stored in deterministic order to preserve auditability.
-
-### 2) Structured buckets (prevent “bleeding” between fields)
-
-One practical trick from agent frameworks is to keep message history, tool outputs, and scratchpad state in separate structured fields, instead of blending everything into one transcript. The model is still reading tokens, but the structure helps reduce collisions.
-
-### 3) Multi-agent isolation (read in parallel, write with caution)
+### 1) Multi-agent isolation (read in parallel, write with caution)
 
 Multi-agent setups can work well for breadth-first “reading” tasks. Subagents explore in parallel, then send condensed results back to a lead agent. It is functional compression.
 
@@ -620,11 +607,62 @@ The counterweight is that parallel “writing” is fragile. Actions carry impli
 
 <DiagramSubtitle>Parallel read and single write pattern for multi-agent synthesis</DiagramSubtitle>
 
-### Sandboxing: isolate big artifacts from the prompt
+### 2) Environment isolation (sandboxes keep heavy state out of the prompt)
 
-For code agents, the ultimate isolation mechanism is an execution sandbox that persists state across turns. The model should not see a 100MB log file. It should see a reference plus a short summary.
+Sandboxed execution is a clean way to prevent tool output from flooding the prompt. Instead of returning every intermediate artifact to the model, run code in a contained environment and pass back only the parts that matter right now. This is especially useful for token-heavy objects like documents, code and logs.
 
-This is not just about cost. It is also about keeping the model’s “universe” small enough to reason effectively.
+Practical sandbox patterns:
+
+- **Return handles, not blobs**: store artifacts in the sandbox, return a short handle + summary to the LLM.
+- **Promote selectively**: only lift small snippets into the prompt when the next step needs them.
+- **Reset aggressively**: treat the sandbox as disposable so stale state does not leak across tasks.
+
+The key benefit is isolation: execution state is real and durable, but the prompt only sees a curated view.
+
+```mermaid
+flowchart LR
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
+
+  LLM["LLM Context"]:::ctx --> CODE["Code/tool call"]:::primary --> SBX["Sandbox env<br/>files, exec state"]:::secondary
+  SBX --> ART["Artifacts + state"]:::secondary
+  SBX -->|summary + handles| LLM
+```
+
+<DiagramSubtitle>Sandboxed execution isolates heavy state from the prompt</DiagramSubtitle>
+
+### 3) State isolation (separate fields, selective exposure)
+
+Runtime state is a second isolation layer. Instead of one unstructured message list, define a schema with explicit fields and only expose the fields needed for a given step. That lets you keep high-value facts close while quarantining anything noisy, risky, or too large.
+
+Examples of state buckets that reduce clashes:
+
+- **messages**: the minimal conversational slice needed for the next turn.
+- **scratchpad**: decisions, constraints, and plan checkpoints.
+- **artifacts**: pointers to large outputs (files, tables, logs).
+- **tool_state**: raw tool outputs and execution metadata.
+
+This makes isolation a default: most data stays in state, and only a thin, intentional slice reaches the LLM on each call.
+
+```mermaid
+flowchart TB
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
+
+  subgraph STATE["Runtime state schema"]
+    direction TB
+    MSG["messages"]:::secondary
+    SP["scratchpad"]:::secondary
+    ART["artifacts"]:::secondary
+    TOOL["tool_state"]:::secondary
+  end
+
+  STATE --> SEL["Select fields for next step"]:::primary --> LLM["LLM Context"]:::ctx
+```
+
+<DiagramSubtitle>State schema isolates context until it is explicitly selected</DiagramSubtitle>
 
 ## Conclusion
 
@@ -635,7 +673,7 @@ Most production techniques in this post reduce to four moves:
 - **Write** what must outlive the next call (session state, scratchpad, curated memories, artifacts).
 - **Select** the minimum evidence and the right tool loadout for the current step, not the entire transcript.
 - **Compress** early and intentionally (prune, summarize, offload), with explicit compaction triggers so you do not only compress in a panic.
-- **Isolate** to prevent collisions (sessions as boundaries, structured buckets, sandboxes for big outputs, parallel agents for reading and a single agent for synthesis).
+- **Isolate** to prevent collisions (parallel agents for reading and a single agent for synthesis).
 
 If you build agents for real workflows, treat context as a first-class product. Budget tokens the way you budget latency, decide what becomes durable, and design for the failure modes (poisoning, distraction, confusion, clash) instead of discovering them in production. The question to keep asking is simple: is every token in this context earning its keep?
 
