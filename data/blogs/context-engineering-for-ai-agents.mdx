@@ -326,6 +326,18 @@ Two upgrades make loadouts work at scale:
 - **Tool search**: keep only a search capability + a few always-on tools in context, and defer the rest. The agent discovers and loads 3–5 matching tools on-demand instead of carrying 50+ definitions upfront.
 - **Programmatic tool calling**: when a step involves many calls or large intermediate results, orchestrate tools in code so only the final output enters the model’s context.
 
+Here is what tool search looks like in practice: a small, always-available search tool narrows the catalog before the model sees any full tool schemas.
+
+<Image
+  alt="Tool search narrows the catalog before loading full tool schemas"
+  src="/static/images/blogs/context-engineering-for-ai-agents/anthropic_tool-search.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
+
+<DiagramSubtitle>Tool search narrows the catalog before loading full tool schemas</DiagramSubtitle>
+
 Accuracy still depends on how tools are described. Schemas say what’s valid, but not what’s correct. Add short, representative tool use examples to teach parameter conventions and disambiguate similar tools.
 
 ### Retrieve relevant skills
@@ -345,43 +357,33 @@ Skills support progressive disclosure:
 - Level 2: the `SKILL.md` instructions load only when a skill is triggered.
 - Level 3+: additional resources or scripts load only when referenced.
 
+This keeps the context window small: the agent only reads the skill file it needs, then follows references on demand instead of preloading an entire toolkit.
+
+<Image
+  alt="Skills are pulled into context only when triggered by the task"
+  src="/static/images/blogs/context-engineering-for-ai-agents/anthropic_skills.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
+
+<DiagramSubtitle>Skills enter the context window only when triggered</DiagramSubtitle>
+
 Once a skill is loaded, treat its instructions like a mini playbook: follow the workflow it defines, and only open deeper resources (guides, templates, scripts) when the current step requires them. This keeps the prompt lean while still letting you tap into richer, domain-specific guidance on demand.
 
-Sample skill structure:
+Here is a sample skill as it appears in practice:
 
-```
-pdf-skill/
-├── SKILL.md
-├── FORMS.md
-├── REFERENCE.md
-└── scripts/
-    ├── extract_text.py
-    └── fill_form.py
-```
+<Image
+  alt="Sample skill layout with SKILL.md and referenced files"
+  src="/static/images/blogs/context-engineering-for-ai-agents/anthropic_sample_skill.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
 
-Example `SKILL.md` skeleton:
+<DiagramSubtitle>Example skill structure</DiagramSubtitle>
 
-````markdown
----
-name: pdf-processing
-description: Extract text and tables from PDFs, fill forms, and merge documents. Use when the user mentions PDFs or document extraction.
----
-
-# PDF Processing
-
-## Quick start
-
-Use pdfplumber to extract text:
-
-```python
-import pdfplumber
-
-with pdfplumber.open("document.pdf") as pdf:
-    text = pdf.pages[0].extract_text()
-```
-````
-
-For advanced form filling, see [FORMS.md](FORMS.md).
+For concrete examples, see Anthropic's open-source agent skills repository: https://github.com/anthropics/skills.
 
 ### Retrieve from scratchpad
 
@@ -690,3 +692,7 @@ If you build agents for real workflows, treat context as a first-class product. 
 9. [Don't Build Multi-Agents](https://cognition.ai/blog/dont-build-multi-agents)
 10. [Advance Tool Use in Claude](https://www.anthropic.com/engineering/advanced-tool-use)
 11. [Agent Skills](https://agentskills.io/home)
+
+## Image Attribution
+
+[Pergola with Oranges (c. 1834) - Thomas Fearnley, Norwegian, 1802-1842](https://www.artic.edu/artworks/160229/pergola-with-oranges)
