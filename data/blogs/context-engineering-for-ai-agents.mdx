@@ -188,7 +188,19 @@ Long-term memory also comes in different flavors. A simple mapping that tends to
 | **Episodic**   | Past experiences       | A successful previous run, turned into a reusable example    |
 | **Procedural** | Rules and instructions | The agent’s operating guidelines, or a refined system prompt |
 
-This becomes non-negotiable in long-horizon work. When you are approaching context limits, summarize completed phases and persist the current plan externally. That is how you can spin up a fresh subagent with a clean context, then continue without losing the thread. Durable execution builds on the same instinct: persist enough state that you can resume instead of restarting.
+This diagram shows the split between short-term, checkpointed conversation memory and long-term memory stored in a separate database that is selectively retrieved into the model.
+
+<Image
+  alt="Cross-section of long-term memory storage and retrieval"
+  src="/static/images/blogs/context-engineering-for-ai-agents/langchain_memory.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
+
+<DiagramSubtitle>Short-term checkpoints vs. long-term memory store</DiagramSubtitle>
+
+In long-horizon work, keep the checkpointed thread lean and promote only durable facts or preferences into the long-term store. That way the short-term window stays focused on the current task, while the long-term store carries what should persist across sessions and can be retrieved when it actually matters.
 
 #### Hot path vs background writes
 
