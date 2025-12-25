@@ -20,6 +20,22 @@ A useful analogy is mise en place for an agent. Before service starts, a great k
 
 LLMs are inherently stateless. For a single API call, the context window is the model’s entire universe. Context engineering is the system that decides what goes into that universe, and just as importantly, what stays out.
 
+## The explosion of task length
+
+We are asking agents to do more than ever before. According to METR, the length of tasks AI can do is doubling every 7 months. We have moved from models limited to 4-second tasks to agents capable of autonomously completing tasks that take expert humans over an hour [12].
+
+<Image
+  alt="The length of tasks AI can do is doubling every 7 months"
+  src="/static/images/blogs/context-engineering-for-ai-agents/metr_length-of-ai-task.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
+
+<DiagramSubtitle>Task length capacity is growing exponentially (Source: METR)</DiagramSubtitle>
+
+As task horizons expand, the volume of state an agent must track grows with it. This creates a pressure cooker for context.
+
 ## Why longer context windows do not magically solve the problem
 
 Longer windows help, but they also tempt us into sloppy behavior: “Screw it, throw it all in.” The problem is that tokens are not free.
@@ -704,6 +720,7 @@ If you build agents for real workflows, treat context as a first-class product. 
 9. [Don't Build Multi-Agents](https://cognition.ai/blog/dont-build-multi-agents)
 10. [Advance Tool Use in Claude](https://www.anthropic.com/engineering/advanced-tool-use)
 11. [Agent Skills](https://agentskills.io/home)
+12. [METR: Measuring AI Ability to Complete Long Tasks](http://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/)
 
 ## Image Attribution
 
