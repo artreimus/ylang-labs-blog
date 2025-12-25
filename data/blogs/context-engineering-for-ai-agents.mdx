@@ -154,7 +154,7 @@ flowchart TB
 
 Writing context is about durability. The context window is working memory. If something needs to survive past the next model call, it has to live somewhere else.
 
-In practice, most “write context” decisions fall into three places: **scratchpads** (in-session), **artifacts** (in-session, but too large or too raw for prompts), and **memory** (cross-session).
+In practice, most "write context" decisions fall into three places: **scratchpads** (working memory), **artifacts** (heavy objects stored outside the prompt), and **memory** (durable cross-session context).
 
 ### Scratchpads (in-session)
 
@@ -171,9 +171,9 @@ Implementations vary, but the idea stays the same:
 - Write to a runtime state object (easy to read and write in orchestration frameworks)
 - Checkpoint that state so it survives tool calls and long runs
 
-### Artifacts (in-session, but not in the prompt)
+### Artifacts (heavy state, persisted outside the prompt)
 
-Artifacts are the bulky stuff: logs, long tool outputs, tables, intermediate files, screenshots, and anything you might want to reference later without paying the token cost every turn.
+Artifacts are the bulky stuff: logs, long tool outputs, tables, intermediate files, screenshots, and anything you might want to reference later without paying the token cost every turn. Use them to bridge the gap between sessions: a file generated today can be the context for a task tomorrow.
 
 The key idea is separation. Keep large blobs out of the prompt, then pull back only what you need, when you need it. Think of artifacts as the agent’s backpack, not its working memory.
 
