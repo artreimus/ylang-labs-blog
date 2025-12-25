@@ -3,22 +3,22 @@ title: 'Context Engineering for AI Agents'
 date: '2025-10-26'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
-summary: 'A practical context engineering playbook: persist durable state, retrieve only what matters, compress tool noise, and isolate context to avoid poisoning, distraction, and clashes.'
+summary: 'Prompt engineering describes the recipe; context engineering manages the kitchen. A technical playbook for the "mise en place" of AI agents: Write, Select, Compress, and Isolate.'
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/context-engineering-for-ai-agents/cardImage.png'
 images: ['/static/images/blogs/context-engineering-for-ai-agents/blogHeader.png']
 layout: 'PostBanner'
 ---
 
-If you have ever demoed an agent that looked brilliant for five minutes and then fell apart on a real workflow, you have already met context engineering.
+If you have ever demoed an agent that looked brilliant for five minutes and then fell apart on a real workflow, you have already met the context problem.
 
-In the early days of LLMs, “prompt engineering” was the headline. It made sense: change a few words, get a different answer. But prompts are static. They describe one interaction.
+In the early days of LLMs, "prompt engineering" was the headline. It made sense: change a few words, get a different answer. But prompts are static. They describe a single interaction.
 
-Agents are not one interaction. They are a loop: plan, call tools, read outputs, update state, repeat. The hard part is not writing the recipe. It is preparing the ingredients, the tools, and the right evidence for the next step.
+Agents are not single interactions. They are loops: plan, call tools, read outputs, update state, repeat. The hard part is not writing the initial recipe. It is managing the kitchen while the service is running.
 
-A useful analogy is mise en place for an agent. Before service starts, a great kitchen does not just have a recipe. It has chopped onions, labeled sauces, the right pan on the right station, and a clear understanding of the diner’s preferences. That prep work is what makes the meal consistent.
+A useful analogy is _mise en place_. Before service starts, a great chef does not just have a recipe. They have their station set: chopped onions, reduced sauces, the right tools, and a clear mental model of the orders. That prep work (that context) is what makes the output consistent.
 
-LLMs are inherently stateless. For a single API call, the context window is the model’s entire universe. Context engineering is the system that decides what goes into that universe, and just as importantly, what stays out.
+LLMs are inherently stateless. For a single API call, the context window is the model's entire universe. **Context engineering** is the system design that decides what goes into that universe and, more importantly, what stays out.
 
 ## The explosion of task length
 
@@ -34,7 +34,7 @@ We are asking agents to do more than ever before. According to METR, the length 
 
 <DiagramSubtitle>Task length capacity is growing exponentially (Source: METR)</DiagramSubtitle>
 
-As task horizons expand, the volume of state an agent must track grows with it. This creates a pressure cooker for context.
+As task horizons expand, the volume of state an agent must track grows with it. This creates a pressure cooker for context. The practical decision rule becomes clear: **If the next step does not need it, keep it in state or memory, not in the prompt.**
 
 ## Why longer context windows do not magically solve the problem
 
@@ -52,7 +52,9 @@ In production, long contexts tend to fail in five recurring ways:
 - **Context distraction**: the model over-focuses on the prompt history and under-uses what it learned during training.
 - **Context confusion**: irrelevant details crowd out signal and degrade reasoning.
 - **Context clash**: new tools, facts, or instructions conflict with what is already there.
-- **Context rot**: performance degrades as context grows, even when the task is unchanged, especially as distractors accumulate and the relevant evidence is less directly aligned with the query.
+- **Context rot**: performance degrades as context grows, even when the task is unchanged.
+
+This isn't just a quirky formatting issue. It is a fundamental property of the attention mechanism. As the context window grows, the probability distribution of the attention head flattens (attention dilution), and the "Lost in the Middle" phenomenon means facts in the center of the prompt are less likely to be retrieved than those at the start or end.
 
 When an agent starts to drift, you can usually recover by doing one of four things: **write** important state somewhere durable, **select** only the evidence needed for the next step, **compress** what you keep so signal fits in the window, or **isolate** different kinds of context so they do not collide.
 
@@ -293,11 +295,13 @@ flowchart TD
 
 Selection is relevance under a budget. For each model call, aim to include:
 
-1. **Task frame**: goal, constraints, what “done” means for this step.
+1. **Task frame**: goal, constraints, what "done" means for this step.
 2. **Evidence**: the minimum facts needed to decide the next action.
 3. **Action space**: only the tools relevant right now.
 
-In practice, “selecting context” is not one retrieval. It is a small set of targeted retrieval passes, each pulling from a different store:
+Implementing this requires moving away from the default `messages = history` pattern. Instead, you build the context dynamically for each step.
+
+In practice, "selecting context" is not one retrieval. It is a small set of targeted retrieval passes, each pulling from a different store:
 
 - Conversation state (thread history, pinned items, rolling summary)
 - Relevant tools (what the agent is allowed to do right now)
@@ -351,7 +355,7 @@ The practical technique is a tool loadout:
 
 Two upgrades make loadouts work at scale:
 
-- **Tool search**: keep only a search capability + a few always-on tools in context, and defer the rest. The agent discovers and loads 3–5 matching tools on-demand instead of carrying 50+ definitions upfront.
+- **Tool search**: keep only a search capability + a few always-on tools in context, and defer the rest. The agent discovers and loads 3-5 matching tools on-demand instead of carrying 50+ definitions upfront.
 - **Programmatic tool calling**: when a step involves many calls or large intermediate results, orchestrate tools in code so only the final output enters the model’s context.
 
 Here is what tool search looks like in practice: a small, always-available search tool narrows the catalog before the model sees any full tool schemas.
@@ -546,6 +550,8 @@ If you want a summary that actually supports the next step, define the fields it
 - Artifacts (pointers to raw data stored outside the prompt)
 - Next steps (what the agent should do next)
 
+This is effectively "lossy compression" applied to your conversation history. Unlike offloading or compression where you can potentially retrieve the original data if needed, summarization is a destructive operation. Once you summarize, the original tokens are gone from the context. You are trading fidelity for space. This is why it should be the last resort or applied only to 'completed' chunks of work where the details are no longer relevant.
+
 <div className="mx-auto max-w-2xl">
 ```mermaid
 flowchart TD
@@ -575,10 +581,10 @@ SUM --> NEXT
 
 Manus employs a specific flavor of compaction to handle the "context rot" that comes from long trajectories of tool use. A typical task might involve over 50 tool calls, many of which produce verbose output.
 
-Instead of keeping every byte of output in the chat history, they compact "stale" tool results—those that have already been acted upon. The full output is written to a file on the agent's file system, and the message history is updated to contain only a reference to that file. This offloading technique drastically reduces token usage while keeping the data accessible if the agent needs to "read" it again later. Importantly, this step is reversible—you can always rehydrate the context.
+Instead of keeping every byte of output in the chat history, they compact "stale" tool results: those that have already been acted upon. The full output is written to a file on the agent's file system, and the message history is updated to contain only a reference to that file. This offloading technique drastically reduces token usage while keeping the data accessible if the agent needs to "read" it again later. Importantly, this step is reversible: you can always rehydrate the context.
 
 <Image
-  alt="Tool compaction example"
+  alt="Diagram illustrating tool compaction: excessively long tool outputs are written to the file system and replaced with short file references in the chat history to save tokens."
   src="/static/images/blogs/context-engineering-for-ai-agents/tool_compaction.png"
   width={900}
   height={520}
