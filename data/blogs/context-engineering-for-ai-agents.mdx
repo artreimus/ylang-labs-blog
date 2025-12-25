@@ -20,6 +20,16 @@ A useful analogy is _mise en place_. Before service starts, a great chef does no
 
 LLMs are inherently stateless. For a single API call, the context window is the model's entire universe. **Context engineering** is the system design that decides what goes into that universe and, more importantly, what stays out.
 
+<Image
+  alt="Prompt Engineering vs Context Engineering"
+  src="/static/images/blogs/context-engineering-for-ai-agents/anthropic_prompt-engineering-vs-context-engineering.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
+
+<DiagramSubtitle>Prompt Engineering vs Context Engineering (Source: Anthropic)</DiagramSubtitle>
+
 ## The explosion of task length
 
 We are asking agents to do more than ever before. According to METR, the length of tasks AI can do is doubling every 7 months. We have moved from models limited to 4-second tasks to agents capable of autonomously completing tasks that take expert humans over an hour [12].
@@ -184,11 +194,6 @@ Common artifact shapes:
 - **Execution traces**: command logs, stack traces, network errors, retry histories
 - **Intermediate files**: drafts, diffs, generated code, notebooks, charts
 
-Two practical patterns make artifacts usable:
-
-- **Store a pointer plus metadata**: a short title, where it came from, and why it matters. The prompt should see the pointer and summary, not the whole blob.
-- **Summarize at write time, slice at read time**: write a small summary next to the artifact, then retrieve targeted snippets later (for example, “the one paragraph that mentions rate limits”).
-
 ### Memory (cross-session)
 
 Memory is what should follow the user or project across sessions: preferences, stable facts, recurring context. Keep it curated. You do not want to “remember the transcript,” you want a small set of items that reliably changes what the agent does next time.
@@ -206,13 +211,13 @@ Long-term memory also comes in different flavors. A simple mapping that tends to
 | **Episodic**   | Past experiences       | A successful previous run, turned into a reusable example    |
 | **Procedural** | Rules and instructions | The agent’s operating guidelines, or a refined system prompt |
 
-This diagram shows the split between short-term, checkpointed conversation memory and long-term memory stored in a separate database that is selectively retrieved into the model.
+This diagram shows the split between short-term, checkpointed conversation memory and long-term memory kept in a **separate logical store** (often within the same database) that is selectively retrieved into the model.
 
 <Image
   alt="Cross-section of long-term memory storage and retrieval"
   src="/static/images/blogs/context-engineering-for-ai-agents/langchain_memory.png"
-  width={900}
-  height={520}
+  width={720}
+  height={416}
   className="mx-auto"
 />
 
@@ -233,38 +238,13 @@ In the background, memory creation is decoupled from the main flow. This keeps t
 | Hot path   | During the step loop  | Immediate recall, easier to explain to users  | More latency, more cognitive load |
 | Background | Outside the step loop | Lower latency, cleaner separation of concerns | Needs triggers, can lag behind    |
 
-<div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
-<div>
-```mermaid
-flowchart TB
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
-
-subgraph HOT["In the hot path (sync)"]
-direction TB
-H1["User message"]:::primary --> H2["Update memory<br/>(tool call)"]:::secondary --> H3["Respond to user"]:::primary
-H3 -. repeat per message .-> H1
-end
-
-````
-</div>
-
-<div>
-```mermaid
-flowchart TB
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
-
-  subgraph BG["In the background (async)"]
-    direction TB
-    B1["User message"]:::primary --> B2["Respond to user"]:::primary
-    B2 -. repeat per message .-> B1
-    B2 --> B3["Memory write scheduled<br/>(timer, cron, event)"]:::secondary --> B4["Update memory"]:::secondary
-  end
-````
-
-</div>
-</div>
+<Image
+  alt="Diagram contrasting hot path (synchronous) versus background (asynchronous) memory updates"
+  src="/static/images/blogs/context-engineering-for-ai-agents/langchain_memory-update.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
 
 <DiagramSubtitle>Synchronous vs. asynchronous memory writes</DiagramSubtitle>
 
@@ -345,7 +325,7 @@ flowchart TB
 
 ### Retrieve relevant tools
 
-Tools are part of context too. A tool definition is not just an API schema, it is also an affordance. If you show the model too many tools at once, it can spend attention sorting them out instead of doing the task. In one reported evaluation (prompting DeepSeek-v3), tool overlap became a problem above 30 tools, and beyond 100 tools the model was virtually guaranteed to fail the tool selection test without dynamic tool selection. At scale, token burn is just as bad: large tool catalogs can consume tens of thousands of tokens before the agent even reads the user request.
+Tools are part of context too. A tool definition is not just an API schema, it is also an affordance. If you show the model too many tools at once, it can spend attention sorting them out instead of doing the task. In one reported evaluation (prompting DeepSeek-v3), tool overlap became a problem above 30 tools, and beyond 100 tools the model was virtually guaranteed to fail the tool selection test without dynamic tool selection [6]. At scale, token burn is just as bad: large tool catalogs can consume tens of thousands of tokens before the agent even reads the user request.
 
 The practical technique is a tool loadout:
 
@@ -376,20 +356,13 @@ Accuracy still depends on how tools are described. Schemas say what’s valid, b
 
 Skills are modular, filesystem-based bundles of instructions, scripts, and reference material. Like tools, they are part of context selection: load only the skills that help with the current step, and keep the rest out of the prompt. Skill selection is a retrieval step in its own right: query the skill catalog by metadata (name + description), rank by task fit, and load only the smallest set that covers the current goal.
 
-Selection heuristics that keep skill loadouts tight:
+Skills support progressive disclosure, and it starts before the first user turn:
 
-- Trigger on strong signals: explicit user mention, file type (PDF, PPTX), or a domain task the skill is built for.
-- Prefer the narrowest skill that fully covers the task; avoid broad "do-everything" skills when a specific one exists.
-- Cap the loadout (often 1 primary + 0-1 supporting skills) to prevent conflicting instructions.
-- Defer loading if unsure; you can always pull a skill mid-run when the need becomes clear.
+- **Level 1 (Pre-loaded Metadata)**: At startup, the agent scans every installed skill and injects just its YAML frontmatter (name + description) into the system prompt. This gives the agent a map of "what I can do" without paying the cost of "how I do it."
+- **Level 2 (Active Loading)**: When the agent decides a skill is relevant, it triggers a tool to read the full `SKILL.md` file into context.
+- **Level 3 (Deep Dive)**: If the skill is complex, the `SKILL.md` only contains high-level instructions and points to other files (scripts, templates) that are read only if specifically needed.
 
-Skills support progressive disclosure:
-
-- Level 1: metadata (name + description) is always available for discovery.
-- Level 2: the `SKILL.md` instructions load only when a skill is triggered.
-- Level 3+: additional resources or scripts load only when referenced.
-
-This keeps the context window small: the agent only reads the skill file it needs, then follows references on demand instead of preloading an entire toolkit.
+This keeps the context window small: the agent only carries the "menu" (metadata) in its head, and orders the "meal" (instructions) only when it decides to eat.
 
 <Image
   alt="Skills are pulled into context only when triggered by the task"
@@ -442,8 +415,46 @@ How you load long-term memory matters as much as what you store. Some systems in
 
 “Memory” can be retrieved either by the model or for the model.
 
-- In “memory as a tool”, long-term memory lives in a store and is fetched via an explicit read (the agent decides when to call it).
-- In “memory as preflight”, long-term memory lives in configuration or rule files that are automatically loaded into the session context by the client before the first model call. The retrieval still happens, it is just proactive and outside the model’s action loop. This is how Claude Code does it: it loads project and user memory files automatically at startup (for example `CLAUDE.md`), then uses them as baseline context.
+- In "memory as a tool", long-term memory lives in a store and is fetched via an explicit read (the agent decides when to call it).
+- In "memory as preflight", long-term memory lives in configuration or rule files that are automatically loaded into the session context by the client before the first model call. The retrieval still happens, it is just proactive and outside the model's action loop. This is how Claude Code does it: it loads project and user memory files automatically at startup (for example `CLAUDE.md`), then uses them as baseline context.
+
+<div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
+<div>
+```mermaid
+flowchart TB
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
+
+subgraph TOOL["Retrieve BY the Model"]
+direction TB
+T_CTX["Context"]:::ctx --> T_LLM["LLM decides<br/>to read memory"]:::primary
+T_LLM --> T_CALL["Call memory tool"]:::secondary
+T_CALL --> T_STORE["Vector / SQL Store"]:::secondary
+T_STORE -->|return content| T_CTX
+end
+
+````
+</div>
+
+<div>
+```mermaid
+flowchart TB
+  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
+  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+  classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
+
+subgraph PRE["Retrieve FOR the Model"]
+direction TB
+P_CLIENT["Client / Runtime"]:::primary --> P_READ["Read config files<br/>(e.g., CLAUDE.md)"]:::secondary
+P_READ --> P_INJECT["Inject into<br/>System Prompt"]:::secondary
+P_INJECT --> P_CTX["Context"]:::ctx
+P_CTX --> P_LLM["LLM starts task<br/>(already knows rules)"]:::primary
+end
+````
+
+</div>
+</div>
 
 If you want the preflight ergonomics in your own agent, treat “load memory” as a step that runs before the first model call (and occasionally re-runs when scope changes), then inject the curated result into system instructions under a strict token budget.
 
@@ -454,21 +465,17 @@ If you want the preflight ergonomics in your own agent, treat “load memory” 
 
 In practice, proactive injection is just “prepend a curated memory block to system instructions”. Memory as a tool is “when you need a memory, query the store, then inject the result for this step”.
 
-### Retrieve relevant knowledge
+### Retrieve relevant knowledge (RAG)
 
-Relevant knowledge is the external “evidence” the agent should ground itself in: docs, tickets, runbooks, codebases, or web pages. The technique is retrieval plus packaging:
+Retrieval-Augmented Generation (RAG) is how you let agents cheat on the test. Instead of relying on their internal training data, they look up the exact answers they need through external evidence: docs, tickets, runbooks, codebases, or web pages.
 
-- Retrieve a small number of high-signal chunks, not entire documents.
-- Prefer hybrid retrieval (semantic + lexical) when your domain has exact identifiers (error codes, function names, IDs).
-- Rerank and dedupe aggressively, then present results as a short evidence bundle.
+A common mistake is "embedding-only retrieval." Semantic similarity is necessary, but it is not sufficient. In practice, retrieval works best when you blend at least three signals:
 
-A common mistake is “embedding-only retrieval.” Semantic similarity is necessary, but it is not sufficient. In practice, retrieval works best when you blend at least three signals:
+- **Relevance**: Does it match the query concept? (Vector search)
+- **Recency**: Is it from this year? (Time decay functions)
+- **Importance**: Is this a canonical source? (Pagerank or manual weights)
 
-- **Relevance** (semantic similarity)
-- **Recency** (time decay)
-- **Importance** (assigned at write-time, often via consolidation)
-
-Start simple with a blended score (a weighted mix of relevance, recency, importance), then tune the weights based on the failures you see.
+Start simple with a blended score (a weighted mix of relevance, recency, importance), then tune the weights based on the failures you see. The goal is to retrieve a small number of high-signal chunks, rerank and dedupe specific items, and then present the results as a short evidence bundle.
 
 ```mermaid
 flowchart LR
@@ -532,52 +539,32 @@ Compression is what you do when the running session becomes a liability: too exp
 There are three common moves, ordered from safest to riskiest:
 
 - **Pruning**: keep recent detail, drop older nuance (good for chatty sessions).
-- **Offloading**: keep full fidelity outside the prompt (good for logs, tables, long docs).
+- **Compaction**: keep full fidelity outside the prompt (good for logs, tables, long docs).
 - **Summarization**: keep decisions and state, lose exact wording (good for long trajectories and handoffs).
 
-Two design details matter more than the choice itself.
+### Pruning
 
-### Summaries should be state, not prose
+Pruning is often misunderstood as just "deleting old messages." In practice, it takes two forms: **Chronological Pruning** (sliding window) and **Semantic Pruning** (context filtering).
 
-A nice paragraph summary is great for humans, and often useless for agents. Agents need state: decisions, constraints, open questions, next steps.
+**Chronological Pruning** is the standard sliding window: drop the oldest messages as new ones arrive. It is safe for casual chat, but dangerous for agents because it often deletes the initial user instruction. If you use this, ensure you "pin" the original goal and system instructions so they are strictly immune to the cut.
 
-If you want a summary that actually supports the next step, define the fields it must preserve:
+**Semantic Pruning** is sharper. Instead of dropping whole messages, you prune irrelevant *content* from within them. Recent research like *Provence* (2025) treats this as a "sequence labeling" task: dynamically masking out irrelevant sentences or tokens from retrieved context chunks before they enter the model [14]. This is critical for RAG-heavy agents, where a retrieved document might be effective 90% noise. By pruning at the sentence or token level (rather than the document level), you maintain robustness while drastically cutting cost.
 
-- Goal (what the user is trying to achieve)
-- Constraints (hard rules, policies, preferences)
-- Decisions (what was decided and why, at a high level)
-- Open questions (what is still missing)
-- Artifacts (pointers to raw data stored outside the prompt)
-- Next steps (what the agent should do next)
+<Image
+  alt="Example of semantic pruning with Provence"
+  src="/static/images/blogs/context-engineering-for-ai-agents/pruning-with-provence-example.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
 
-This is effectively "lossy compression" applied to your conversation history. Unlike offloading or compression where you can potentially retrieve the original data if needed, summarization is a destructive operation. Once you summarize, the original tokens are gone from the context. You are trading fidelity for space. This is why it should be the last resort or applied only to 'completed' chunks of work where the details are no longer relevant.
+<DiagramSubtitle>Semantic pruning removes irrelevant sentences while keeping the "needle"</DiagramSubtitle>
 
-<div className="mx-auto max-w-2xl">
-```mermaid
-flowchart TD
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+### Compaction
 
-HIST["Long session history"]:::secondary --> TRIG{Compaction trigger}:::primary
-TRIG -->|count-based| COMP["Compaction job"]:::secondary
-TRIG -->|time-based| COMP
-TRIG -->|event-based| COMP
+Compaction is essentially **offloading**. You take a large block of context (like a 50-row database result) and move it to a persistent store (a file or database), replacing it in the chat history with a lightweight pointer (e.g., `Result saved to ID: 4921`). The model sees the pointer and can choose to read the full content again if needed, but it doesn't pay the token tax just to carry it around.
 
-COMP --> CHOICE{Compression move}:::primary
-CHOICE -->|prune| PRUNE["Keep recent turns"]:::secondary
-CHOICE -->|offload| OFF["Store raw as artifacts"]:::secondary
-CHOICE -->|summarize| SUM["State summary<br/>goal, constraints, decisions,<br/>open questions, next steps"]:::secondary
-
-PRUNE --> NEXT["Next prompt payload"]:::primary
-OFF --> NEXT
-SUM --> NEXT
-
-````
-
-<DiagramSubtitle>Context compaction lifecycle</DiagramSubtitle>
-</div>
-
-### Practical example: Tool compaction
+#### Practical example: Tool compaction
 
 Manus employs a specific flavor of compaction to handle the "context rot" that comes from long trajectories of tool use. A typical task might involve over 50 tool calls, many of which produce verbose output.
 
@@ -593,23 +580,23 @@ Instead of keeping every byte of output in the chat history, they compact "stale
 
 <DiagramSubtitle>Offloading stale tool results to the file system</DiagramSubtitle>
 
-### Compaction triggers should be explicit
+### Summarization
 
-Three trigger types come up often:
+Summarization is the nuclear option: it replaces the actual history with a synthesized description. It is effectively "lossy compression" applied to your conversation history. Unlike pruning or offloading, summarization is a destructive operation. Once you summarize, the original tokens are gone from the context.
 
-- **Count-based**: when token usage reaches a threshold (reliable, blunt).
-- **Time-based**: compress during inactivity (good for chat workloads).
-- **Event-based**: compress at semantic boundaries (harder, cleanest output).
+You are trading fidelity for space. This is why it should be the last resort or applied only to 'completed' chunks of work where the details are no longer relevant.
 
-If you do not define triggers, compaction turns into an emergency response, not a system.
+#### Summaries should be state, not prose
 
-### The compaction rhythm
+A nice paragraph summary is great for humans, and often useless for agents. Agents need state: decisions, constraints, open questions, next steps. When summarizing, force the model to output a structured object (or at least a bulleted list of facts), not a "story" of what happened.
+
+### The Compression Lifecycle
 
 When you combine these techniques, the context usage graph should look like a sawtooth.
 
-1.  **Accumulation**: The agent works, accumulating history.
-2.  **Compaction**: As limits approach, the system compacts historical tool results, offloading them to the file system. Usage drops significantly.
-3.  **Summarization / Hard Reset**: Eventually, usually when the window fills to capacity (e.g., 95%), a summarization event is triggered. This distills the entire history into a compact summary. Unlike compaction, this is lossy and irreversible.
+1.  **Accumulation**: The agent works, accumulating history (context grows).
+2.  **Compaction**: A trigger fires—whether it's a token threshold, a completed subtask, or a period of inactivity. The system compacts stale results (offloading to files), causing usage to drop.
+3.  **Summarization**: At major boundaries (e.g., changing topics) or critical limits (e.g., 95% full), a summarization event is triggered. This distills the history into a compact state object. Unlike compaction, this is lossy and irreversible.
 
 <Image
   alt="Context length over time with compaction and summarization"
@@ -620,6 +607,16 @@ When you combine these techniques, the context usage graph should look like a sa
 />
 
 <DiagramSubtitle>The lifecycle: Accumulate, Compact, then Summarize</DiagramSubtitle>
+
+### When to compress: Triggers
+
+Three trigger types come up often:
+
+- **Count-based**: when token usage reaches a threshold (reliable, blunt).
+- **Time-based**: compress during inactivity (good for chat workloads).
+- **Event-based**: compress at semantic boundaries (harder, cleanest output).
+
+If you do not define triggers, compression turns into an emergency response, not a system.
 
 ## Bucket 4: Isolate context (prevent collisions and enable parallelism)
 
@@ -681,12 +678,6 @@ The counterweight is that parallel “writing” is fragile. Actions carry impli
 
 Sandboxed execution is a clean way to prevent tool output from flooding the prompt. Instead of returning every intermediate artifact to the model, run code in a contained environment and pass back only the parts that matter right now. This is especially useful for token-heavy objects like documents, code and logs.
 
-Practical sandbox patterns:
-
-- **Return handles, not blobs**: store artifacts in the sandbox, return a short handle + summary to the LLM.
-- **Promote selectively**: only lift small snippets into the prompt when the next step needs them.
-- **Reset aggressively**: treat the sandbox as disposable so stale state does not leak across tasks.
-
 The key benefit is isolation: execution state is real and durable, but the prompt only sees a curated view.
 
 ```mermaid
@@ -696,7 +687,6 @@ flowchart LR
   classDef ctx fill:#fefde8,stroke:#efc003,stroke-width:1px,color:#432305;
 
   LLM["LLM Context"]:::ctx --> CODE["Code/tool call"]:::primary --> SBX["Sandbox env<br/>files, exec state"]:::secondary
-  SBX --> ART["Artifacts + state"]:::secondary
   SBX -->|summary + handles| LLM
 ```
 
@@ -762,7 +752,9 @@ If you build agents for real workflows, treat context as a first-class product. 
 11. [Agent Skills](https://agentskills.io/home)
 12. [METR: Measuring AI Ability to Complete Long Tasks](http://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/)
 13. [Context Engineering for Agents](https://notion.so/Context-Engineering-for-Agents-2a1808527b17803ba221c2ced7eef508?source=copy_link)
+14. [Provence: efficient and robust context pruning for retrieval-augmented generation](http://arxiv.org/abs/2501.16214)
 
 ## Image Attribution
 
 [Pergola with Oranges (c. 1834) - Thomas Fearnley, Norwegian, 1802-1842](https://www.artic.edu/artworks/160229/pergola-with-oranges)
+````
