@@ -75,7 +75,7 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     <motion.div
       ref={ref}
       // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
-      className={cn('sticky inset-x-0 top-20 z-80 w-full', className)}
+      className={cn('sticky inset-x-0 top-20 z-20 w-full', className)}
       animate={{ y: hidden ? '-120%' : '0%' }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
