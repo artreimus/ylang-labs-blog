@@ -47,7 +47,9 @@ const Header = () => {
           <NavItems items={navItems} />
           <div className="relative z-[70] flex items-center gap-4">
             <SearchButton />
-            <ThemeSwitch />
+            <div className="ml-4">
+              <ThemeSwitch />
+            </div>
           </div>
         </NavBody>
 
@@ -56,8 +58,6 @@ const Header = () => {
           <MobileNavHeader>
             <CustomNavbarLogo />
             <div className="relative z-[70] flex items-center gap-2">
-              <SearchButton />
-              <ThemeSwitch />
               <MobileNavToggle
                 isOpen={isMobileMenuOpen}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -77,6 +77,19 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
+            </div>
+            {/* Control Center Footer */}
+            <div className="mt-4 grid w-full grid-cols-2 gap-4 border-t border-gray-100 pt-4 dark:border-white/10">
+              {/* Theme Switcher Block */}
+              <ThemeSwitch mobile />
+
+              {/* Search Block */}
+              <div
+                className="flex w-full cursor-pointer items-center justify-center"
+                onClickCapture={() => setIsMobileMenuOpen(false)}
+              >
+                <SearchButton mobile />
+              </div>
             </div>
           </MobileNavMenu>
         </MobileNav>
