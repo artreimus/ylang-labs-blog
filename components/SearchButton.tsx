@@ -2,7 +2,7 @@ import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
 import { KBarButton } from 'pliny/search/KBarButton'
 import siteMetadata from '@/data/siteMetadata'
 
-const SearchButton = () => {
+const SearchButton = ({ mobile = false }: { mobile?: boolean }) => {
   if (
     siteMetadata.search &&
     (siteMetadata.search.provider === 'algolia' || siteMetadata.search.provider === 'kbar')
@@ -11,7 +11,14 @@ const SearchButton = () => {
       siteMetadata.search.provider === 'algolia' ? AlgoliaButton : KBarButton
 
     return (
-      <SearchButtonWrapper aria-label="Search">
+      <SearchButtonWrapper
+        aria-label="Search"
+        className={
+          mobile
+            ? 'flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gray-50 dark:bg-white/5'
+            : ''
+        }
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -27,6 +34,9 @@ const SearchButton = () => {
             d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
           />
         </svg>
+        {mobile && (
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Search</span>
+        )}
       </SearchButtonWrapper>
     )
   }
