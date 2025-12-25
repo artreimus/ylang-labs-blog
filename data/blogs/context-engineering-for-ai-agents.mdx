@@ -571,6 +571,22 @@ SUM --> NEXT
 <DiagramSubtitle>Context compaction lifecycle</DiagramSubtitle>
 </div>
 
+### Practical example: Tool compaction
+
+Manus employs a specific flavor of compaction to handle the "context rot" that comes from long trajectories of tool use. A typical task might involve over 50 tool calls, many of which produce verbose output.
+
+Instead of keeping every byte of output in the chat history, they compact "stale" tool results—those that have already been acted upon. The full output is written to a file on the agent's file system, and the message history is updated to contain only a reference to that file. This offloading technique drastically reduces token usage while keeping the data accessible if the agent needs to "read" it again later. Importantly, this step is reversible—you can always rehydrate the context.
+
+<Image
+  alt="Tool compaction example"
+  src="/static/images/blogs/context-engineering-for-ai-agents/tool_compaction.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
+
+<DiagramSubtitle>Offloading stale tool results to the file system</DiagramSubtitle>
+
 ### Compaction triggers should be explicit
 
 Three trigger types come up often:
@@ -580,6 +596,24 @@ Three trigger types come up often:
 - **Event-based**: compress at semantic boundaries (harder, cleanest output).
 
 If you do not define triggers, compaction turns into an emergency response, not a system.
+
+### The compaction rhythm
+
+When you combine these techniques, the context usage graph should look like a sawtooth.
+
+1.  **Accumulation**: The agent works, accumulating history.
+2.  **Compaction**: As limits approach, the system compacts historical tool results, offloading them to the file system. Usage drops significantly.
+3.  **Summarization / Hard Reset**: Eventually, usually when the window fills to capacity (e.g., 95%), a summarization event is triggered. This distills the entire history into a compact summary. Unlike compaction, this is lossy and irreversible.
+
+<Image
+  alt="Context length over time with compaction and summarization"
+  src="/static/images/blogs/context-engineering-for-ai-agents/compaction-and-summarization.png"
+  width={900}
+  height={520}
+  className="mx-auto"
+/>
+
+<DiagramSubtitle>The lifecycle: Accumulate, Compact, then Summarize</DiagramSubtitle>
 
 ## Bucket 4: Isolate context (prevent collisions and enable parallelism)
 
@@ -721,6 +755,7 @@ If you build agents for real workflows, treat context as a first-class product. 
 10. [Advance Tool Use in Claude](https://www.anthropic.com/engineering/advanced-tool-use)
 11. [Agent Skills](https://agentskills.io/home)
 12. [METR: Measuring AI Ability to Complete Long Tasks](http://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/)
+13. [Context Engineering for Agents](https://notion.so/Context-Engineering-for-Agents-2a1808527b17803ba221c2ced7eef508?source=copy_link)
 
 ## Image Attribution
 
