@@ -181,7 +181,7 @@ export default function ProjectListLayout({
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-7xl pt-12">
       {/* Header */}
       <motion.div
         className="mb-12 text-center"
