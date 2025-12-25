@@ -46,19 +46,39 @@ const Monitor = () => (
 )
 const Blank = () => <svg className="h-6 w-6" />
 
-const ThemeSwitch = () => {
+const ThemeSwitch = ({ mobile = false }: { mobile?: boolean }) => {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
 
   // When mounted on client, now we can show the UI
   useEffect(() => setMounted(true), [])
 
+  const dropdownClasses = mobile
+    ? 'absolute left-0 bottom-full z-50 mb-2 w-full origin-bottom rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800'
+    : 'absolute right-0 z-50 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800'
+
   return (
-    <div className="mr-5 flex items-center">
-      <Menu as="div" className="relative inline-block text-left">
-        <div className="flex items-center justify-center hover:text-primary-500 dark:hover:text-primary-400">
-          <Menu.Button aria-label="Theme switcher">
+    <div className={mobile ? 'w-full' : 'flex items-center'}>
+      <Menu as="div" className={`relative ${mobile ? 'block w-full' : 'inline-block text-left'}`}>
+        <div
+          className={
+            mobile
+              ? ''
+              : 'flex items-center justify-center hover:text-primary-500 dark:hover:text-primary-400'
+          }
+        >
+          <Menu.Button
+            aria-label="Theme switcher"
+            className={
+              mobile
+                ? 'flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gray-50 dark:bg-white/5'
+                : ''
+            }
+          >
             {mounted ? resolvedTheme === 'dark' ? <Moon /> : <Sun /> : <Blank />}
+            {mobile && (
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Theme</span>
+            )}
           </Menu.Button>
         </div>
         <Transition
@@ -70,7 +90,7 @@ const ThemeSwitch = () => {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 z-50 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800">
+          <Menu.Items className={dropdownClasses}>
             <RadioGroup value={theme} onChange={setTheme}>
               <div className="p-1">
                 <RadioGroup.Option value="light">
