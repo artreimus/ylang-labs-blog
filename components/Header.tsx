@@ -15,6 +15,7 @@ import {
   MobileNavMenu,
 } from '@/components/ui/resizable-navbar'
 import { useState } from 'react'
+import { useKBar, VisualState } from 'kbar'
 
 const CustomNavbarLogo = () => {
   return (
@@ -38,9 +39,23 @@ const Header = () => {
 
   const navbarClass = 'fixed inset-x-0 top-0 z-50'
 
+  const { visualState } = useKBar((state) => ({
+    visualState: state.visualState,
+  }))
+
   return (
-    <div className="relative w-full">
-      <Navbar className={navbarClass}>
+    <div
+      className={`relative w-full ${
+        visualState === VisualState.showing || visualState === VisualState.animatingIn ? 'z-40' : ''
+      }`}
+    >
+      <Navbar
+        className={`${navbarClass} transition-opacity duration-300 ${
+          visualState === VisualState.showing || visualState === VisualState.animatingIn
+            ? 'pointer-events-none opacity-0'
+            : 'opacity-100'
+        }`}
+      >
         {/* Desktop Navigation */}
         <NavBody>
           <CustomNavbarLogo />
