@@ -161,7 +161,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
         width: visible ? '90%' : '100%',
         paddingRight: visible ? '12px' : '0px',
         paddingLeft: visible ? '12px' : '0px',
-        borderRadius: visible ? '4px' : '2rem',
+        borderRadius: '9999px',
         y: visible ? 20 : 0,
       }}
       transition={{
@@ -216,7 +216,7 @@ export const MobileNavMenu = ({ children, className, isOpen, onClose }: MobileNa
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className={cn(
-            'absolute left-1/2 top-full z-[1000] -mt-px flex w-screen max-w-none -translate-x-1/2 flex-col items-start justify-start border-t border-gray-200 border-t-transparent bg-white px-5 pb-8 pt-4 shadow-[0_14px_28px_-10px_rgba(15,23,42,0.18)] dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-[0_16px_32px_-10px_rgba(0,0,0,0.45)]',
+            'absolute left-0 top-full z-[1000] mt-2 flex w-full flex-col items-start justify-start rounded-3xl border border-white/20 bg-white/80 px-4 pb-4 pt-4 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-md dark:border-white/10 dark:bg-black/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]',
             className
           )}
         >
