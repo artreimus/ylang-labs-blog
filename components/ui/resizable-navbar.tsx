@@ -52,6 +52,8 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     offset: ['start start', 'end start'],
   })
   const [visible, setVisible] = useState<boolean>(false)
+  const [hidden, setHidden] = useState<boolean>(false)
+  const lastScrollY = useRef(0)
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     if (latest > 100) {
@@ -59,6 +61,14 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     } else {
       setVisible(false)
     }
+
+    const delta = latest - lastScrollY.current
+    if (latest > 120 && delta > 5) {
+      setHidden(true)
+    } else if (delta < -5) {
+      setHidden(false)
+    }
+    lastScrollY.current = latest
   })
 
   return (
@@ -66,6 +76,8 @@ export const Navbar = ({ children, className }: NavbarProps) => {
       ref={ref}
       // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
       className={cn('sticky inset-x-0 top-20 z-80 w-full', className)}
+      animate={{ y: hidden ? '-120%' : '0%' }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
@@ -96,7 +108,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         minWidth: '800px',
       }}
       className={cn(
-        'relative z-70 mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 dark:bg-transparent lg:flex',
+        'relative z-70 mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-1.5 dark:bg-transparent lg:flex',
         visible && 'bg-white/80 dark:bg-neutral-950/80',
         className
       )}
@@ -158,7 +170,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
         damping: 50,
       }}
       className={cn(
-        'relative z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col items-center justify-between bg-transparent px-0 py-2 lg:hidden',
+        'relative z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col items-center justify-between bg-transparent px-0 py-1.5 lg:hidden',
         visible && 'bg-white/80 dark:bg-neutral-950/80',
         className
       )}

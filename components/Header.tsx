@@ -36,10 +36,7 @@ const Header = () => {
       link: link.href,
     }))
 
-  let navbarClass = ''
-  if (siteMetadata.stickyNav) {
-    navbarClass = 'sticky top-0 z-50'
-  }
+  const navbarClass = 'fixed inset-x-0 top-0 z-50'
 
   return (
     <div className="relative w-full">
