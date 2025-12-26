@@ -425,9 +425,11 @@ In practice, proactive injection is just “prepend a curated memory block to sy
 
 ### Retrieve relevant knowledge (RAG)
 
-Retrieval-Augmented Generation (RAG) is how you let agents cheat on the test. Instead of relying on their internal training data, they look up the exact answers they need through external evidence: docs, tickets, runbooks, codebases, or web pages.
+Retrieval-Augmented Generation (RAG) gives agents an open-book test. However, traditional "passive" RAG—fetching docs based on the user's initial prompt—often fails in multi-step workflows. The user's initial request ("Fix the login bug") rarely contains the keywords needed for step 10 ("OAuth token expiry error").
 
-A common mistake is "embedding-only retrieval." Semantic similarity is necessary, but it is not sufficient. In practice, retrieval works best when you blend at least three signals:
+**Agentic RAG** is active. Instead of relying on static context, the agent actively formulates its own search queries based on the _current step's goal_. It decides _what_ to search for, _when_ to search, and _how_ to refine the query if the first result is noise.
+
+A common mistake in the retrieval layer itself is "embedding-only retrieval." Semantic similarity is necessary, but it is not sufficient. In practice, retrieval works best when you blend at least three signals:
 
 - **Relevance**: Does it match the query concept? (Vector search)
 - **Recency**: Is it from this year? (Time decay functions)
