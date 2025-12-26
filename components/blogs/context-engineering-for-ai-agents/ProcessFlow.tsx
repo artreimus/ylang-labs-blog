@@ -46,7 +46,7 @@ const ProcessFlow = () => {
   return (
     <div className="not-prose mx-auto w-full max-w-6xl p-4 duration-700 animate-in fade-in slide-in-from-bottom-4 md:p-8">
       <div className="mb-12 text-center">
-        <h2 className="bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-3xl font-bold text-transparent">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           Latency Optimization Strategies
         </h2>
         <p className="mt-2 text-gray-400">
@@ -57,13 +57,13 @@ const ProcessFlow = () => {
           <button
             onClick={start}
             disabled={isRunning && step < 8}
-            className="flex items-center gap-2 rounded-full bg-secondary-600 px-6 py-2 font-bold text-white shadow-lg shadow-secondary-900/20 transition-all hover:bg-secondary-500 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-full bg-primary-500 px-6 py-2 font-bold text-white shadow-lg shadow-primary-900/20 transition-all hover:bg-primary-600 disabled:opacity-50"
           >
             <Play size={18} /> Run Simulation
           </button>
           <button
             onClick={reset}
-            className="flex items-center gap-2 rounded-full bg-gray-700 px-6 py-2 font-bold text-white transition-all hover:bg-gray-600"
+            className="flex items-center gap-2 rounded-full bg-secondary-500 px-6 py-2 font-bold text-white transition-all hover:bg-secondary-600"
           >
             <RotateCcw size={18} /> Reset
           </button>
