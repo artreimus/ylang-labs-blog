@@ -48,6 +48,10 @@ import AgentToolsFlow from './blogs/key-elements-of-multi-agent-systems/AgentToo
 import MultiAgentCollaboration from './blogs/key-elements-of-multi-agent-systems/MultiAgentCollaboration'
 import AgentMemory from './blogs/key-elements-of-multi-agent-systems/AgentMemory'
 
+// Context Engineering Blog Components
+import MemoryArchitecture from './blogs/context-engineering-for-ai-agents/MemoryArchitecture'
+import ProcessFlow from './blogs/context-engineering-for-ai-agents/ProcessFlow'
+
 // Core MDX Components
 const coreMDXComponents = {
   Image,
@@ -106,6 +110,11 @@ const multiAgentBlogComponents = {
   AgentMemory,
 }
 
+const contextEngineeringBlogComponents = {
+  MemoryArchitecture,
+  ProcessFlow,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
@@ -114,4 +123,5 @@ export const components: MDXComponents = {
   ...pydanticBlogComponents,
   ...deepSeekBlogComponents,
   ...multiAgentBlogComponents,
+  ...contextEngineeringBlogComponents,
 }

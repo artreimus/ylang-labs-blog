@@ -58,3 +58,13 @@ input:-webkit-autofill:focus {
   display: inline-block;
   vertical-align: middle;
 }
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.flow-line {
+  stroke-dasharray: 10, 10;
+  animation: flow 1s linear infinite;
+}

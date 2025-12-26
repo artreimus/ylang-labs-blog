@@ -204,13 +204,7 @@ Long-term memory also comes in different flavors. A simple mapping that tends to
 
 This diagram shows the split between short-term, checkpointed conversation memory and long-term memory kept in a **separate logical store** (often within the same database) that is selectively retrieved into the model.
 
-<Image
-  alt="Cross-section of long-term memory storage and retrieval"
-  src="/static/images/blogs/context-engineering-for-ai-agents/langchain_memory.png"
-  width={720}
-  height={416}
-  className="mx-auto"
-/>
+<MemoryArchitecture />
 
 <DiagramSubtitle>Short-term checkpoints vs. long-term memory store</DiagramSubtitle>
 
@@ -225,13 +219,7 @@ Once you decide something should become long-term memory, you must choose when t
 | Hot path   | During the step loop  | Immediate recall, easier to explain to users  | More latency, more cognitive load |
 | Background | Outside the step loop | Lower latency, cleaner separation of concerns | Needs triggers, can lag behind    |
 
-<Image
-  alt="Diagram contrasting hot path (synchronous) versus background (asynchronous) memory updates"
-  src="/static/images/blogs/context-engineering-for-ai-agents/langchain_memory-update.png"
-  width={900}
-  height={520}
-  className="mx-auto"
-/>
+<ProcessFlow />
 
 <DiagramSubtitle>Synchronous vs. asynchronous memory writes</DiagramSubtitle>
 
