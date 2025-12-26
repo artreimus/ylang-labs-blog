@@ -9,7 +9,7 @@ const MemoryArchitecture = () => {
   return (
     <div className="not-prose mx-auto w-full max-w-6xl p-4 duration-700 animate-in fade-in md:p-8">
       <div className="mb-8 text-center">
-        <h2 className="bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-3xl font-bold text-transparent">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           Neural Memory Architecture
         </h2>
         <p className="mt-2 text-gray-400">
