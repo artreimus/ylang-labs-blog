@@ -54,17 +54,15 @@ Longer windows help, but they also tempt us into sloppy behavior: “Screw it, t
 - **Noise** grows too: stale facts, conflicting instructions, and verbose tool logs.
 - **Quality can degrade** as input gets longer, even when the task itself is simple.
 
-Recent long-context evaluations are a useful reality check. Models can score near-perfect on Needle-in-a-Haystack style retrieval, then still degrade as you increase input length, especially when the needle and the question have lower semantic similarity and when distractors are present. In other words, the hard part is not only retrieval. It is filtering and reasoning in the presence of distractors.
+Recent evaluations show that while models excel at "Needle-in-a-Haystack" retrieval, they degrade as input length grows—especially when "distractors" (irrelevant information) are present. The bottleneck isn't just retrieval; it is reasoning amidst noise.
 
 In production, long contexts tend to fail in five recurring ways:
 
-- **Context poisoning**: a mistake makes it into context and keeps getting reused.
-- **Context distraction**: the model over-focuses on the prompt history and under-uses what it learned during training.
-- **Context confusion**: irrelevant details crowd out signal and degrade reasoning.
-- **Context clash**: new tools, facts, or instructions conflict with what is already there.
-- **Context rot**: performance degrades as context grows, even when the task is unchanged.
-
-This isn't just a quirky formatting issue. It is a fundamental property of the attention mechanism. As the context window grows, the probability distribution of the attention head flattens (attention dilution), and the "Lost in the Middle" phenomenon means facts in the center of the prompt are less likely to be retrieved than those at the start or end.
+- **Context poisoning**: mistakes stay in context and get reused.
+- **Context distraction**: model over-focuses on history vs. training data.
+- **Context confusion**: irrelevant details drown out signal.
+- **Context clash**: new tools or instructions conflict with old ones.
+- **Context rot**: performance degrades as context grows.
 
 When an agent starts to drift, you can usually recover by doing one of four things: **write** important state somewhere durable, **select** only the evidence needed for the next step, **compress** what you keep so signal fits in the window, or **isolate** different kinds of context so they do not collide.
 
@@ -168,7 +166,7 @@ In practice, most "write context" decisions fall into three places: **scratchpad
 
 ### Scratchpads (in-session)
 
-Scratchpads are where agents take notes while they work. They are not user-facing, and they should not be treated as chat history. They are a place to keep:
+Scratchpads are where agents take notes while they work. They are a place to keep:
 
 - The current plan and progress
 - Constraints and decisions that should not be re-litigated every turn
@@ -186,13 +184,6 @@ Implementations vary, but the idea stays the same:
 Artifacts are the bulky stuff: logs, long tool outputs, tables, intermediate files, screenshots, and anything you might want to reference later without paying the token cost every turn. Use them to bridge the gap between sessions: a file generated today can be the context for a task tomorrow.
 
 The key idea is separation. Keep large blobs out of the prompt, then pull back only what you need, when you need it. Think of artifacts as the agent’s backpack, not its working memory.
-
-Common artifact shapes:
-
-- **Raw tool outputs**: API responses, HTML pages, search results, database dumps
-- **Derived work products**: tables, ranked lists, extracted quotes, cleaned datasets
-- **Execution traces**: command logs, stack traces, network errors, retry histories
-- **Intermediate files**: drafts, diffs, generated code, notebooks, charts
 
 ### Memory (cross-session)
 
@@ -227,11 +218,7 @@ In long-horizon work, keep the checkpointed thread lean and promote only durable
 
 #### Hot path vs background writes
 
-Once you decide something should become long-term memory, you still have to choose when that write happens. A practical split is to write “in the hot path” (during the user-facing loop) or write “in the background” (as an asynchronous job).
-
-In the hot path, memory creation is part of the agent’s main flow. Practically, this usually means an extra write step (often a tool call that upserts to a memory store) before the agent returns its final answer. This makes new memories immediately available and can be transparent (you can tell the user what was saved), but it adds latency and forces the agent to multitask: solve the task and decide what is worth remembering.
-
-In the background, memory creation is decoupled from the main flow. This keeps the user-facing loop fast and separates application logic from memory management, but it introduces its own operational questions: how often to write, what triggers a write, and how to avoid redundant or stale memories.
+Once you decide something should become long-term memory, you must choose when to write it. The trade-off is simple: **Hot path** writes (synchronous) ensure immediate recall but add latency; **Background** writes (asynchronous) keep the loop fast but risk staleness.
 
 | Write mode | When it runs          | Upside                                        | Cost                              |
 | ---------- | --------------------- | --------------------------------------------- | --------------------------------- |
@@ -247,29 +234,6 @@ In the background, memory creation is decoupled from the main flow. This keeps t
 />
 
 <DiagramSubtitle>Synchronous vs. asynchronous memory writes</DiagramSubtitle>
-
-#### The write decision
-
-After each agent step, make the persistence decision explicit. Most context bloat comes from skipping this and letting everything leak into the next prompt by default.
-
-```mermaid
-flowchart TD
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
-
-  A["Agent step completes"]:::primary --> D{"Does this need to persist?"}:::primary
-
-  D -->|Yes, within session| SP["Write to scratchpad / state"]:::secondary
-  D -->|Yes, across sessions| MEM["Write to long-term memory"]:::secondary
-  D -->|Yes, large artifact| ART["Write to artifact store<br/>files, DB, reports"]:::secondary
-  D -->|No| DROP["Drop"]:::secondary
-
-  SP -->|read later| A
-  MEM -->|retrieve later| A
-  ART -->|reference later| A
-```
-
-<DiagramSubtitle>The persistence decision flow</DiagramSubtitle>
 
 ## Bucket 2: Select context (retrieve only what matters now)
 
@@ -338,7 +302,7 @@ Two upgrades make loadouts work at scale:
 - **Tool search**: keep only a search capability + a few always-on tools in context, and defer the rest. The agent discovers and loads 3-5 matching tools on-demand instead of carrying 50+ definitions upfront.
 - **Programmatic tool calling**: when a step involves many calls or large intermediate results, orchestrate tools in code so only the final output enters the model’s context.
 
-Here is what tool search looks like in practice: a small, always-available search tool narrows the catalog before the model sees any full tool schemas.
+Here is the impact of tool search on context usage. In a traditional approach, loading a full catalog of MCP tools can consume massive amounts of space (e.g., 72k tokens), leaving little room for reasoning. By switching to a tool search pattern—where only a search tool and discovered tools are loaded—you can reclaim almost the entire context window (e.g., dropping usage to under 9k tokens). The agent searches the index first, and only pays the token cost for the full schemas of the tools it actually intends to use.
 
 <Image
   alt="Tool search narrows the catalog before loading full tool schemas"
@@ -350,17 +314,11 @@ Here is what tool search looks like in practice: a small, always-available searc
 
 <DiagramSubtitle>Tool search narrows the catalog before loading full tool schemas</DiagramSubtitle>
 
-Accuracy still depends on how tools are described. Schemas say what’s valid, but not what’s correct. Add short, representative tool use examples to teach parameter conventions and disambiguate similar tools.
-
 ### Retrieve relevant skills
 
 Skills are modular, filesystem-based bundles of instructions, scripts, and reference material. Like tools, they are part of context selection: load only the skills that help with the current step, and keep the rest out of the prompt. Skill selection is a retrieval step in its own right: query the skill catalog by metadata (name + description), rank by task fit, and load only the smallest set that covers the current goal.
 
-Skills support progressive disclosure, and it starts before the first user turn:
-
-- **Level 1 (Pre-loaded Metadata)**: At startup, the agent scans every installed skill and injects just its YAML frontmatter (name + description) into the system prompt. This gives the agent a map of "what I can do" without paying the cost of "how I do it."
-- **Level 2 (Active Loading)**: When the agent decides a skill is relevant, it triggers a tool to read the full `SKILL.md` file into context.
-- **Level 3 (Deep Dive)**: If the skill is complex, the `SKILL.md` only contains high-level instructions and points to other files (scripts, templates) that are read only if specifically needed.
+Skills support progressive disclosure. At startup, load only **metadata** (name + description). When relevant, actively load the **instructions** (the `SKILL.md`). For complex skills, perform a **deep dive** by reading specific script files only when the task demands it. This keeps the "menu" light while allowing the agent to order the full "meal" on demand.
 
 This keeps the context window small: the agent only carries the "menu" (metadata) in its head, and orders the "meal" (instructions) only when it decides to eat.
 
@@ -500,12 +458,7 @@ flowchart LR
 
 ### Where you inject retrieved context matters
 
-Four placement choices come up often:
-
-- **System instructions**: highest authority, good for stable profile facts and non-negotiable constraints.
-- **Conversation history**: easy, but risks “dialogue injection” where retrieved facts are mistaken for something the user said.
-- **Memory-as-a-tool**: efficient for episodic recall, but adds a sequential tool-call step.
-- **Skill instructions**: load a relevant skill on demand, then follow its playbook for the current step.
+Common placement choices include **System instructions** (authority), **Conversation history** (easy access), **Memory-as-a-tool** (on-demand), or **Skill instructions** (task-specific).
 
 <div className="mx-auto max-w-2xl">
 ```mermaid
@@ -566,9 +519,7 @@ Compaction is essentially **offloading**. You take a large block of context (lik
 
 #### Practical example: Tool compaction
 
-Manus employs a specific flavor of compaction to handle the "context rot" that comes from long trajectories of tool use. A typical task might involve over 50 tool calls, many of which produce verbose output.
-
-Instead of keeping every byte of output in the chat history, they compact "stale" tool results: those that have already been acted upon. The full output is written to a file on the agent's file system, and the message history is updated to contain only a reference to that file. This offloading technique drastically reduces token usage while keeping the data accessible if the agent needs to "read" it again later. Importantly, this step is reversible: you can always rehydrate the context.
+Manus, for example, handles the "context rot" of long tool trajectories by compacting "stale" results. Instead of keeping every verbose output in chat history, they write the full content to a file and replace the message with a lightweight pointer (e.g., `Result saved to ID: 4921`). This preserves the data without paying the token tax.
 
 <Image
   alt="Diagram illustrating tool compaction: excessively long tool outputs are written to the file system and replaced with short file references in the chat history to save tokens."
@@ -657,12 +608,9 @@ flowchart LR
 
 ### 1) Multi-agent isolation (read in parallel, write with caution)
 
-Multi-agent setups can work well for breadth-first “reading” tasks. Subagents explore in parallel, then send condensed results back to a lead agent. It is functional compression.
+Multi-agent setups excel at breadth-first **reading**: subagents explore in parallel and report back. However, parallel **writing** is fragile. Conflicting decisions (dependencies, architecture) turn merges into context clashes.
 
-The counterweight is that parallel “writing” is fragile. Actions carry implicit decisions. Two subagents can make conflicting choices (dependencies, function names, architecture) and the merge becomes a context clash problem disguised as coordination.
-
-- Use parallel agents to read, search, and summarize.
-- Use a single agent to synthesize the final artifact.
+**Rule of thumb**: Parallelize the reading; serialize the writing.
 
 <Image
   alt="Parallel read and single write pattern for multi-agent synthesis"
