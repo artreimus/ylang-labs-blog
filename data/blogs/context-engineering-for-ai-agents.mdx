@@ -223,13 +223,11 @@ Once you decide something should become long-term memory, you must choose when t
 
 ## Strategy 2: Select context (retrieve only what matters now)
 
-Selection is relevance under a budget. For each model call, aim to include:
+Think about how you work. When you plan a project, you look at the calendar and the requirements. When you fix a bug, you look at the error log and the code. You almost never look at everything at once.
 
-1. **Task frame**: goal, constraints, what "done" means for this step.
-2. **Evidence**: the minimum facts needed to decide the next action.
-3. **Action space**: only the tools relevant right now.
+Agents should work the same way. The default approach of shoving every message, tool result, and document into one growing list (`messages = history`) is a trap. It confuses the model and wastes money.
 
-Implementing this requires moving away from the default `messages = history` pattern. Instead, you build the context dynamically for each step.
+**Context selection** means giving the agent exactly what it needs for the _current_ step, and nothing else. You are dynamically assembling a fresh "view" of the world for every single action.
 
 In practice, "selecting context" is not one retrieval. It is a small set of targeted retrieval passes, each pulling from a different store:
 
@@ -422,9 +420,7 @@ Retrieval-Augmented Generation (RAG) gives agents an open-book test. However, tr
 
 ## Strategy 3: Compress context (fight token bloat and context rot)
 
-Compression is what you do when the running session becomes a liability: too expensive, too slow, or too noisy.
-
-There are three common moves, ordered from safest to riskiest:
+When a session becomes too expensive or confusing, you need to compress. There are three common moves, ordered from safest to riskiest:
 
 - **Pruning**: keep recent detail, drop older nuance (good for chatty sessions).
 - **Compaction**: keep full fidelity outside the prompt (good for logs, tables, long docs).
@@ -508,40 +504,13 @@ If you do not define triggers, compression turns into an emergency response, not
 
 ## Strategy 4: Isolate context (prevent collisions and enable parallelism)
 
-Isolation is how you prevent context clash. It shows up at three levels.
+One agent doing everything is a bottleneck. As systems scale, "one big context window" becomes a liability. Isolation splits the problem so that different parts of the system don't pollute each other.
 
-```mermaid
-flowchart LR
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
+This happens at three levels:
 
-  U[User]:::primary --> S1["Session A"]:::secondary
-  U --> S2["Session B"]:::secondary
-
-  S1 --> ACL["ACL boundary<br/>user isolation"]:::primary
-  S2 --> ACL
-
-  subgraph BUCKETS["Structured buckets (within a session)"]
-    HISTB["History"]:::secondary
-    TOOLB["Tool outputs"]:::secondary
-    SPB["Scratchpad"]:::secondary
-    MEMB["Retrieved memories"]:::secondary
-  end
-
-  ACL --> BUCKETS --> PAY["Assembled payload"]:::primary
-
-  PAY --> ORCH["Lead agent"]:::primary
-  ORCH -->|delegate read| A1["Subagent 1"]:::secondary
-  ORCH -->|delegate read| A2["Subagent 2"]:::secondary
-  A1 -->|summary + pointers| ORCH
-  A2 -->|summary + pointers| ORCH
-
-  ORCH --> SBX["Execution sandbox"]:::secondary
-  SBX --> ART["Artifacts"]:::secondary
-  ART --> PAY
-```
-
-<DiagramSubtitle>Isolation boundaries across sessions and agents</DiagramSubtitle>
+1.  **Multi-agent isolation**: Parallel agents for reading, single agent for writing.
+2.  **Environment isolation**: Running code in a sandbox, not in the prompt.
+3.  **State isolation**: Separating critical state from noisy logs.
 
 ### 1) Multi-agent isolation (read in parallel, write with caution)
 
