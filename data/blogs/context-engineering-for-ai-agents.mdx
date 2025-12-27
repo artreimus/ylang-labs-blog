@@ -158,7 +158,7 @@ flowchart TB
 
 <DiagramSubtitle>The four pillars of context engineering</DiagramSubtitle>
 
-## Bucket 1: Write context (persist outside the prompt)
+## Strategy 1: Write context (persist outside the prompt)
 
 Writing context is about durability. The context window is working memory. If something needs to survive past the next model call, it has to live somewhere else.
 
@@ -168,10 +168,10 @@ In practice, most "write context" decisions fall into three places: **scratchpad
 
 Scratchpads are where agents take notes while they work. They are a place to keep:
 
-- The current plan and progress
-- Constraints and decisions that should not be re-litigated every turn
-- Intermediate results and open questions
-- Short summaries of tool outputs (especially when outputs are long)
+- **Current plan and progress**: where are we in the loop?
+- **Constraints and decisions**: facts that should not be re-litigated every turn.
+- **Intermediate results**: partial outputs that frame the next step.
+- **Tool output summaries**: distilled results, especially when the raw output is verbose.
 
 Implementations vary, but the idea stays the same:
 
@@ -223,7 +223,7 @@ Once you decide something should become long-term memory, you must choose when t
 
 <DiagramSubtitle>Synchronous vs. asynchronous memory writes</DiagramSubtitle>
 
-## Bucket 2: Select context (retrieve only what matters now)
+## Strategy 2: Select context (retrieve only what matters now)
 
 Selection is relevance under a budget. For each model call, aim to include:
 
@@ -235,11 +235,11 @@ Implementing this requires moving away from the default `messages = history` pat
 
 In practice, "selecting context" is not one retrieval. It is a small set of targeted retrieval passes, each pulling from a different store:
 
-- Conversation state (thread history, pinned items, rolling summary)
-- Relevant tools (what the agent is allowed to do right now)
-- Scratchpad (what the agent already discovered in this run)
-- Long-term memory (what the agent should remember across runs)
-- Relevant knowledge (what the agent should reference from docs, data, or the web)
+- **Conversation state**: thread history, pinned items, rolling summary.
+- **Relevant tools**: what the agent is allowed to do right now.
+- **Scratchpad**: what the agent already discovered in this run.
+- **Long-term memory**: what the agent should remember across runs.
+- **Relevant knowledge**: what the agent should reference from docs, data, or the web.
 
 ### Conversation state (short-term, thread-scoped)
 
@@ -247,9 +247,9 @@ A thread defines the conversation boundary, but it should not dictate prompt siz
 
 A simple default is:
 
-- Recent turns (last N messages)
-- Pinned items (current goal, constraints, decisions)
-- A rolling summary of older context
+- **Recent turns**: the last N messages.
+- **Pinned items**: current goal, constraints, and decisions.
+- **Rolling summary**: a digest of older context that has been pruned.
 
 ```mermaid
 flowchart TB
@@ -342,8 +342,8 @@ Scratchpad retrieval is the easiest win because it is already “yours”. It is
 
 Two patterns make scratchpads usable:
 
-- Keep scratchpad as structured buckets (constraints, plan, intermediate facts), not an unbounded wall of text.
-- Prefer “pinned” items over recency alone, for example: the current goal, non-negotiable constraints, and latest decisions.
+- **Structured buckets**: organize by constraints, plan, and intermediate facts, not an unbounded wall of text.
+- **Pinned items**: prioritize the current goal, non-negotiable constraints, and latest decisions over recency alone.
 
 ### Retrieve long-term memory
 
@@ -351,9 +351,9 @@ Long-term memory is what you want to carry across sessions, without dragging alo
 
 In practice, long-term memory is usually a mix of:
 
-- Stable preferences (style, tone, defaults)
-- Stable facts (profile, environment, recurring projects)
-- Commitments (what was agreed on, what “done” means)
+- **Stable preferences**: style, tone, and format defaults.
+- **Stable facts**: user profile, environment details, and recurring project context.
+- **Commitments**: agreed-upon goals and definitions of "done."
 
 The retrieval trick is to blend relevance, recency, and importance, so a core preference can survive time decay, while stale trivia quietly disappears.
 
@@ -475,7 +475,7 @@ PAY --> LLM["LLM call"]:::primary
 
 Many production systems use a hybrid: stable facts in system instructions, episodic memories retrieved on demand.
 
-## Bucket 3: Compress context (fight token bloat and context rot)
+## Strategy 3: Compress context (fight token bloat and context rot)
 
 Compression is what you do when the running session becomes a liability: too expensive, too slow, or too noisy.
 
@@ -559,7 +559,7 @@ Three trigger types come up often:
 
 If you do not define triggers, compression turns into an emergency response, not a system.
 
-## Bucket 4: Isolate context (prevent collisions and enable parallelism)
+## Strategy 4: Isolate context (prevent collisions and enable parallelism)
 
 Isolation is how you prevent context clash. It shows up at three levels.
 
