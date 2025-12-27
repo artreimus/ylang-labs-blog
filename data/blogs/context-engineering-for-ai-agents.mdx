@@ -17,9 +17,9 @@ layout: 'PostBanner'
 
 After years of focusing on "prompt engineering," the frontier of applied AI has shifted. Building reliable agents is now less about finding the perfect phrase and more about answering a broader systems question: **what configuration of context is most likely to generate the model’s desired behavior?**
 
-**Context** refers to the set of tokens included when sampling from an LLM. The **engineering** problem is optimizing the utility of those tokens against the model's finite attention budget. Effectively wrangling agents requires _thinking in context_: considering the holistic state available to the model at any given time—system instructions, tools, message history, and data—and managing how that state evolves loop after loop.
+**Context** refers to the set of tokens included when sampling from an LLM. The **engineering** problem is optimizing the utility of those tokens against the model's finite attention budget. Effectively wrangling agents requires _thinking in context_: considering the holistic state available to the model at any given time, such as system instructions, tools, message history, and data. It also means managing how that state evolves loop after loop.
 
-A useful analogy is _mise en place_. Prompt engineering is writing the recipe (the static instructions). Context engineering is managing the kitchen during service (the dynamic state). Before service starts, a chef has their station set: chopped onions, reduced sauces, and tools ready. That prep work—that curated context—is what makes the output consistent even when the heat is on.
+A useful analogy is _mise en place_. Prompt engineering is writing the recipe (the static instructions). Context engineering is managing the kitchen during service (the dynamic state). Before service starts, a chef has their station set: chopped onions, reduced sauces, and tools ready. That prep work, or curated context, is what makes the output consistent even when the heat is on.
 
 LLMs are inherently stateless. For a single API call, the context window is the model's entire universe. **Context engineering** is the system design that decides what goes into that universe and, more importantly, what stays out.
 
@@ -57,7 +57,7 @@ Longer windows help, but they also tempt us into sloppy behavior: “Screw it, t
 - **Noise** grows too: stale facts, conflicting instructions, and verbose tool logs.
 - **Quality can degrade** as input gets longer, even when the task itself is simple.
 
-Recent evaluations show that while models excel at "Needle-in-a-Haystack" retrieval, they degrade as input length grows—especially when "distractors" (irrelevant information) are present. The bottleneck isn't just retrieval; it is reasoning amidst noise.
+Recent evaluations show that while models excel at "Needle-in-a-Haystack" retrieval, they degrade as input length grows, especially when "distractors" (irrelevant information) are present. The bottleneck isn't just retrieval; it is reasoning amidst noise.
 
 In production, long contexts tend to fail in five recurring ways:
 
@@ -291,7 +291,7 @@ Two upgrades make loadouts work at scale:
 - **Tool search**: keep only a search capability + a few always-on tools in context, and defer the rest. The agent discovers and loads 3-5 matching tools on-demand instead of carrying 50+ definitions upfront.
 - **Programmatic tool calling**: when a step involves many calls or large intermediate results, orchestrate tools in code so only the final output enters the model’s context.
 
-Here is the impact of tool search on context usage. In a traditional approach, loading a full catalog of MCP tools can consume massive amounts of space (e.g., 72k tokens), leaving little room for reasoning. By switching to a tool search pattern—where only a search tool and discovered tools are loaded—you can reclaim almost the entire context window (e.g., dropping usage to under 9k tokens). The agent searches the index first, and only pays the token cost for the full schemas of the tools it actually intends to use.
+Here is the impact of tool search on context usage. In a traditional approach, loading a full catalog of MCP tools can consume massive amounts of space (e.g., 72k tokens), leaving little room for reasoning. By switching to a tool search pattern, where only a search tool and discovered tools are loaded, you can reclaim almost the entire context window (e.g., dropping usage to under 9k tokens). The agent searches the index first, and only pays the token cost for the full schemas of the tools it actually intends to use.
 
 <Image
   alt="Tool search narrows the catalog before loading full tool schemas"
@@ -414,7 +414,7 @@ In practice, proactive injection is just “prepend a curated memory block to sy
 
 ### Retrieve relevant knowledge (RAG)
 
-Retrieval-Augmented Generation (RAG) gives agents an open-book test. However, traditional **Passive RAG**—fetching docs based on the user's initial prompt—often fails in multi-step workflows. The user's initial request ("Fix the login bug") rarely contains the keywords needed for step 10 ("OAuth token expiry error").
+Retrieval-Augmented Generation (RAG) gives agents an open-book test. However, traditional **Passive RAG** (fetching docs based on the user's initial prompt) often fails in multi-step workflows. The user's initial request ("Fix the login bug") rarely contains the keywords needed for step 10 ("OAuth token expiry error").
 
 **Agentic RAG (or Active RAG)** treats retrieval as a tool. The agent encounters a gap in its knowledge and _decides_ to go find the answer.
 
@@ -484,7 +484,7 @@ A nice paragraph summary is great for humans, and often useless for agents. Agen
 When you combine these techniques, the context usage graph should look like a sawtooth.
 
 1.  **Accumulation**: The agent works, accumulating history (context grows).
-2.  **Compaction**: A trigger fires—whether it's a token threshold, a completed subtask, or a period of inactivity. The system compacts stale results (offloading to files), causing usage to drop.
+2.  **Compaction**: A trigger fires. This could be a token threshold, a completed subtask, or a period of inactivity. The system compacts stale results (offloading to files), causing usage to drop.
 3.  **Summarization**: At major boundaries (e.g., changing topics) or critical limits (e.g., 95% full), a summarization event is triggered. This distills the history into a compact state object. Unlike compaction, this is lossy and irreversible.
 
 <Image
