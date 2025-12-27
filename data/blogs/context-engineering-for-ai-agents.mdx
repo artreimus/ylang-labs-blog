@@ -411,67 +411,14 @@ In practice, proactive injection is just “prepend a curated memory block to sy
 
 ### Retrieve relevant knowledge (RAG)
 
-Retrieval-Augmented Generation (RAG) gives agents an open-book test. However, traditional "passive" RAG—fetching docs based on the user's initial prompt—often fails in multi-step workflows. The user's initial request ("Fix the login bug") rarely contains the keywords needed for step 10 ("OAuth token expiry error").
+Retrieval-Augmented Generation (RAG) gives agents an open-book test. However, traditional **Passive RAG**—fetching docs based on the user's initial prompt—often fails in multi-step workflows. The user's initial request ("Fix the login bug") rarely contains the keywords needed for step 10 ("OAuth token expiry error").
 
-**Agentic RAG** is active. Instead of relying on static context, the agent actively formulates its own search queries based on the _current step's goal_. It decides _what_ to search for, _when_ to search, and _how_ to refine the query if the first result is noise.
+**Agentic RAG (or Active RAG)** treats retrieval as a tool. The agent encounters a gap in its knowledge and _decides_ to go find the answer.
 
-A common mistake in the retrieval layer itself is "embedding-only retrieval." Semantic similarity is necessary, but it is not sufficient. In practice, retrieval works best when you blend at least three signals:
-
-- **Relevance**: Does it match the query concept? (Vector search)
-- **Recency**: Is it from this year? (Time decay functions)
-- **Importance**: Is this a canonical source? (Pagerank or manual weights)
-
-Start simple with a blended score (a weighted mix of relevance, recency, importance), then tune the weights based on the failures you see. The goal is to retrieve a small number of high-signal chunks, rerank and dedupe specific items, and then present the results as a short evidence bundle.
-
-```mermaid
-flowchart LR
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
-
-  Q["User query + step goal"]:::primary --> CANDS["Retrieve candidates<br/>scratchpad, long-term memory, knowledge"]:::primary
-  CANDS --> REL["Relevance"]:::secondary
-  CANDS --> REC["Recency"]:::secondary
-  CANDS --> IMP["Importance"]:::secondary
-
-  REL --> SCORE["Blend + rank + dedupe"]:::primary
-  REC --> SCORE
-  IMP --> SCORE
-
-  SCORE --> EVID["Evidence slice"]:::secondary --> PACK["Pack prompt payload"]:::primary
-  Q --> TOOLS["Tool catalog"]:::secondary --> LOAD["Tool loadout<br/>select a small subset"]:::secondary --> PACK
-  PACK --> LLM["LLM call"]:::primary
-```
-
-<DiagramSubtitle>Hybrid retrieval scoring</DiagramSubtitle>
-
-### Where you inject retrieved context matters
-
-Common placement choices include **System instructions** (authority), **Conversation history** (easy access), **Memory-as-a-tool** (on-demand), or **Skill instructions** (task-specific).
-
-<div className="mx-auto max-w-2xl">
-```mermaid
-flowchart TD
-  classDef primary fill:#fffdc2,stroke:#efc003,stroke-width:1px,color:#432305;
-  classDef secondary fill:#e3f0d7,stroke:#75b34a,stroke-width:1px,color:#16240f;
-
-START["Need extra context for this step?"]:::primary --> CHOICE{Strategy}:::primary
-CHOICE -->|proactive| SYS["Inject into<br/>system instructions"]:::secondary
-CHOICE -->|inline| HIST["Insert into<br/>conversation history"]:::secondary
-CHOICE -->|reactive| TOOL["Call memory tool<br/>then inject result"]:::secondary
-CHOICE -->|skills| SKILL["Load skill instructions<br/>on demand"]:::secondary
-
-SYS --> PAY["Assembled payload"]:::primary
-HIST --> PAY
-TOOL --> PAY
-SKILL --> PAY
-PAY --> LLM["LLM call"]:::primary
-
-````
-
-<DiagramSubtitle>Context injection strategies</DiagramSubtitle>
-</div>
-
-Many production systems use a hybrid: stable facts in system instructions, episodic memories retrieved on demand.
+- **Internal Knowledge**: For static or dense company data (wikis, old tickets, PDFs), agents query a **vector database**. This allows for semantic search over vast archives that cannot be easily queried via standard APIs.
+- **Filesystem**: Instead of dumping an entire codebase into context (which is slow and expensive), efficient coding agents like Claude Code use "lightweight identifiers" (file paths) and exploration tools (`ls`, `grep`, `glob`) to find exactly what they need. They don't memorize the repo; they learn how to navigate it.
+- **Web Search**: For questions where the answer isn't in your docs, the "database" is the internet. Deep research agents use search tools (`google_search`, `browser`) to perform iterative "multi-hop" retrieval: search, read a page, discover a new term, and search again.
+- **Live Connections (MCP)**: For operational, fast-moving data (Google Drive, Linear, Jira, Notion), agents connect directly to the source of truth via the Model Context Protocol (MCP). Unlike a vector database which is often a "stale snapshot," MCP lets the agent read the _current_ state of a ticket or document.
 
 ## Strategy 3: Compress context (fight token bloat and context rot)
 
@@ -489,7 +436,7 @@ Pruning is often misunderstood as just "deleting old messages." In practice, it 
 
 **Chronological Pruning** is the standard sliding window: drop the oldest messages as new ones arrive. It is safe for casual chat, but dangerous for agents because it often deletes the initial user instruction. If you use this, ensure you "pin" the original goal and system instructions so they are strictly immune to the cut.
 
-**Semantic Pruning** is sharper. Instead of dropping whole messages, you prune irrelevant *content* from within them. Recent research like *Provence* (2025) treats this as a "sequence labeling" task: dynamically masking out irrelevant sentences or tokens from retrieved context chunks before they enter the model [14]. This is critical for RAG-heavy agents, where a retrieved document might be effective 90% noise. By pruning at the sentence or token level (rather than the document level), you maintain robustness while drastically cutting cost.
+**Semantic Pruning** is sharper. Instead of dropping whole messages, you prune irrelevant _content_ from within them. Recent research like _Provence_ (2025) treats this as a "sequence labeling" task: dynamically masking out irrelevant sentences or tokens from retrieved context chunks before they enter the model [14]. This is critical for RAG-heavy agents, where a retrieved document might be effective 90% noise. By pruning at the sentence or token level (rather than the document level), you maintain robustness while drastically cutting cost.
 
 <Image
   alt="Example of semantic pruning with Provence"
@@ -499,7 +446,9 @@ Pruning is often misunderstood as just "deleting old messages." In practice, it 
   className="mx-auto"
 />
 
-<DiagramSubtitle>Semantic pruning removes irrelevant sentences while keeping the "needle"</DiagramSubtitle>
+<DiagramSubtitle>
+  Semantic pruning removes irrelevant sentences while keeping the "needle"
+</DiagramSubtitle>
 
 ### Compaction
 
@@ -693,4 +642,7 @@ If you build agents for real workflows, treat context as a first-class product. 
 ## Image Attribution
 
 [Pergola with Oranges (c. 1834) - Thomas Fearnley, Norwegian, 1802-1842](https://www.artic.edu/artworks/160229/pergola-with-oranges)
-````
+
+```
+
+```
