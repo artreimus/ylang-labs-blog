@@ -14,6 +14,7 @@ import Tags from '@/components/Tags'
 import PostNavigation from '@/components/PostNavigation'
 import Author from '@/components/Author'
 import Callout from '@/components/Callout'
+import MarkdownContent from '@/components/MarkdownContent'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -24,7 +25,7 @@ interface LayoutProps {
 }
 
 export default function PostBanner({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { slug, title, images, tags, date, path, filePath, summary } = content
+  const { slug, title, images, tags, date, path, filePath, summary, tldr } = content
   const basePath = path.split('/')[0]
   const displayImage =
     images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
@@ -77,9 +78,9 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
           <div className="divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:divide-y-0">
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">
-                {summary && (
-                  <Callout type="info" title="TLDR">
-                    {summary}
+                {(tldr || summary) && (
+                  <Callout type="info" title="Key Takeaways">
+                    {tldr ? <MarkdownContent content={tldr} /> : summary}
                   </Callout>
                 )}
                 {children}

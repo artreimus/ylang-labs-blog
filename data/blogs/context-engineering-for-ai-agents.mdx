@@ -4,6 +4,11 @@ date: '2025-12-27'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
 summary: 'Prompt engineering describes the recipe; context engineering manages the kitchen. A technical playbook for the "mise en place" of AI agents: Write, Select, Compress, and Isolate.'
+tldr: |
+  - **Context engineering** is the system design that decides what goes into the model's input window, and what stays out.
+  - Longer context windows do not solve the problem; they just give you a bigger junk drawer.
+  - Four strategies manage context: **Write** (persist outside the prompt), **Select** (retrieve only what's needed now), **Compress** (fight token bloat), **Isolate** (prevent collisions).
+  - Every token in your prompt should earn its keep. If it does not change the model's behavior, cut it.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/context-engineering-for-ai-agents/cardImage.png'
 images: ['/static/images/blogs/context-engineering-for-ai-agents/blogHeader.png']
@@ -589,7 +594,13 @@ Most production techniques in this post reduce to four moves:
 - **Compress** early and intentionally (prune, summarize, offload), with explicit compaction triggers so you do not only compress in a panic.
 - **Isolate** to prevent collisions (parallel agents for reading and a single agent for synthesis).
 
-If you build agents for real workflows, treat context as a first-class product. Budget tokens the way you budget latency, decide what becomes durable, and design for the failure modes (poisoning, distraction, confusion, clash) instead of discovering them in production. The question to keep asking is simple: is every token in this context earning its keep?
+If you build agents for real workflows, treat context as a first-class product. Budget tokens the way you budget latency, decide what becomes durable, and design for the failure modes (poisoning, distraction, confusion, clash) instead of discovering them in production.
+
+The question to keep asking is simple: **is every token in this context earning its keep?**
+
+If you can answer "yes" for every token, you have mastered context engineering. If you cannot, you know exactly where to start cutting.
+
+The agents that win in production will not be the ones with the longest context windows. They will be the ones with the most disciplined kitchens.
 
 ## References
 
