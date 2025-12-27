@@ -10,13 +10,11 @@ images: ['/static/images/blogs/context-engineering-for-ai-agents/blogHeader.png'
 layout: 'PostBanner'
 ---
 
-If you have ever demoed an agent that looked brilliant for five minutes and then fell apart on a real workflow, you have already met the context problem.
+After years of focusing on "prompt engineering," the frontier of applied AI has shifted. Building reliable agents is now less about finding the perfect phrase and more about answering a broader systems question: **what configuration of context is most likely to generate the model’s desired behavior?**
 
-In the early days of LLMs, "prompt engineering" was the headline. It made sense: change a few words, get a different answer. But prompts are static. They describe a single interaction.
+**Context** refers to the set of tokens included when sampling from an LLM. The **engineering** problem is optimizing the utility of those tokens against the model's finite attention budget. Effectively wrangling agents requires _thinking in context_: considering the holistic state available to the model at any given time—system instructions, tools, message history, and data—and managing how that state evolves loop after loop.
 
-Agents are not single interactions. They are loops: plan, call tools, read outputs, update state, repeat. The hard part is not writing the initial recipe. It is managing the kitchen while the service is running.
-
-A useful analogy is _mise en place_. Before service starts, a great chef does not just have a recipe. They have their station set: chopped onions, reduced sauces, the right tools, and a clear mental model of the orders. That prep work (that context) is what makes the output consistent.
+A useful analogy is _mise en place_. Prompt engineering is writing the recipe (the static instructions). Context engineering is managing the kitchen during service (the dynamic state). Before service starts, a chef has their station set: chopped onions, reduced sauces, and tools ready. That prep work—that curated context—is what makes the output consistent even when the heat is on.
 
 LLMs are inherently stateless. For a single API call, the context window is the model's entire universe. **Context engineering** is the system design that decides what goes into that universe and, more importantly, what stays out.
 
