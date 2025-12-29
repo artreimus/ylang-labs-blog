@@ -19,11 +19,13 @@ import { useKBar, VisualState } from 'kbar'
 
 const CustomNavbarLogo = () => {
   return (
-    <Link href="/" aria-label={siteMetadata.headerTitle}>
-      <div className="flex h-20 items-center">
-        <DynamicLogo />
-      </div>
-    </Link>
+    <div className="relative z-50">
+      <Link href="/" aria-label={siteMetadata.headerTitle}>
+        <div className="flex h-20 items-center">
+          <DynamicLogo />
+        </div>
+      </Link>
+    </div>
   )
 }
 
