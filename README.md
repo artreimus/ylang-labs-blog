@@ -17,7 +17,6 @@ Welcome to Ylang Labs - a reading platform dedicated to AI engineering. We belie
 - 🌙 Light/dark mode for comfortable reading
 - 🔍 Full-text search capabilities
 - 🏷️ Organized content categories
-- 💬 Community discussions
 
 ## Content Focus
 
