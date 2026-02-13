@@ -13,6 +13,7 @@ import MermaidDiagram from './MermaidDiagram'
 import DspyWorkflowDiagram from './blogs/dspy-programming-not-prompting-your-lms/DspyWorkflowDiagram'
 import DspyVsTraditionalDiagram from './blogs/dspy-programming-not-prompting-your-lms/DspyVsTraditionalDiagram'
 import CompleteDspyEcosystemDiagram from './blogs/dspy-programming-not-prompting-your-lms/CompleteDspyEcosystemDiagram'
+import CodeSandbox from './CodeSandbox'
 
 // MemGPT Blog Components
 import {
@@ -71,6 +72,7 @@ const dspyBlogComponents = {
   DspyWorkflowDiagram,
   DspyVsTraditionalDiagram,
   CompleteDspyEcosystemDiagram,
+  CodeSandbox,
 }
 
 const memGPTBlogComponents = {
