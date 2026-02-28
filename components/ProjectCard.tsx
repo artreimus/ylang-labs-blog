@@ -5,7 +5,7 @@ import React from 'react'
 import type { Project } from 'contentlayer/generated'
 
 export default function ProjectCard({ project }: { project: Project }) {
-  const { slug, title, tags, cardImage, image } = project
+  const { slug, title, tags, cardImage, image, imageTheme = 'white' } = project
   const displayImage = cardImage || image
 
   return (
@@ -34,7 +34,12 @@ export default function ProjectCard({ project }: { project: Project }) {
 
         {/* Bottom Content: Title */}
         <div className="absolute bottom-0 left-0 p-4">
-          <h2 className="line-clamp-2 text-lg font-bold leading-tight text-white">{title}</h2>
+          <h2
+            className="line-clamp-2 text-lg font-bold leading-tight"
+            style={{ color: imageTheme }}
+          >
+            {title}
+          </h2>
         </div>
       </article>
     </Link>

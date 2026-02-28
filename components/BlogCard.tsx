@@ -4,7 +4,7 @@ import Image from 'next/image'
 import React from 'react'
 
 export default function BlogCard({ post, variant = 'default' }) {
-  const { slug, title, tags, cardImage, summary, readingTime, images } = post
+  const { slug, title, tags, cardImage, summary, readingTime, images, imageTheme = 'white' } = post
   const displayImage = (Array.isArray(images) && images.length > 0 && images[0]) || cardImage
 
   if (variant === 'grid') {
@@ -79,7 +79,12 @@ export default function BlogCard({ post, variant = 'default' }) {
 
         {/* Bottom Content: Title */}
         <div className="absolute bottom-0 left-0 p-4">
-          <h2 className="line-clamp-2 text-lg font-bold leading-tight text-white">{title}</h2>
+          <h2
+            className="line-clamp-2 text-lg font-bold leading-tight"
+            style={{ color: imageTheme }}
+          >
+            {title}
+          </h2>
         </div>
       </article>
     </Link>
