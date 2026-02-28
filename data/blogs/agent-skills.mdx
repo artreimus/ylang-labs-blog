@@ -81,14 +81,14 @@ description: >
 ---
 ```
 
-**Level 2: Instructions (<5,000 tokens).** When the agent determines a Skill is relevant to the current task, it reads the full `SKILL.md` body from the filesystem. Only then do the instructions enter the context window. This is the "recipe," the step-by-step guidance for completing the task.
+**Level 2: Instructions (&lt;5,000 tokens).** When the agent determines a Skill is relevant to the current task, it reads the full `SKILL.md` body from the filesystem. Only then do the instructions enter the context window. This is the "recipe," the step-by-step guidance for completing the task.
 
 **Level 3: Resources (as needed).** Additional files bundled within the Skill directory, such as scripts, reference documents, and templates, are loaded only when the instructions reference them. An executable script like `validate_form.py` runs via the agent's shell, and only its output (not its source code) enters the context. This makes scripts far more token-efficient than having the agent generate equivalent code on the fly ([Agent Skills Specification](https://agentskills.io/specification)).
 
 | Level        | When loaded             | Token cost            | Content                                             |
 | ------------ | ----------------------- | --------------------- | --------------------------------------------------- |
 | Metadata     | Always (startup)        | ~100 tokens per Skill | `name` and `description` from YAML frontmatter      |
-| Instructions | When Skill is triggered | <5,000 tokens         | SKILL.md body with workflows and guidance           |
+| Instructions | When Skill is triggered | &lt;5,000 tokens      | SKILL.md body with workflows and guidance           |
 | Resources    | As needed               | Effectively unlimited | Scripts, references, assets accessed via filesystem |
 
 The practical consequence: you can bundle comprehensive API documentation, large datasets, or extensive examples in a Skill without any context penalty for content that is not used in a given conversation.
