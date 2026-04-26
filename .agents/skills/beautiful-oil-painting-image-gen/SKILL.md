@@ -5,96 +5,109 @@ description: Generate or prompt beautiful museum-quality oil-painting images. Us
 
 # Beautiful Oil Painting Image Generation
 
-Use this skill to create original oil-painting images or polished image-generation prompts that feel refined, intentional, and visually beautiful. The result should feel like an original painting that could belong in a museum, gallery, editorial spread, or premium private collection, not a generic AI image with a paint filter.
+Use this skill when the user asks to generate a beautiful oil painting, classical painting, museum-quality artwork, painterly portrait, landscape, still life, historical scene, mythological scene, or emotionally rich visual inspired by famous oil-painting traditions.
 
-## Core Approach
+The goal is to produce image-generation prompts that feel refined, intentional, and visually beautiful while avoiding direct imitation of living artists. For historical artists, the agent may reference broad stylistic inspiration, but should still synthesize a fresh composition rather than copying a known work.
 
-Create original paintings inspired by the visual language of art history, not replicas of famous artworks.
+## When to Use
 
-Prioritize:
+Use this skill when the user asks for:
 
-- Clear subject and focal point
-- Strong composition
-- Atmospheric lighting
-- Specific color harmony
-- Painterly brushwork and surface texture
-- Emotional tone
-- Art-historical context without copying
-- Negative prompt details that prevent common image-generation artifacts
+* An oil painting
+* A classical or museum-quality artwork
+* A portrait in a painterly style
+* A dramatic landscape or seascape
+* A Renaissance, Baroque, Romantic, Impressionist, Post-Impressionist, Symbolist, Realist, or Dutch Golden Age inspired image
+* A scene inspired by famous painters or famous art movements
+* A beautiful, premium, emotional, cinematic, or timeless painting-like image
 
-When the user asks to generate an image directly, generate the image through the available image-generation tool. Keep the response minimal. When the user asks for a prompt, provide the prompt only unless they ask for variations.
+Do not use this skill when the user asks for photorealistic photography, vector logos, UI design, diagrams, product mockups, or modern digital illustration unless they explicitly request an oil-painting treatment.
 
-## Workflow
+## Core Principle
 
-1. Identify the subject and intended use.
-   - If the user gives a simple subject, enrich it with painterly specificity.
-   - If the user provides a reference image, preserve the important likeness, pose, structure, and requested details.
+Create original oil paintings inspired by the visual language of art history, not replicas of famous artworks.
 
-2. Choose one dominant art direction.
-   - Pick a recipe from the style recipes below or blend two compatible traditions.
-   - Prefer movements and deceased historical artists as influence anchors.
-   - For living artists, translate the request into broad traits instead of naming or imitating them.
+The agent should combine:
 
-3. Build the prompt with concrete visual controls.
-   - Composition, lighting, color palette, brushwork, mood, setting, symbolic details, and negative prompt terms should all be explicit.
+* Subject clarity
+* Strong composition
+* Painterly brushwork
+* Rich color harmony
+* Atmospheric lighting
+* Emotional tone
+* Historical art references
+* Modern image-prompt precision
 
-4. Generate or return the result.
-   - If the user asked for an image, use the image-generation tool.
-   - If the user asked for a prompt, return only a clean copy-ready prompt.
-   - If the user asked for options, offer 3 to 5 concise directions.
+## Artist Inspiration Guidelines
 
-## Artist And Style Guidelines
+### Allowed Historical Inspiration
 
-Use deceased historical artists and movements as broad inspiration when helpful:
+The agent may reference deceased historical artists and movements as inspiration, such as:
 
-- Renaissance: balanced composition, sfumato, graceful figures, humanist calm
-- Baroque: chiaroscuro, theatrical staging, dramatic diagonals, emotional realism
-- Dutch Golden Age: quiet interiors, window light, polished material detail
-- Romanticism: sublime nature, storms, ruins, solitude, spiritual scale
-- Impressionism: plein-air light, broken color, luminous atmosphere
-- Post-Impressionism: impasto, rhythmic strokes, emotional color
-- Symbolism: allegory, dream logic, mystical light, jewel-toned mystery
-- Society portraiture: elegant posture, luminous fabrics, confident brushwork
+* Leonardo da Vinci: sfumato, gentle transitions, serene faces, balanced composition
+* Michelangelo: sculptural anatomy, heroic physicality, monumental forms
+* Caravaggio: chiaroscuro, dramatic light, intense realism, theatrical staging
+* Rembrandt: warm shadows, expressive portraiture, psychological depth
+* Vermeer: quiet interiors, soft window light, domestic intimacy
+* Velázquez: elegant realism, subtle brushwork, noble restraint
+* Rubens: dynamic movement, rich flesh tones, Baroque drama
+* Turner: luminous atmosphere, storms, dissolving light, sublime landscapes
+* Monet: broken color, plein-air light, atmospheric impression
+* Renoir: soft warmth, luminous skin, joyful color
+* Van Gogh: expressive impasto, swirling movement, emotional color
+* Cézanne: structured forms, simplified planes, architectural composition
+* Degas: unusual cropping, intimate candid moments, movement
+* Sargent: confident brushwork, elegant portraiture, luminous fabrics
+* Klimt: ornamental richness, gold accents, symbolic elegance
+* Goya: psychological darkness, social tension, haunting atmosphere
+* Botticelli: graceful figures, flowing lines, mythological elegance
+* Titian: rich Venetian color, sensual warmth, painterly depth
+* Delacroix: Romantic energy, saturated color, dramatic gesture
+* Caspar David Friedrich: solitude, spiritual landscapes, sublime scale
+* Whistler: tonal harmony, restrained mood, elegant minimalism
 
-Avoid asking the image model to recreate a specific famous painting exactly. Transform direct-copy requests into original compositions.
+### Avoid Direct Copying
 
-Examples:
+Do not ask the image model to recreate a specific famous painting exactly. Avoid prompts like:
 
-- Instead of: `Recreate the Mona Lisa but with my cat`
-  Use: `Create an original Renaissance-inspired oil portrait of a cat with serene sfumato lighting, balanced composition, and restrained earth tones.`
-- Instead of: `Paint Starry Night over Manila`
-  Use: `Create an original nocturne oil painting of Manila with expressive impasto, rhythmic sky movement, saturated blues and golds, and a poetic night atmosphere.`
-- Instead of: `Make it like [living artist]`
-  Use broad traits: `Create an original contemporary oil painting with bold color blocking, symbolic details, expressive brushwork, and a gallery-art mood.`
+* “Recreate the Mona Lisa but with...”
+* “Paint Starry Night with my dog in it”
+* “Make the exact composition of The Last Supper”
 
-## Prompt Template
+Instead, transform the request into:
 
-Use this structure for final prompts:
+* “A serene Renaissance-inspired portrait with sfumato lighting and balanced composition...”
+* “A night landscape with expressive impasto brushwork, swirling sky movement, and emotional color...”
+* “A dramatic group scene with Baroque chiaroscuro and theatrical staging...”
+
+### Living Artist Rule
+
+Do not directly imitate the style of living artists. If the user names a living artist, translate the request into broad visual traits.
+
+Example:
+
+User: “Make it like [living artist].”
+
+Agent response/prompt approach:
+
+“Create an original oil painting with expressive brushwork, bold color blocking, surreal symbolic details, and a contemporary gallery-art mood.”
+
+## Default Prompt Template
+
+Use this structure when creating the final image-generation prompt:
 
 ```text
 Create an original museum-quality oil painting of [SUBJECT].
 
 Composition: [framing, perspective, arrangement, focal point].
-Lighting: [sfumato, chiaroscuro, golden hour, candlelight, window light, moonlight, storm light, or diffuse overcast].
-Color palette: [specific colors, warmth/coolness, contrast].
-Brushwork and surface: [impasto, glazing, broken color, fine detail, visible strokes, varnished canvas texture].
-Art-historical inspiration: [movement or deceased historical influences, blended without copying a known work].
+Lighting: [chiaroscuro, golden hour, candlelight, overcast, soft window light, moonlight].
+Color palette: [specific palette, warmth/coolness, contrast].
+Brushwork and surface: [impasto, glazing, fine detail, visible strokes, varnished canvas texture].
+Art-historical inspiration: [movement or deceased artist influences, blended and not copied].
 Mood: [emotion, atmosphere, narrative feeling].
-Details: [costume, environment, symbolic objects, textures].
+Details: [costume, environment, symbolic elements, textures].
 Quality: refined anatomy, cohesive color harmony, rich oil paint texture, elegant composition, gallery-worthy finish.
-Avoid: text, watermark, signature, frame, low-resolution, blurry face, distorted hands, extra fingers, plastic skin, glossy digital look, photorealistic camera artifacts, copied famous composition, direct replica of an existing painting.
-```
-
-For portraits, add:
-
-```text
-Avoid: asymmetrical eyes, distorted mouth, uncanny smile, malformed hands, inaccurate anatomy.
-```
-
-For historical scenes, add:
-
-```text
-Avoid: anachronistic objects unless requested, costume inaccuracies, modern logos.
+Avoid: photorealistic camera look, plastic skin, harsh digital artifacts, text, watermark, signature, copied famous composition.
 ```
 
 ## Style Recipes
@@ -110,7 +123,7 @@ Lighting: gentle sfumato transitions, warm natural light, delicate shadow modeli
 Color palette: muted earth tones, soft creams, deep greens, warm umbers, restrained gold accents.
 Brushwork and surface: smooth glazing, subtle canvas texture, refined facial modeling.
 Mood: serene, timeless, contemplative, noble.
-Avoid: direct copying of any known Renaissance painting, text, watermark, signature.
+Avoid: direct copying of any known Renaissance painting, modern clothing unless requested, text, watermark, signature.
 ```
 
 ### Baroque Drama
@@ -171,7 +184,7 @@ Avoid: overly detailed photorealism, harsh outlines, copied famous compositions,
 
 ### Post-Impressionist Emotion
 
-Use for expressive landscapes, portraits, cafes, night scenes, flowers, and emotional color studies.
+Use for expressive landscapes, portraits, cafés, night scenes, flowers, and emotional color studies.
 
 ```text
 Create an original Post-Impressionist inspired oil painting of [SUBJECT].
@@ -211,91 +224,142 @@ Mood: mysterious, sacred, dreamlike, melancholic, enchanted.
 Avoid: literal fantasy-game rendering, cheap digital glow, copied famous compositions, text, watermark, signature.
 ```
 
-## Subject Enhancement
+## Subject Enhancement Rules
 
-When the user gives a simple subject, add concrete painting details while preserving the user intent.
+When the user gives a simple subject, enrich it with painterly specificity.
 
 Example:
 
-User: `A woman reading by the window.`
+User: “A woman reading by the window.”
 
-Prompt:
+Enhanced prompt:
 
 ```text
 Create an original Dutch Golden Age inspired oil painting of a woman reading a letter beside a tall window in a quiet room. She is seated at a wooden table with a folded linen cloth, a small ceramic cup, and a vase of pale flowers. Soft morning light enters from the left, illuminating her face and hands while the room falls into gentle amber shadow. Use warm browns, ivory, muted ultramarine, and deep green. The brushwork should be delicate and realistic, with polished glazing, subtle canvas texture, and careful detail in the wood, fabric, paper, and skin. The mood is quiet, intimate, intelligent, and reflective. Avoid copied famous compositions, photorealistic camera effects, text, watermark, and signature.
 ```
 
-## Reference Image Handling
+## Composition Controls
 
-If the user asks to turn their own image into an oil painting, preserve the subject's identity and requested details unless they ask for changes.
+Use these when needed:
 
-Use:
+* Portrait: bust, half-length, three-quarter, full-length
+* Landscape: wide panoramic, vertical sublime scale, low horizon, high horizon
+* Scene: single figure, group scene, triangular arrangement, diagonal movement
+* Perspective: eye-level, low-angle heroic, elevated view, intimate close-up
+* Focal point: face, hands, lantern, horizon, symbolic object, central figure
+
+## Lighting Controls
+
+Choose one dominant lighting style:
+
+* Sfumato: soft, smoky transitions
+* Chiaroscuro: dramatic bright-dark contrast
+* Tenebrism: extreme darkness with a strong illuminated subject
+* Golden hour: warm sunset glow
+* Candlelight: intimate warm illumination
+* Window light: soft directional indoor light
+* Moonlight: cool, mysterious, poetic
+* Storm light: dramatic clouds and glowing breaks
+* Diffuse overcast: gentle realism and muted mood
+
+## Brushwork Controls
+
+Use brushwork intentionally:
+
+* Smooth glazing: refined Renaissance or Dutch realism
+* Thick impasto: expressive Post-Impressionist energy
+* Broken color: Impressionist outdoor light
+* Loose confident strokes: elegant portraiture
+* Atmospheric blending: Romantic landscapes
+* Fine detailing: jewelry, glass, eyes, flowers, fabric
+* Scumbled texture: aged, smoky, atmospheric surfaces
+
+## Color Palette Controls
+
+Use specific color language:
+
+* Warm earth palette: umber, ochre, sienna, ivory, muted gold
+* Venetian palette: crimson, deep blue, warm flesh tones, amber
+* Dutch palette: brown, black, ivory, ultramarine, muted yellow
+* Romantic palette: storm gray, deep blue, moss green, amber light
+* Impressionist palette: lavender shadows, fresh greens, pale yellow, rose, sky blue
+* Symbolist palette: violet, teal, gold, pearl, midnight blue
+* Premium portrait palette: charcoal, ivory, navy, burgundy, warm bronze
+
+## Negative Prompt Additions
+
+Always include relevant avoidance terms when generating prompts:
 
 ```text
-Transform the provided image into an original museum-quality oil painting while preserving the subject's identity, facial structure, expression, pose, and overall likeness. Use [chosen style recipe]. Add rich oil-paint texture, elegant lighting, cohesive color harmony, and a refined gallery-worthy finish. Avoid changing the person's identity, distorting the face, altering eye direction, adding text, watermark, or signature.
+Avoid: text, watermark, signature, frame, low-resolution, blurry face, extra fingers, distorted hands, plastic skin, glossy digital look, photorealistic camera artifacts, copied famous composition, direct replica of an existing painting.
 ```
 
-## Quick Controls
+For portraits, add:
 
-Composition options:
+```text
+Avoid: asymmetrical eyes, distorted mouth, uncanny smile, malformed hands, inaccurate anatomy.
+```
 
-- Portrait: bust, half-length, three-quarter, full-length
-- Landscape: wide panoramic, vertical sublime scale, low horizon, high horizon
-- Scene: single figure, group scene, triangular arrangement, diagonal movement
-- Perspective: eye-level, low-angle heroic, elevated view, intimate close-up
-- Focal point: face, hands, lantern, horizon, symbolic object, central figure
+For historical scenes, add:
 
-Lighting options:
+```text
+Avoid: anachronistic objects unless requested, costume inaccuracies, modern logos.
+```
 
-- Sfumato: soft, smoky transitions
-- Chiaroscuro: dramatic bright-dark contrast
-- Tenebrism: extreme darkness with a strong illuminated subject
-- Golden hour: warm sunset glow
-- Candlelight: intimate warm illumination
-- Window light: soft directional indoor light
-- Moonlight: cool, mysterious, poetic
-- Storm light: dramatic clouds and glowing breaks
-- Diffuse overcast: gentle realism and muted mood
+## User Image Handling
 
-Brushwork options:
+If the user asks to turn their own photo into an oil painting, use the current image as the visual reference and preserve the person’s identity, facial structure, pose, and key features unless they ask for changes.
 
-- Smooth glazing: refined Renaissance or Dutch realism
-- Thick impasto: expressive Post-Impressionist energy
-- Broken color: Impressionist outdoor light
-- Loose confident strokes: elegant portraiture
-- Atmospheric blending: Romantic landscapes
-- Fine detailing: jewelry, glass, eyes, flowers, fabric
-- Scumbled texture: aged, smoky, atmospheric surfaces
+Prompt pattern:
 
-Palette options:
-
-- Warm earth: umber, ochre, sienna, ivory, muted gold
-- Venetian: crimson, deep blue, warm flesh tones, amber
-- Dutch: brown, black, ivory, ultramarine, muted yellow
-- Romantic: storm gray, deep blue, moss green, amber light
-- Impressionist: lavender shadows, fresh greens, pale yellow, rose, sky blue
-- Symbolist: violet, teal, gold, pearl, midnight blue
-- Premium portrait: charcoal, ivory, navy, burgundy, warm bronze
+```text
+Transform the provided image into an original museum-quality oil painting while preserving the subject’s identity, facial structure, expression, pose, and overall likeness. Use [chosen style recipe]. Add rich oil-paint texture, elegant lighting, cohesive color harmony, and a refined gallery-worthy finish. Avoid changing the person’s identity, distorting the face, altering eye direction, adding text, watermark, or signature.
+```
 
 ## Response Behavior
 
-- Generate the image directly when the user asks for an image.
-- Provide only the prompt when the user asks for a prompt.
-- Offer 3 to 5 concise options when the user asks for directions or styles.
-- Choose a suitable art-historical direction automatically when the user provides only a subject.
-- Do not over-explain image outputs; keep any accompanying text short.
+When the user asks to generate an image directly, generate the image. Do not over-explain.
+
+When the user asks for a prompt, provide only the prompt unless they ask for variations.
+
+When the user asks for style options, offer 3 to 5 concise options.
+
+When the user provides only a subject, choose a suitable art-historical direction automatically.
+
+## Example Outputs
+
+### Example 1: Mythic Portrait
+
+```text
+Create an original museum-quality oil painting of a young oracle standing in a marble temple at dusk, holding a shallow bronze bowl filled with glowing water. The composition uses a graceful triangular arrangement, with the oracle centered and columns receding into mist behind her. Lighting is soft and mystical, with warm candlelight on her face and cool violet twilight in the background. The color palette combines ivory, muted gold, deep violet, blue-green shadows, and pearlescent highlights. The brushwork blends smooth glazing for the face and hands with visible painterly texture in the robes, stone, and mist. Inspired by Renaissance harmony, Symbolist mystery, and Venetian color, while remaining an original composition. The mood is sacred, dreamlike, calm, and prophetic. Avoid text, watermark, signature, copied famous composition, plastic skin, distorted hands, and digital glow.
+```
+
+### Example 2: Storm Landscape
+
+```text
+Create an original Romantic-era inspired oil painting of a lone traveler standing on a cliff above a stormy sea. The composition emphasizes vast scale, with the small figure in the foreground and enormous waves crashing below. A break in the storm clouds releases amber sunlight across the water, while the sky remains deep blue-gray and turbulent. Use atmospheric blending, textured rocks, expressive clouds, and luminous mist. The color palette includes storm gray, deep Prussian blue, moss green, burnt umber, and radiant gold light. The mood is sublime, lonely, spiritual, and awe-inspiring. Avoid tourist-photo realism, copied famous landscapes, text, watermark, signature, and over-sharp digital detail.
+```
+
+### Example 3: Premium Professional Portrait
+
+```text
+Create an original elegant society oil portrait of a confident AI engineer seated beside a dark wooden desk, with a subtle abstract diagram glowing faintly in the background like a painted motif rather than a screen. Use a three-quarter portrait composition, calm posture, refined negative space, and a softly textured studio backdrop. Lighting is soft and directional, with luminous skin, gentle shadow depth, and a subtle rim light. The color palette includes charcoal, ivory, deep navy, burgundy, muted gold, and warm bronze. Brushwork should be confident and painterly, with refined face detail and looser expressive strokes in the clothing and background. The mood is sophisticated, intelligent, premium, and timeless. Avoid plastic skin, exaggerated facial features, copied famous compositions, text, watermark, signature, and digital UI elements.
+```
 
 ## Quality Checklist
 
-Before finalizing a prompt or image request, confirm it includes:
+Before finalizing the prompt, confirm it includes:
 
-- Clear subject
-- Specific composition
-- Specific lighting
-- Specific color palette
-- Specific brushwork
-- Mood and emotional direction
-- Historical inspiration without copying
-- Negative prompt terms
-- Originality requirement
+* Clear subject
+* Specific composition
+* Specific lighting
+* Specific color palette
+* Specific brushwork
+* Mood and emotional direction
+* Historical inspiration without copying
+* Negative prompt terms
+* Originality requirement
 
+## Final Instruction
+
+Always aim for beauty, taste, and restraint. The output should feel like an original painting that could belong in a museum or premium private collection, not a generic AI image with a paint filter.
