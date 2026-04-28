@@ -9,11 +9,13 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 ## Required First Steps
 
 - Check relevant local skills before starting. For this repo, prefer:
+  - `trending-blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
   - `blog-authoring` for creating or structuring new blog posts.
   - `blog-image-creator` for preparing `cardImage.png` and `blogHeader.png`.
   - `blog-social-post-generator` when asked for social copy tied to a post or project.
   - `beautiful-oil-painting-image-gen` when asked for oil-painting-style generated artwork.
 - Research before planning. Inspect the current files, schemas, layouts, and local docs before writing a plan or changing code.
+- For autonomous trend/topic research, use Codex's available Exa MCP search tool when present. Do not add repo-level Exa SDK dependencies or `EXA_API_KEY` wiring unless the user asks for a standalone scheduled script outside Codex.
 - When a library detail is unclear, use Context7 for current docs. If Context7 is insufficient, use web search and cite external sources in the final answer.
 - Never create a git commit unless explicitly asked. If asked to commit, include only task-related files and exclude temporary plans, scratch files, generated support notes, and unrelated dirty files.
 - Preserve unrelated work. This repo may have generated or user-owned changes in the worktree; do not revert or stage them unless the user asks.
