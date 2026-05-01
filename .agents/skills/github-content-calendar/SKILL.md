@@ -25,10 +25,10 @@ gh auth status
 gh project --help
 ```
 
-GitHub Projects requires project scopes. If project commands fail with missing scope errors, ask the user to authorize or run:
+GitHub Projects requires the `project` OAuth scope. If project commands fail with missing scope errors, ask the user to authorize or run:
 
 ```bash
-gh auth refresh -s read:project -s project
+gh auth refresh -s project
 ```
 
 If the GitHub connector is available, it can help inspect issues and PRs, but prefer `gh project` for Project v2 field reads and mutations.
