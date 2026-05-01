@@ -1,6 +1,6 @@
 ---
 name: blog-authoring
-description: Use this skill when the user wants to create a new blog post, start a new article, or write a blog. This skill automates the setup of the MDX file, frontmatter, and asset directories for the ylang-labs-blog project.
+description: Use this skill when the user wants to create a new blog post, start a new article, or write a blog. This skill automates the setup of the MDX file, frontmatter, and asset directories for the ylang-labs-blog project. If the post comes from or should create a GitHub content-calendar issue, use `github-content-calendar` to preserve content type, tags, target date, end date, slug, and description metadata.
 ---
 
 # Blog Authoring Skill
@@ -12,6 +12,7 @@ This skill guides you through creating a new blog post for the `ylang-labs-blog`
 - Blog posts are stored in `data/blogs/*.mdx`.
 - Static assets (images) are stored in `public/static/images/blogs/[slug]/`.
 - Authors are defined in `data/authors/*.mdx`.
+- Calendar-tracked posts are represented by GitHub issues and Project items through `.agents/skills/github-content-calendar/SKILL.md`.
 
 ## 2. Information Gathering
 
@@ -21,6 +22,7 @@ Before creating the post, ensure you have the following information:
 - **Date**: Defaults to today's date (YYYY-MM-DD).
 - **Authors**: A list of author slugs (e.g., `arthur-reimus`, `christopher-caysido`, `ezekiel-mariano`, `van-panugan`, `default`).
 - **Tags**: A list of tags. Common tags in this project: `AI/ML`, `Agents`, `Generative AI`, `DeepSeek`, `Pydantic`, `Multi-Agent Systems`, `Context Engineering`, `RAG`.
+- **Calendar Metadata** (Optional): GitHub issue URL/number, content type, canonical tag keys from `app/blog-tag-data.json`, target date, end date, slug, priority, and description.
 - **Summary**: A short description for the blog list view.
 - **TLDR**: A "Too Long; Didn't Read" summary.
 - **Bibliography** (Optional): Path to a `.bib` file if references are used.
@@ -35,6 +37,15 @@ The project provides three distinct layouts for blog posts. Choose the one that 
 - **`PostBanner`**: Features a prominent full-width banner image at the top (uses the first image in the `images` array). It includes a "Key Takeaways" section at the start and is best for deep dives or visually-rich announcements.
 
 ## 4. Workflow
+
+### Step 0: Preserve Calendar Metadata
+
+If the user references a GitHub issue, Project item, target date, end date, or content calendar, read `.agents/skills/github-content-calendar/SKILL.md` before creating the MDX file.
+
+- Use the calendar issue description as the draft brief.
+- Use the calendar slug if one is present.
+- Convert canonical calendar tag keys to existing human-readable frontmatter tags where possible, such as `aiml` -> `AI/ML`, `agents` -> `Agents`, and `context-engineering` -> `Context Engineering`.
+- Do not invent missing schedule dates. If `Target Date` or `End Date` is absent, leave the calendar metadata incomplete and report the gap.
 
 ### Step 1: Generate the Slug
 
