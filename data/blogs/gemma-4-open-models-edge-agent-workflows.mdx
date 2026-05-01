@@ -1,0 +1,256 @@
+---
+title: 'Gemma 4: Open Models for Edge and Agent Workflows'
+date: '2026-04-28'
+tags: ['AI/ML', 'Agents', 'Generative AI']
+draft: false
+summary: 'A technical read of Gemma 4: how Google DeepMind combines dense, MoE, PLE, long-context, and multimodal design to make open models practical from phones to agent servers.'
+tldr: |
+  - Gemma 4 is not one model. It is a four-model deployment ladder: E2B, E4B, 26B A4B MoE, and 31B dense.
+  - The strongest engineering idea is matching architecture to hardware: PLE for on-device models, MoE for latency, dense weights for maximum quality.
+  - The attention stack keeps long context practical with local/global interleaving, sliding windows, and heavier GQA in global layers.
+  - Multimodal support is now a first-class design surface: variable image aspect ratios, visual token budgets, and audio on E2B/E4B.
+  - For production agents, the license and ecosystem matter as much as benchmark scores: Apache 2.0 plus Hugging Face, Kaggle, Ollama, AI Studio, Vertex, LiteRT-LM, and other runtimes.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/gemma-4-open-models-edge-agent-workflows/cardImage.png'
+images: ['/static/images/blogs/gemma-4-open-models-edge-agent-workflows/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Gemma 4 is easiest to misunderstand if you treat it as a bigger Gemma 3.
+
+Gemma 4 is better understood as a deployment system. Google DeepMind is not only shipping a stronger open model. It is shipping four related models with different compute profiles, different memory constraints, and different intended jobs.
+
+That distinction matters for builders. A local assistant on a phone does not need the same architecture as a server-side coding agent. A batch reasoning workflow does not have the same latency target as an on-device voice interface. Gemma 4's design is interesting because it accepts those differences instead of pretending a single model shape can cover everything.
+
+<Image
+  alt="An oil painting metaphor for Gemma 4 with edge devices, routed experts, and dense reasoning models in a research atelier"
+  src="/static/images/blogs/gemma-4-open-models-edge-agent-workflows/source-artwork.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A research atelier metaphor for Gemma 4: edge devices, routed experts, and a dense reasoning tower
+  on the same workbench.
+</DiagramSubtitle>
+
+The public launch material describes Gemma 4 as Google DeepMind's most capable open model family to date, built from Gemini 3 research and released under Apache 2.0 ([Google launch blog](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/)). The official model card then fills in the useful engineering numbers: E2B and E4B for edge, 26B A4B as a sparse MoE, and 31B as the dense quality model ([Gemma 4 model card](https://ai.google.dev/gemma/docs/core/model_card_4)).
+
+The useful engineering intuition is not just "more parameters." The point is where those parameters live, how many are active, how attention is paid, and how much of a prompt budget gets spent on images or audio.
+
+## The paper trail behind Gemma 4
+
+Gemma 4 is best read as the next step in a cumulative engineering line rather than as an isolated release.
+
+The original Gemma paper established the public open-model family built from Gemini research and described the training, safety, and evaluation framing for the first 2B and 7B models ([Gemma paper](https://arxiv.org/abs/2403.08295)). Gemma 2 then made practical efficiency a central theme with grouped-query attention, interleaved local-global attention, and model-size choices aimed at strong quality per unit of compute ([Gemma 2 paper](https://arxiv.org/abs/2408.00118)). Gemma 3 extended that direction into long-context and multimodal models, including a 128K context window, vision support, and a 5:1 local/global attention pattern ([Gemma 3 Technical Report](https://arxiv.org/abs/2503.19786)).
+
+That lineage explains why Gemma 4 is defined by routing, memory placement, attention ratios, and visual token budgets. The new release is not only a benchmark update. It is the point where several earlier Gemma ideas become a deployment ladder.
+
+## The four-model shape
+
+Gemma 4 ships as a ladder:
+
+| Model     | Architecture                          | Context | Modalities                      | Design center                   |
+| --------- | ------------------------------------- | ------- | ------------------------------- | ------------------------------- |
+| E2B       | Dense effective model with PLE        | 128K    | Text, image, audio in; text out | Phones, tablets, laptops, IoT   |
+| E4B       | Larger dense effective model with PLE | 128K    | Text, image, audio in; text out | Stronger on-device agents       |
+| 26B A4B   | Mixture of experts                    | 256K    | Text and image in; text out     | Low-latency reasoning           |
+| 31B dense | Dense model                           | 256K    | Text and image in; text out     | Maximum quality and fine-tuning |
+
+<Image
+  alt="Gemma 4 deployment map showing E2B, E4B, 26B A4B, and 31B dense models"
+  src="/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-model-map.png"
+  width={1400}
+  height={820}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The family is segmented by deployment target: edge memory, on-device quality, sparse latency, and
+  dense reasoning.
+</DiagramSubtitle>
+
+The headline is that the 31B dense model ranks near the top of open-model chat leaderboards for its size, while the 26B MoE activates only about 3.8B parameters per forward pass. In practice, the 31B is the raw-quality model, while the 26B A4B is the practical latency model. The official model card lists 25.2B total parameters, 3.8B active parameters, 128 total experts, 8 active experts, and one shared expert for the 26B A4B model.
+
+The smaller E2B and E4B models solve a different problem. They are not miniature versions of the same server model. They are built around on-device memory pressure and audio-capable multimodality. The "E" means effective parameters: the E2B model has 2.3B effective parameters and 5.1B total parameters with embeddings, while E4B has 4.5B effective parameters and 8B total parameters with embeddings.
+
+That language can sound like marketing unless you look at PLE.
+
+## The attention stack: local where possible, global where needed
+
+The Gemma 4 dense models keep the decoder-only transformer shape, but the attention pattern is tuned for long context.
+
+Gemma 4 uses a local/global interleaving pattern: most layers use local sliding-window attention, while periodic global layers attend across the prior sequence. The larger models use a 5:1 local-to-global ratio; the smaller E2B uses a 4:1 ratio. Local layers use bounded windows: 512 tokens in the smaller models and 1,024 tokens in the larger models. The last layer is always global, so the final representation can still gather information across the full context.
+
+This is where the earlier paper trail becomes implementation detail. Gemma 2 introduced interleaved local-global attention and grouped-query attention as practical transformer modifications for open models ([Gemma 2 paper](https://arxiv.org/abs/2408.00118)). Gemma 3 then pushed the long-context version of the idea: 128K context, a 5:1 local/global pattern, and shorter local spans to keep KV-cache memory from exploding ([Gemma 3 Technical Report](https://arxiv.org/abs/2503.19786)).
+
+Gemma 4 takes that line further with grouped-query attention as the next pressure valve. Local layers group two queries per key/value head. Global layers group eight queries per key/value head because global attention is the expensive part. To avoid losing too much capacity, the key/value head size is doubled in global layers, from 256 to 512.
+
+The practical reading is simple: long context is not free, and architecture has to decide where global awareness is worth paying for.
+
+<Callout type="note" title="Engineering rule">
+  Long context should be treated as a systems budget, not as permission to pass everything. Gemma 4
+  makes the budget larger, but the local/global attention pattern still exists because full
+  attention everywhere is too expensive.
+</Callout>
+
+## MoE: 26B knowledge, 4B-ish active compute
+
+The 26B A4B model is the first MoE model in the Gemma family.
+
+In a dense feed-forward block, every token pays for the same feed-forward network. In the Gemma 4 MoE variant, that standard feed-forward network is replaced with a routed expert layer: 128 total experts, eight selected by the router for each forward pass, plus one always-on shared expert. The shared expert is three times the size of a regular expert.
+
+<Image
+  alt="Illustration of Gemma 4 26B A4B MoE routing from a token stream into selected experts and a shared expert"
+  src="/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-moe-routing.png"
+  width={1400}
+  height={820}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The 26B A4B model keeps many experts available, but activates only a small subset for a given
+  token.
+</DiagramSubtitle>
+
+This gives the 26B model a useful production personality:
+
+- It has more representational capacity than a tiny dense model.
+- It does not activate the whole model on every token.
+- It is a better fit for latency-sensitive agent loops than the 31B dense model when absolute quality is not the only constraint.
+
+For agents, this is important. Tool-calling workflows are often bottlenecked by round trips: plan, call tool, read result, revise, call another tool. A model that is slightly below the dense flagship but materially faster can win the product experience.
+
+## PLE: the trick behind the effective models
+
+The most interesting edge-device idea in Gemma 4 is Per-Layer Embeddings, or PLE.
+
+Standard token embeddings map a token ID to one embedding vector. E2B has a normal embedding dimension of 1,536; E4B uses 2,560. PLE adds another embedding table, but with a much smaller dimension of 256, and with separate embeddings per layer.
+
+That sounds like it should make memory worse. The key is where the table lives. The PLE table is stored in flash memory rather than VRAM. On phones and laptops, VRAM or unified memory pressure is often the hard limit. Flash storage is slower than memory, but lookup-style access to compact per-layer embeddings changes the shape of the tradeoff.
+
+<Image
+  alt="Per-layer embeddings illustration showing token IDs, decoder stack, flash memory, and reduced VRAM pressure"
+  src="/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-ple-flash-memory.png"
+  width={1400}
+  height={820}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  PLE gives each decoder layer a small token-specific signal while avoiding the cost of keeping the
+  whole extra table in VRAM.
+</DiagramSubtitle>
+
+At the end of a decoder block, the model can look up the layer-specific 256-dimensional embedding for each token, project it up to the full model size, and use it as a layer-specific signal. The total parameter count is larger than the effective active count, but the additional capacity behaves more like storage-backed representational depth than fully active dense compute.
+
+This is the core reason "effective 2B" is a meaningful phrase. It does not mean the model has only 2B total parameters. It means the model is designed so the active inference footprint is closer to the smaller number while representational depth benefits from additional per-layer stored embeddings.
+
+## Multimodality is now part of the base design
+
+Gemma 3 introduced vision. Gemma 3n added open audio, vision, and text for on-device scenarios. Gemma 4 folds that work into the main family.
+
+The model card says all Gemma 4 models support text and image input, with audio support on E2B and E4B. The architecture-level detail is what makes this useful for builders:
+
+- The 31B and 26B models use an approximately 550M-parameter vision encoder.
+- E2B and E4B use a smaller approximately 150M-parameter vision encoder.
+- Images are split into 16 by 16 pixel patches.
+- Patches are projected into patch embeddings and transformed with positional encodings.
+- Groups of 3 by 3 patches are pooled into a single soft token.
+- Developers can choose visual token budgets of 70, 140, 280, 560, or 1,120.
+
+<Image
+  alt="Gemma 4 multimodal token budget illustration showing image patches, soft tokens, and Gemma 4"
+  src="/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-multimodal-token-budget.png"
+  width={1400}
+  height={820}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Gemma 4 lets developers trade visual detail for speed by selecting the image token budget.
+</DiagramSubtitle>
+
+The important change from Gemma 3 is that pan-and-scan is no longer the central workaround for arbitrary image shapes. In Gemma 3, variable aspect ratios could be handled by slicing an image into square crops and passing those crops as multiple images. Gemma 4 instead supports variable aspect ratios and variable resolutions more directly.
+
+This turns image processing into an application knob:
+
+| Task                                          | Practical image budget choice                         |
+| --------------------------------------------- | ----------------------------------------------------- |
+| Captioning or coarse classification           | Lower token budget for throughput                     |
+| Video frame analysis                          | Lower token budget to process more frames             |
+| OCR, document parsing, charts, UI screenshots | Higher token budget for small text and spatial detail |
+| Object detection and pointing                 | Higher token budget when precise localization matters |
+
+The audio path is similarly practical. On E2B and E4B, raw audio is processed through a MEL spectrogram, split into chunks, downsampled through two convolutional layers, and turned into soft audio tokens for a 35M-parameter conformer encoder used for speech recognition and translation tasks.
+
+The model card adds one production detail worth preserving: audio inputs are currently for E2B and E4B, and audio length is capped at 30 seconds. Video support is handled as frames, with a maximum of 60 seconds assuming one frame per second.
+
+## Why this matters for agents
+
+The most important production shift is not only that Gemma 4 is more capable. It is that it lines up with the shape of modern agent workloads.
+
+Agent systems need:
+
+- Long context for repositories, documents, traces, and tool output.
+- Function calling and structured output for tool loops.
+- Multimodal input for screenshots, PDFs, diagrams, audio, and video frames.
+- Local or sovereign deployment when prompts cannot leave the device or tenant boundary.
+- Small enough models for always-on assistants and offline interfaces.
+- Fast enough models for multi-step loops where latency compounds.
+
+Gemma 4 directly targets that list. The launch blog calls out native function calling, structured JSON output, system instructions, code generation, longer context, and multimodal input. The model card lists thinking mode, function calling, coding, image understanding, video understanding, and multilingual support across more than 140 pre-training languages.
+
+The cloud and runtime story matters too. Google lists AI Studio and Vertex AI for hosted 31B and 26B prototyping, while model weights are available through Hugging Face, Kaggle, and Ollama. Hugging Face documents day-one support across Transformers, llama.cpp, MLX, WebGPU, Rust, fine-tuning workflows, and agent integrations ([Hugging Face Gemma 4 blog](https://huggingface.co/blog/gemma4)). Google's edge post adds AI Edge Gallery and LiteRT-LM, including on-device Agent Skills experiments powered by Gemma 4 ([Google Developers Blog](https://developers.googleblog.com/bring-state-of-the-art-agentic-skills-to-the-edge-with-gemma-4/)).
+
+The license is part of the architecture story. Apache 2.0 makes the family more usable for commercial application teams than the earlier Gemma license posture. It does not mean the training data is open, and it does not remove the need for safety evaluation, but it materially lowers adoption friction.
+
+<Callout type="warning" title="Do not skip evals">
+  Open weights and strong benchmarks do not make a model safe for your product by default. The Gemma
+  4 model card explicitly discusses factuality limits, misuse risk, bias, privacy, and the need for
+  application-specific safeguards.
+</Callout>
+
+## How I would choose a Gemma 4 model
+
+For a product team, the family maps to a straightforward decision tree.
+
+Use **E2B** when the product must run locally, offline, or inside a mobile/IoT memory budget. It is the right starting point for private assistants, embedded workflows, lightweight voice features, and local data extraction where sending data to an API is not acceptable.
+
+Use **E4B** when the same on-device constraints apply but the task needs more headroom. This is the model to try when E2B is almost good enough but struggles with reasoning depth, multi-step instructions, or messy multimodal inputs.
+
+Use **26B A4B** when latency and throughput matter but the system still needs advanced reasoning. This is the most interesting agent-serving candidate: enough capacity for tool use and coding-like workflows, but sparse enough to avoid dense-model cost on every token.
+
+Use **31B dense** when quality matters most, especially for complex reasoning, coding, evaluation, and fine-tuning baselines. The dense model is the clean foundation when latency is secondary to correctness.
+
+## The real lesson
+
+Gemma 4's technical story is not a single breakthrough. It is a set of targeted compromises:
+
+- Local attention for efficiency, global attention for sequence-wide awareness.
+- GQA to keep global layers affordable.
+- MoE to trade total capacity for lower active compute.
+- PLE to put representational depth where edge devices can actually store it.
+- Variable visual token budgets to stop treating every image as equally expensive.
+- Apache 2.0 and broad runtime support to make the release operationally useful.
+
+That is why the release is interesting for AI engineers. It is not just a leaderboard entry. It is a model family that exposes the deployment tradeoffs directly.
+
+If Gemma 3 made open multimodal models practical on a single GPU, Gemma 4 pushes the next question: how much intelligence can be placed exactly where the workflow runs?
+
+For edge agents, the answer starts with E2B and E4B. For local-first coding and tool loops, it starts with 26B A4B. For highest-quality open-model experiments, it starts with 31B dense.
+
+The best Gemma 4 model is not the largest one. It is the one whose architecture matches the job.
+
+## References
+
+1. [Gemma 4: Byte for byte, the most capable open models - Google](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/)
+2. [Gemma 4 model card - Google AI for Developers](https://ai.google.dev/gemma/docs/core/model_card_4)
+3. [Bring state-of-the-art agentic skills to the edge with Gemma 4 - Google Developers Blog](https://developers.googleblog.com/bring-state-of-the-art-agentic-skills-to-the-edge-with-gemma-4/)
+4. [Welcome Gemma 4: Frontier multimodal intelligence on device - Hugging Face](https://huggingface.co/blog/gemma4)
+5. [Introducing Gemma 4 on Google Cloud - Google Cloud Blog](https://cloud.google.com/blog/products/ai-machine-learning/gemma-4-available-on-google-cloud)
+6. [Gemma 3 Technical Report - arXiv:2503.19786](https://arxiv.org/abs/2503.19786)
+7. [Gemma 2: Improving Open Language Models at a Practical Size - arXiv:2408.00118](https://arxiv.org/abs/2408.00118)
+8. [Gemma: Open Models Based on Gemini Research and Technology - arXiv:2403.08295](https://arxiv.org/abs/2403.08295)
