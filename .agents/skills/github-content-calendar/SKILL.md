@@ -7,6 +7,8 @@ description: Use this skill whenever the user wants to use GitHub Issues and Git
 
 Use this skill to manage the Ylang Labs editorial calendar with GitHub Issues as content briefs and GitHub Projects as the scheduling board. The issue is the durable content brief and discussion thread; the Project item stores scheduling fields such as stage, content type, tags, target date, end date, channel, slug, and priority.
 
+GitHub Issues do not have native custom fields. Mirror the content type onto the issue with labels such as `type: blog` and `type: project`, then store the richer metadata in both the issue body and the Project item fields.
+
 ## Operating Rules
 
 - Keep the repository content files as the publishing source of truth. Calendar issues track intent, status, links, and deadlines; they do not replace `data/blogs/*.mdx`, `data/projects/*.mdx`, image assets, or social-copy files.
@@ -118,9 +120,11 @@ If a requested topic needs a new tag that is absent from the relevant JSON file,
    ```bash
    gh label list --limit 100 --json name,color,description
    gh label create blog --color fbca04 --description "Blog post"
+   gh label create "type: blog" --color 1d76db --description "Content calendar item: blog"
+   gh label create "type: project" --color 5319e7 --description "Content calendar item: project"
    ```
 
-   The `blog` label already exists in this repo as of the current setup. Do not rewrite existing label colors or descriptions unless the user asks.
+   The `blog` label already exists in this repo as of the current setup. Do not rewrite existing label colors or descriptions unless the user asks. Add `type: blog` or `type: project` to calendar issues so content type remains visible on the issue page and issue lists, even outside the Project view.
 
 ## Bootstrap A Project
 
@@ -168,8 +172,8 @@ Use this issue body structure:
 
 - Type:
 - Tags:
-- Target date:
-- End date:
+- Target date: TBD
+- End date: TBD
 - Channel:
 - Working title:
 - Slug:
@@ -207,10 +211,10 @@ Use this issue body structure:
 Create the issue:
 
 ```bash
-gh issue create --title "[Blog] <working title>" --label blog --body-file <body-file>
+gh issue create --title "[Blog] <working title>" --label blog --label "type: blog" --body-file <body-file>
 ```
 
-Use existing labels first. For blog posts, prefer the existing `blog` label. Store the canonical metadata tags in the issue body and `Tags` project field, not as GitHub labels by default. Add new GitHub labels only when they improve filtering and the user wants the calendar taxonomy expanded.
+Use existing labels first. For blog posts, prefer the existing `blog` label plus `type: blog`. For project-showcase topics, use `type: project`. Store canonical metadata tags such as `aiml` and `agents` in the issue body and `Tags` project field, not as GitHub labels by default.
 
 ## Add Or Update Project Fields
 
@@ -237,6 +241,8 @@ gh project item-edit --id "$ITEM_ID" --project-id "$PROJECT_ID" --field-id "$TAR
 gh project item-edit --id "$ITEM_ID" --project-id "$PROJECT_ID" --field-id "$END_DATE_FIELD_ID" --date YYYY-MM-DD
 gh project item-edit --id "$ITEM_ID" --project-id "$PROJECT_ID" --field-id "$STAGE_FIELD_ID" --single-select-option-id "$DRAFTING_OPTION_ID"
 ```
+
+Only set `Target Date` and `End Date` on the Project item when real dates are known. If the user has not provided dates, write `TBD` in the issue body metadata and leave the Project date fields blank.
 
 For a project showcase, select the `Project` content-type option and use tags from `app/project-tag-data.json`. For social or newsletter items tied to a blog post, keep `Content Type` as `Social` or `Newsletter` but use the blog tag source so the taxonomy stays aligned with the related post.
 
@@ -285,6 +291,7 @@ Report:
 
 - Overdue items: `Target Date` before today and not `Published` or `Parked`.
 - Missing dates: items in `Outline`, `Drafting`, `Editing`, `Assets`, or `Scheduled` without `Target Date` or `End Date`.
+- Missing type labels: issues without `type: blog` or `type: project` when the item is a blog or project-showcase topic.
 - Missing tags: items without `Tags`, or with tags that are absent from the relevant `app/blog-tag-data.json` or `app/project-tag-data.json`.
 - Missing slugs: website content without `Slug`.
 - Broken execution links: items in `Drafting` or later without a repo path, branch, PR, or draft link.
