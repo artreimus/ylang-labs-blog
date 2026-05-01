@@ -1,6 +1,6 @@
 ---
 name: trending-blog-topic-research
-description: Autonomously research current technical conversations across Hacker News, Twitter/X, Reddit, and supporting web sources, then propose exactly 5 strong Ylang Labs blog topic candidates. Use this skill whenever the user asks for trending blog ideas, topic research, what to write about next, Hacker News/Twitter/Reddit trend scans, content ideation from social signals, or a shortlist of possible posts.
+description: Autonomously research current technical conversations across Hacker News, Twitter/X, Reddit, and supporting web sources, then propose exactly 5 strong Ylang Labs blog topic candidates. Use this skill whenever the user asks for trending blog ideas, topic research, what to write about next, Hacker News/Twitter/Reddit trend scans, content ideation from social signals, or a shortlist of possible posts. If the user wants those topics added to the GitHub content calendar, handed off as issues, scheduled, or tracked, use `github-content-calendar` after the shortlist is produced.
 ---
 
 # Trending Blog Topic Research
@@ -87,7 +87,22 @@ Use recency filters when available. For trend research, default to the last 7-14
 
 7. Prepare next-step handoff.
    - If the user wants to proceed with one topic, hand off to `blog-authoring` or `end-to-end-blog-creation`.
+   - If the user wants the shortlist or selected topic tracked in GitHub, hand off to `github-content-calendar` at `.agents/skills/github-content-calendar/SKILL.md`.
    - If working inside the Ylang Labs blog repo, save the final shortlist to `posts/topic-research-YYYY-MM-DD.md` unless the user asked for chat-only output or the environment is read-only.
+
+## Content Calendar Handoff
+
+When the user asks to add researched topics to the content calendar, read `github-content-calendar` and create or update GitHub issues after the research output is complete.
+
+For each calendarized topic, map the research output into:
+
+- `Type`: `Blog` unless the user specifies `Project`, `Social`, `Newsletter`, `Website`, or `Research`.
+- `Tags`: canonical keys from `app/blog-tag-data.json`, such as `aiml`, `agents`, `generative-ai`, `context-engineering`, or `security`.
+- `Target Date` and `End Date`: use explicit user-provided dates; if absent, leave them blank in the issue metadata rather than inventing a schedule.
+- `Description`: use the topic thesis, why-now signal, and Ylang angle.
+- `Content Brief`: use the proposed article shape, source links, risks, and demo/diagram idea.
+
+Do not create duplicate issues. Search existing open and closed issues by title, slug, and core topic terms before creating anything.
 
 ## Output Format
 

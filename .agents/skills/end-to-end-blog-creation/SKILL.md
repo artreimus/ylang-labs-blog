@@ -1,6 +1,6 @@
 ---
 name: end-to-end-blog-creation
-description: Orchestrate complete Ylang Labs blog creation from a user-provided blog idea or draft through generated oil-painting artwork, MDX post setup, cropped card/header images, LinkedIn/social copy, validation, and draft PR publication. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want artwork, blog assets, social posts, and a PR handled together.
+description: Orchestrate complete Ylang Labs blog creation from a user-provided blog idea or draft through generated oil-painting artwork, MDX post setup, cropped card/header images, LinkedIn/social copy, validation, draft PR publication, and optional GitHub content-calendar tracking. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want artwork, blog assets, social posts, scheduling, GitHub issues/projects, or a PR handled together.
 ---
 
 # End-to-End Blog Creation
@@ -14,19 +14,22 @@ Read and apply these skills in this order:
 1. `trending-blog-topic-research` when the user wants topic ideation before creating the post.
    - Path: `.agents/skills/trending-blog-topic-research/SKILL.md`
    - Purpose: research current technical conversations and produce exactly 5 Ylang Labs topic candidates that can be handed off into this workflow.
-2. `beautiful-oil-painting-image-gen`
+2. `github-content-calendar` when the user provides a calendar issue, asks to schedule/track the post, or wants the work represented in GitHub Issues/Projects.
+   - Path: `.agents/skills/github-content-calendar/SKILL.md`
+   - Purpose: create or update the content-calendar issue and Project item with content type, tags, target date, end date, slug, stage, and description.
+3. `beautiful-oil-painting-image-gen`
    - Path: `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md`
    - Purpose: generate the source artwork or a refined generation prompt for the blog hero image.
-3. `blog-authoring`
+4. `blog-authoring`
    - Path: `.agents/skills/blog-authoring/SKILL.md`
    - Purpose: create the MDX file, frontmatter, slug, asset directory, and content structure.
-4. `blog-image-creator`
+5. `blog-image-creator`
    - Path: `.agents/skills/blog-image-creator/SKILL.md`
    - Purpose: crop the generated source artwork into `cardImage.png` and `blogHeader.png`.
-5. `blog-social-post-generator`
+6. `blog-social-post-generator`
    - Path: `.agents/skills/blog-social-post-generator/SKILL.md`
    - Purpose: create 2-3 short social post variations and save them under `posts/`.
-6. `github:yeet` when the user wants the workflow published as a PR.
+7. `github:yeet` when the user wants the workflow published as a PR.
    - Purpose: commit only scoped task files, push the branch, and open a draft PR.
 
 If one of these skills is unavailable, continue with the closest repo-native workflow and clearly state the gap.
@@ -39,6 +42,8 @@ Derive missing details from the provided blog whenever possible instead of block
 - Blog body, outline, notes, or source draft.
 - Preferred author slugs. Default to `arthur-reimus` only when the user does not specify and the repo has that author.
 - Tags. Use existing tags when possible.
+- GitHub content-calendar issue or Project item, if the work is already tracked.
+- Target date and end date when the user wants scheduling metadata.
 - Publication date. Default to today's date in `YYYY-MM-DD`.
 - Draft status. Default to `draft: false` unless the user asks for a draft article.
 - Any external references or canonical URL.
@@ -68,6 +73,7 @@ Before writing files:
 - Inspect nearby posts in `data/blogs/` for style, frontmatter, tag, reference, and component patterns.
 - Read `DESIGN.md` before making visual or layout-sensitive choices.
 - Confirm the intended slug does not already exist in `data/blogs/` or `public/static/images/blogs/`.
+- If the user references GitHub content-calendar tracking, read `.agents/skills/github-content-calendar/SKILL.md`, inspect the issue/Project item first, and preserve its content type, tags, target date, end date, slug, and description as workflow metadata.
 
 ### 2. Research Or Confirm The Topic
 
@@ -137,7 +143,18 @@ posts/social-media-<slug>.md
 
 Create 2-3 variations. For LinkedIn, prefer a professional and insight-led variation. Keep each post under 300 characters and include a `[URL]` placeholder unless the final URL is known.
 
-### 7. Validate
+### 7. Update The Content Calendar
+
+When the user asked for calendar tracking or the workflow started from a calendar issue, use `github-content-calendar` to update the GitHub issue/Project item after each meaningful handoff:
+
+- Move to `Drafting` once the MDX draft exists.
+- Move to `Assets` while source artwork, card image, and header are being produced.
+- Move to `Scheduled` when content, assets, social copy, target date, and end date are ready.
+- Move to `Published` only after the final public URL is known and linked in the issue.
+
+If Project auth is missing, continue the repo work and report the exact auth blocker from the calendar skill.
+
+### 8. Validate
 
 At minimum:
 
@@ -151,7 +168,7 @@ For code or component changes, also run `pnpm lint`.
 
 State exactly what validation ran and any gaps.
 
-### 8. Publish As A Draft PR
+### 9. Publish As A Draft PR
 
 When publishing is requested as part of the task:
 
