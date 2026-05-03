@@ -1,6 +1,6 @@
 ---
 name: blog-authoring
-description: Use this skill when the user wants to create a new blog post, start a new article, or write a blog. This skill automates the setup of the MDX file, frontmatter, and asset directories for the ylang-labs-blog project. If the post comes from or should create a GitHub content-calendar issue, use `github-content-calendar` to preserve content type, tags, target date, end date, slug, and description metadata.
+description: "Use this skill when the user wants to create a new blog post, start a new article, or write a blog. This skill automates the setup of the MDX file, frontmatter, and asset directories for the ylang-labs-blog project. If the post comes from or should create a GitHub content-calendar issue, use `github-content-calendar` to preserve content type, tags, target date, end date, slug, and description metadata. If the user asks for Anthropic-like, research-lab, measured, evidence-led, or caveat-heavy prose, combine this skill with `anthropic-blog-style`."
 ---
 
 # Blog Authoring Skill
@@ -13,6 +13,7 @@ This skill guides you through creating a new blog post for the `ylang-labs-blog`
 - Static assets (images) are stored in `public/static/images/blogs/[slug]/`.
 - Authors are defined in `data/authors/*.mdx`.
 - Calendar-tracked posts are represented by GitHub issues and Project items through `.agents/skills/github-content-calendar/SKILL.md`.
+- Anthropic-style prose requests are handled through `.agents/skills/anthropic-blog-style/SKILL.md`; use it as a writing overlay, not as a replacement for this repo setup workflow.
 
 ## 2. Information Gathering
 
@@ -25,6 +26,7 @@ Before creating the post, ensure you have the following information:
 - **Calendar Metadata** (Optional): GitHub issue URL/number, content type, canonical tag keys from `app/blog-tag-data.json`, target date, end date, slug, priority, and description.
 - **Summary**: A short description for the blog list view.
 - **TLDR**: A "Too Long; Didn't Read" summary.
+- **Style Direction** (Optional): If the user asks for Anthropic-like, research-lab, measured, evidence-led, or caveat-heavy prose, read `.agents/skills/anthropic-blog-style/SKILL.md` before drafting.
 - **Bibliography** (Optional): Path to a `.bib` file if references are used.
 - **CanonicalUrl** (Optional): Original URL if this is a cross-post.
 
@@ -67,6 +69,8 @@ Follow these strict naming conventions for essential blog assets:
 Place all images in: `public/static/images/blogs/[slug]/`
 
 ### Step 4: Create the MDX File
+
+If the style direction is Anthropic-like, use `.agents/skills/anthropic-blog-style/SKILL.md` before drafting the `summary`, `tldr`, and article body. Keep this skill responsible for file structure, frontmatter, asset paths, and MDX conventions; let `anthropic-blog-style` shape the central question, evidence, caveats, limitations, and next steps.
 
 Create the file `data/blogs/[slug].mdx` with the following frontmatter:
 
@@ -140,4 +144,5 @@ The project supports two ways to handle references:
 
 - Confirm the directory `public/static/images/blogs/[slug]/` exists.
 - Confirm the file `data/blogs/[slug].mdx` exists with the correct frontmatter.
+- For Anthropic-style requests, confirm the draft opens with a central question/tension, includes concrete evidence, states limitations, and ends with implications or next steps.
 - Suggest that the user place `cardImage.png` and `blogHeader.png` in the new assets directory.

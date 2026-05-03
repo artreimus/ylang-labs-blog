@@ -12,6 +12,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
   - `trending-blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
   - `end-to-end-blog-creation` when asked to turn a blog idea or draft into a complete post with generated artwork, blog assets, social copy, and PR publication.
   - `blog-authoring` for creating or structuring new blog posts.
+  - `anthropic-blog-style` when asked to write, rewrite, or critique a blog post in an Anthropic-like style.
   - `blog-image-creator` for preparing `cardImage.png` and `blogHeader.png`.
   - `blog-social-post-generator` when asked for social copy tied to a post or project.
   - `beautiful-oil-painting-image-gen` when asked for oil-painting-style generated artwork.
