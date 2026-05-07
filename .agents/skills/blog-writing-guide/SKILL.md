@@ -1,11 +1,11 @@
 ---
 name: blog-writing-guide
-description: Write, review, and improve blog posts for the Ylang Labs engineering blog following Ylang Labs' specific writing standards, voice, and quality bar. Use this skill whenever someone asks to write a blog post, draft a technical article, review blog content, improve a draft, write a product announcement, create an engineering deep-dive, or produce any written content destined for the Ylang Labs blog or developer audience. Also trigger when the user mentions "blog post," "blog draft," "write-up," "announcement post," "engineering post," "deep dive," "postmortem," or asks for help with technical writing for Ylang Labs. Even if the user just says "help me write about [feature/topic]" — if it sounds like it could become a Ylang Labs blog post, use this skill.
+description: Write, review, and improve blog posts for the Ylang Labs engineering blog following Ylang Labs' specific writing standards, voice, and quality bar. This is the primary/default writing guide for Ylang Labs blog drafting, rewriting, editing, and review. Use this skill whenever someone asks to write a blog post, draft a technical article, review blog content, improve a draft, write a product announcement, create an engineering deep-dive, or produce any written content destined for the Ylang Labs blog or developer audience. Also trigger when the user mentions "blog post," "blog draft," "write-up," "announcement post," "engineering post," "deep dive," "postmortem," or asks for help with technical writing for Ylang Labs. Even if the user just says "help me write about [feature/topic]" — if it sounds like it could become a Ylang Labs blog post, use this skill.
 ---
 
 # Ylang Labs Blog Writing Skill
 
-This skill enforces Ylang Labs' blog writing standards across every post — whether you're helping an engineer write their first blog post or a marketer draft a product announcement.
+This is the primary Ylang Labs blog writing skill. It enforces Ylang Labs' blog writing standards across every post — whether you're helping an engineer write their first blog post or a marketer draft a product announcement.
 
 **The bar:** Every Ylang Labs blog post should be something a senior engineer would share in their team's Slack, or reference in a technical decision.
 

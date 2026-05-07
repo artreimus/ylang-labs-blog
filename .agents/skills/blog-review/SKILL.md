@@ -1,6 +1,6 @@
 ---
 name: blog-review
-description: 'Review, critique, fact-check, and validate Ylang Labs blog drafts or published posts. Use this skill when the user asks to review a blog, check factual accuracy, assess MDX/frontmatter/assets/citations, find unsupported claims, or provide editorial feedback before publishing. Pair with `anthropic-blog-style` when the requested review includes Anthropic-like tone, evidence-led prose, caveats, or research-lab style.'
+description: 'Review, critique, fact-check, and validate Ylang Labs blog drafts or published posts. Use this skill when the user asks to review a blog, check factual accuracy, assess MDX/frontmatter/assets/citations, find unsupported claims, or provide editorial feedback before publishing. Use `blog-writing-guide` as the primary editorial rubric for Ylang Labs blog prose.'
 ---
 
 # Blog Review
@@ -25,7 +25,7 @@ Derive these from the request and repo when possible:
 
 - Blog target: `data/blogs/<slug>.mdx`, a draft file, a PR diff, a rendered URL, or pasted content.
 - Review mode: factual accuracy, editorial quality, technical correctness, repo/MDX compliance, citation audit, publication readiness, or all of the above.
-- Intended audience and style direction. If the user asks for Anthropic-like, measured, evidence-led, caveat-heavy, or research-lab prose, read `.agents/skills/anthropic-blog-style/SKILL.md`.
+- Intended audience and style direction. Use `.agents/skills/blog-writing-guide/SKILL.md` as the primary editorial rubric.
 - Whether the user wants a read-only review or wants fixes applied after the review.
 
 Ask one concise question only if there is no review target and no reasonable way to infer it.
@@ -43,7 +43,7 @@ Always inspect:
 Load related skills only when relevant:
 
 - `.agents/skills/blog-authoring/SKILL.md` for frontmatter, citations, asset paths, MDX component conventions, and publishing contracts.
-- `.agents/skills/anthropic-blog-style/SKILL.md` for prose and evidence-style review.
+- `.agents/skills/blog-writing-guide/SKILL.md` for the primary Ylang Labs prose, structure, title, and editorial quality bar.
 - `.agents/skills/blog-image-creator/SKILL.md` when reviewing cover/header assets or dimensions.
 - `.agents/skills/trending-blog-topic-research/SKILL.md` when reviewing claims based on current technical discourse.
 
@@ -99,6 +99,8 @@ When a source is weak, prefer a concrete rewrite such as "replace `proves` with 
 
 Assess whether the post works for Ylang Labs' audience: practical AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, and implementation lessons.
 
+Apply `.agents/skills/blog-writing-guide/SKILL.md` as the primary editorial rubric.
+
 Check for:
 
 - A clear thesis or technical question.
@@ -110,8 +112,6 @@ Check for:
 - No hype language without evidence.
 - No unnecessary marketing prose, vague superlatives, or buzzword stacking.
 - A conclusion that explains implications, next steps, or practical use.
-
-For Anthropic-like style reviews, apply `.agents/skills/anthropic-blog-style/SKILL.md` as the rubric, but still keep factual accuracy above style.
 
 ### 5. Check Citations And References
 
@@ -185,6 +185,7 @@ Before finalizing a review, confirm:
 - The target blog was identified and read.
 - Relevant repo instructions and local skills were checked.
 - Factual claims were separated from editorial judgments.
+- `blog-writing-guide` was used as the primary editorial rubric.
 - High-risk claims were verified against primary or current sources.
 - Unsupported claims were explicitly marked instead of silently accepted.
 - Recommended rewrites are more accurate than the original.
