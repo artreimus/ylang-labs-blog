@@ -46,6 +46,8 @@ Before editing, inspect the source image with `view_image` or another visual ins
 
 For Ylang Labs blog art, the preferred house style remains a beautiful painting-like background with a central conceptual illustration or diagram. When the provided image already has that structure, preserve it. When it does not, still crop it cleanly; do not invent new artwork unless the user asks for generation.
 
+If no source artwork has been provided yet, generate or prompt the source artwork through `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md` before creating `cardImage.png` and `blogHeader.png`. The card and header should come from that oil-painting source artwork unless the user explicitly asks for a different style or supplies an image that must be used.
+
 ## Crop Strategy
 
 ### `cardImage.png` crop
