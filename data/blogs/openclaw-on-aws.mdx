@@ -1,0 +1,379 @@
+---
+title: 'OpenClaw on AWS: EC2, ECS, EKS, AgentCore, and the Tradeoffs That Matter'
+date: '2026-05-08'
+tags: ['AI/ML', 'Agents', 'Cloud']
+draft: false
+summary: 'A practical decision guide for running OpenClaw on AWS, from one private EC2 host to ECS, EKS, Kata isolation, AgentCore, Batch, Lambda, and Bedrock.'
+tldr: |
+  - OpenClaw is a stateful Gateway plus workspace, sessions, skills, scheduled jobs, and provider credentials. Storage and lifecycle design matter as much as compute.
+  - EC2 with EBS, SSM, and Bedrock IAM is the fastest honest AWS deployment. Docker, ECR, and CodeBuild make that path repeatable.
+  - ECS Fargate can run small stable fleets, but persistence, sandbox behavior, and replacement semantics need deliberate design.
+  - EKS is the production shape for SaaS: one runtime boundary per user or workspace, private routing, DynamoDB binding state, S3 snapshots, Pod Identity, NetworkPolicy, and warm pools.
+  - AgentCore, Lambda, Batch, EventBridge, and App Runner are useful around OpenClaw. They are not proven drop-in replacements for the OpenClaw Gateway.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/openclaw-on-aws/cardImage.png'
+images: ['/static/images/blogs/openclaw-on-aws/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Running OpenClaw on AWS is not about finding the cheapest place to put a Node process.
+
+It is about deciding how much of a stateful agent runtime you want AWS to own. OpenClaw is a long-running Gateway, a workspace, a session store, a skills system, a scheduler, a model-provider client, and a tool-execution surface. Treat it like a stateless web app and the design will lie to you.
+
+<Image
+  alt="An abstract OpenClaw on AWS runtime gateway with private routing, persistent state, and model-provider connections"
+  src="/static/images/blogs/openclaw-on-aws/source-artwork.png"
+  width={1800}
+  height={1800}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The hard part is not booting a container. It is deciding which runtime state survives, who can
+  reach the Gateway, and how each user boundary is enforced.
+</DiagramSubtitle>
+
+The useful answer is not one deployment. It is a decision tree.
+
+If you want your own OpenClaw in AWS this weekend, use EC2. If you want a repeatable internal lane, use EC2 with Docker, ECR, CodeBuild, EBS, Secrets Manager, and Systems Manager. If you want a small managed container fleet, consider ECS. If you want to sell a product where every customer gets a dedicated OpenClaw runtime, start thinking in EKS terms.
+
+AgentCore, Lambda, Batch, EventBridge, and App Runner all matter too, but mostly as surrounding pieces. They are not the default place to put the full Gateway.
+
+## What OpenClaw is, in AWS deployment terms
+
+OpenClaw's Gateway is the center of the system. The official Gateway docs describe a long-running process that owns routing, control APIs, OpenAI-compatible endpoints, channels, sessions, and the Control UI on the Gateway port. The default port is `18789`, and the safe default is loopback binding with authentication.
+
+The agent runtime also expects a workspace. It loads prompt files, skills, session history, generated files, and local state. The Docker docs persist `/home/node/.openclaw` and the workspace through mounted directories. The Kubernetes docs show the same idea in cluster form: a Deployment, a Service, a PVC, a ConfigMap, and Secrets.
+
+So before choosing AWS compute, answer six questions:
+
+1. Where does the always-on Gateway run?
+2. Where do `~/.openclaw`, workspace files, session JSONL, cron run logs, and plugin dependency state persist?
+3. How does the runtime authenticate to model providers, especially Bedrock?
+4. Who can reach the Gateway port?
+5. How are tool execution and sandbox boundaries enforced?
+6. How are user runtimes created, warmed, suspended, restored, and deleted?
+
+Those questions explain why the right answer changes by scenario.
+
+## Use AWS with OpenClaw, or host OpenClaw on AWS
+
+The lowest-risk AWS option is not hosting OpenClaw on AWS at all.
+
+Run OpenClaw locally, on a workstation, homelab, or existing VPS, and configure the `amazon-bedrock` provider. OpenClaw's Bedrock provider uses the AWS SDK credential chain. Locally that can be `AWS_PROFILE`, SSO, or shared config. On AWS it becomes an instance role, task role, pod identity, Lambda role, or AgentCore role.
+
+That path is a good fit when:
+
+- The assistant is personal.
+- Local files, desktop automation, or user-owned devices matter.
+- You mainly want Bedrock models or embeddings.
+- You do not need AWS to manage Gateway uptime.
+
+It is the wrong fit when a browser or mobile client needs backend-owned access, when multiple users need isolated runtimes, or when uptime and operational controls belong to a product team.
+
+Use this language carefully: this is AWS-powered OpenClaw, not OpenClaw hosted in AWS.
+
+## The fastest honest deployment is EC2
+
+The simplest real AWS deployment is one EC2 instance, one OpenClaw Gateway, and one persistent volume.
+
+Recommended shape:
+
+- EC2 instance in a private subnet.
+- EBS gp3 volume mounted for OpenClaw state, workspace, generated config, and plugin dependencies.
+- IAM instance profile for Bedrock, S3, CloudWatch, Secrets Manager, and SSM as needed.
+- No inbound SSH.
+- No public `18789`.
+- Systems Manager Session Manager for operator shell access and port forwarding.
+- Gateway token in Secrets Manager or OpenClaw SecretRefs.
+- Logs shipped to CloudWatch or an OpenTelemetry collector.
+
+This is the path I would use for a personal assistant, a staging runtime, or a single internal operator host.
+
+Use a native systemd install when you want the closest match to a personal server. Use Docker when you want image promotion, faster rollback by tag, and a cleaner way to package plugin dependencies.
+
+<Callout type="warning" title="Do not expose the Gateway casually">
+  Keep the Gateway private by default. If a browser can reach OpenClaw directly, the browser now
+  holds a runtime token and a route into the agent execution surface. A backend-owned private path
+  is a much better default.
+</Callout>
+
+For an EC2 lane, the proof should be Gateway-first:
+
+- Verify the host service is alive.
+- Open a fresh SSM port forward.
+- Run an authenticated Gateway health check.
+- Confirm model auth through Bedrock.
+- Confirm state survives restart.
+- Confirm the workspace, skills, and scheduled-job state are still present.
+
+If a Gateway cannot survive a restart, it is not deployed. It is just running.
+
+## The repeatable single-runtime path is EC2 Docker
+
+EC2 becomes much more useful when the box stops being hand-managed.
+
+A clean single-runtime lane looks like this:
+
+<MermaidDiagram>
+  {`
+    flowchart LR
+      A["CodeBuild<br/>build runtime image"] --> B["ECR<br/>versioned image"]
+      B --> C["Private EC2 host<br/>systemd pulls image"]
+      D["Secrets Manager<br/>Gateway token and env"] --> C
+      E["EBS volume<br/>state and workspace"] --> C
+      F["SSM Session Manager<br/>operator access and port forward"] --> C
+      C --> G["OpenClaw Gateway<br/>private 18789"]
+      G --> H["Amazon Bedrock<br/>via instance role"]
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  The EC2 Docker lane keeps compute, image promotion, secrets, operator access, and state in
+  separate boxes. That separation is the whole point.
+</DiagramSubtitle>
+
+The deployment path is boring in the best way:
+
+1. Build a runtime image in CodeBuild.
+2. Push it to ECR.
+3. Store runtime secrets in Secrets Manager.
+4. Bootstrap EC2 through SSM.
+5. Run a systemd service that pulls the selected image and starts the container.
+6. Mount EBS for state, workspace, generated config, plugin deps, and any host-level swap.
+7. Verify through SSM port forwarding with `openclaw gateway health`.
+
+This teaches the right lessons without making you build a SaaS control plane on day one. It also prevents the common failure mode where "production" means a human edited a server until it worked.
+
+The constraint is obvious: it is still one runtime. Treat it as single-tenant, staging, internal, or personal.
+
+## ECS is a reasonable middle, not a magic multi-tenant layer
+
+ECS Fargate can run a long-lived OpenClaw container without managing EC2 nodes. You get task roles, service deployments, CloudWatch integration, capacity providers, and managed replacement behavior.
+
+That sounds perfect until persistence enters the room.
+
+Fargate tasks have configurable ephemeral storage, but ephemeral storage is not durable. ECS can use EFS for shared file storage, and ECS also supports task-attached EBS volumes in specific shapes. The EBS caveat is important: ECS service-managed task volumes are deleted when the task terminates, so treat them as replaceable task storage unless you have an explicit snapshot or restore design. If the service replaces a task and the runtime state disappears, users will experience that as memory loss, broken sessions, or lost skill state.
+
+Use ECS Fargate when:
+
+- You need one or a few stable OpenClaw Gateways.
+- You can put state on EFS, EBS, S3-backed restore, or another deliberate persistence layer.
+- You want task IAM roles for Bedrock and AWS APIs.
+- You do not need the task to manage sibling Docker containers.
+
+Be careful when:
+
+- OpenClaw uses file patterns that do not behave well on EFS.
+- Tool sandboxing depends on host Docker behavior.
+- You need per-user wake and sleep semantics.
+- You want hundreds or thousands of dedicated runtimes.
+
+ECS on EC2 or ECS Managed Instances sits between Fargate and Kubernetes. Use it when your team wants ECS scheduling but needs host-level control over disks, custom AMIs, privileged operations, sidecars, or Docker behavior.
+
+Once you start building endpoint caches, wake locks, user-to-runtime mapping, state snapshots, and tenant-aware routing around ECS, you are already building a runtime plane. At that point, EKS usually models the problem more directly.
+
+## EKS is where OpenClaw becomes a SaaS runtime plane
+
+A SaaS product should not share one OpenClaw Gateway across unrelated users. OpenClaw is personal and stateful by design, so the product architecture should create a runtime boundary per user or workspace.
+
+The AWS sample for multi-tenancy OpenClaw on EKS is useful because it treats OpenClaw as a fleet of tenant runtimes, not as one shared service. The sample uses a router, orchestrator, Redis, DynamoDB, S3, Karpenter, EKS Pod Identity, NetworkPolicy, optional warm pools, and optional Kata Containers.
+
+The production version should still keep the app backend as the trust boundary:
+
+<MermaidDiagram>
+  {`
+    flowchart TD
+      Browser["Browser or mobile client"] --> API["Product backend<br/>auth, policy, billing, user state"]
+      API --> NLB["Internal OpenClaw load balancer"]
+      NLB --> Control["OpenClaw runtime control plane"]
+      Control --> DDB["DynamoDB<br/>bindings, pins, runtime status"]
+      Control --> S3["S3<br/>workspace snapshots and live state"]
+      Control --> Cache["Redis or ElastiCache<br/>wake locks and endpoint cache"]
+      Control --> Pod["Per-user OpenClaw pod"]
+      Pod --> S3
+      Pod --> Bedrock["Amazon Bedrock<br/>Pod Identity"]
+      Pod --> APIs["Allowed external APIs"]
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  In a SaaS shape, the browser talks to the product backend. The backend owns trust and policy, then
+  reaches the OpenClaw runtime plane privately.
+</DiagramSubtitle>
+
+The runtime contract should be explicit:
+
+- One logical binding per user or workspace.
+- A stable binding key, for example `ws-<workspace_id>-u-<user_id>`.
+- A control plane that wakes a runtime pod on request.
+- A private proxy path from backend to current pod.
+- S3 restore before startup.
+- S3 sync on suspend, shutdown, or checkpoint.
+- DynamoDB state for binding, pin, endpoint, and lifecycle records.
+- Redis or ElastiCache for wake locks and endpoint cache.
+- Pod Identity for Bedrock and S3 access.
+- NetworkPolicy to prevent cross-tenant traffic.
+- Warm pools if cold-start latency matters.
+
+Start with normal `runc` pods. Pod isolation, IAM scoping, NetworkPolicy, backend policy, and S3 prefix isolation are already meaningful milestones.
+
+The AWS sample's March 2026 cold-start analysis gives useful numbers from its tested path: `runc` warm start was roughly 54 seconds, while `runc` cold start was roughly 2 minutes and 14 seconds. Kata warm start was roughly 43 seconds, while Kata cold start was roughly 5 minutes. Do not copy those numbers as guarantees for your cluster. Use them to size the problem.
+
+## Kata Containers are for isolation requirements you can name
+
+Kata Containers gives each runtime pod a lightweight VM boundary. That is attractive for agent workloads because tool execution is exactly where tenant isolation stops being theoretical.
+
+Use Kata when:
+
+- Tenants are mutually untrusted.
+- Agents can execute risky tools.
+- Compliance demands stronger isolation than a shared Linux kernel.
+- You can afford bare-metal node cost and more cluster complexity.
+
+The AWS sample uses Kata on bare-metal EC2 nodes because Kata needs hardware virtualization support. It also documents the surrounding operational work: Karpenter labels and taints, containerd behavior, image architecture, network egress, and startup effects.
+
+This is a strong second phase. It is not the first milestone for most teams.
+
+## AgentCore is relevant, but not a drop-in Gateway host
+
+Amazon Bedrock AgentCore Runtime is the AWS-managed agent runtime that belongs in this conversation. AWS positions it as framework agnostic and able to host real-time and long-running agent workloads. Sessions run in isolated microVMs, can stream, and can keep session context across invocations. AWS also announced managed session storage in public preview, with 1 GB per session and 14-day idle retention.
+
+That is relevant to OpenClaw, but the boundary matters.
+
+AgentCore might be a good fit for:
+
+- A custom agent or tool that mirrors part of an OpenClaw workflow.
+- Deterministic tools that benefit from managed isolation.
+- A comparison target against a do-it-yourself EKS runtime plane.
+- New agent code that can adopt AgentCore's lifecycle directly.
+
+AgentCore is not currently documented as a drop-in host for OpenClaw's Gateway, channel lifecycle, Control UI, WebSocket behavior, OpenAI-compatible endpoints, skills, cron, and workspace model.
+
+So include AgentCore in the architecture discussion. Do not pretend it makes the OpenClaw deployment problem disappear.
+
+## Lambda, Batch, EventBridge, and App Runner belong around the runtime
+
+AWS Lambda is useful around OpenClaw, not usually under it. Lambda's standard timeout is 900 seconds. Container-image Lambdas still use Lambda's runtime API, run on a read-only filesystem, write only to `/tmp`, and are Linux-only. That is a poor fit for the always-on Gateway.
+
+Good Lambda jobs:
+
+- Normalize and verify webhooks before forwarding them to the product backend.
+- Mint short-lived runtime tokens.
+- Trigger wake calls.
+- Run small deterministic tools.
+- Fan out work to SQS, Step Functions, ECS tasks, or Batch.
+
+Bad Lambda jobs:
+
+- Host the OpenClaw Gateway.
+- Store workspace state in `/tmp`.
+- Run arbitrary long agent loops.
+- Own paired chat channels that expect persistent sockets.
+
+EventBridge Scheduler belongs in the same surrounding layer. Use it when AWS should wake an AWS API target, backend endpoint, Step Function, ECS task, or Batch job. Use OpenClaw cron when the schedule is part of the runtime's own agent state.
+
+AWS Batch is the right tool for offline and headless workloads: high-throughput research, document processing, report generation, or queued jobs that read from S3 and write outputs back to S3 or a database. It is not the live chat Gateway.
+
+App Runner is tempting because it is easy to run a container behind a managed web service. Use it for a constrained demo where all state is externalized. Avoid it for serious OpenClaw hosting unless you have proven the Gateway lifecycle, filesystem persistence, network posture, and private access model.
+
+EC2 Mac is the niche option for macOS-only surfaces, such as iMessage or Apple-specific automation. It uses Dedicated Hosts and has a 24-hour minimum allocation period. Most OpenClaw-on-AWS deployments do not need it. The ones that do usually know exactly why.
+
+## Deployment decision table
+
+| Option                      | Best for                                                  | Persistence                         | Isolation                         | Verdict                                                   |
+| --------------------------- | --------------------------------------------------------- | ----------------------------------- | --------------------------------- | --------------------------------------------------------- |
+| Local OpenClaw with Bedrock | Developers who want AWS models without moving the runtime | Local disk                          | Local machine                     | Use when AWS is the model provider, not the host.         |
+| Single EC2                  | Personal assistant, staging, internal operator host       | EBS                                 | One host                          | Best simple AWS path.                                     |
+| EC2 Docker                  | Repeatable single-runtime lane                            | EBS plus image promotion            | One host and one container        | Best tutorial and MVP path.                               |
+| ECS Fargate                 | Small stable Gateway fleets                               | EFS, EBS, or external state         | Task boundary                     | Good if state and sandbox limits are handled.             |
+| ECS on EC2                  | ECS scheduling with host control                          | EBS or EFS                          | Task plus host                    | Useful before Kubernetes if host behavior matters.        |
+| Simple EKS                  | One internal Gateway in Kubernetes                        | PVC, EFS, or EBS                    | Pod boundary                      | Good cluster baseline, not SaaS by itself.                |
+| EKS with `runc`             | SaaS dedicated runtimes                                   | S3 snapshots plus pod volume        | Pod, IAM, network, backend policy | Best production direction for many users.                 |
+| EKS with Kata               | Higher-assurance tenant isolation                         | S3 snapshots                        | VM-level pod boundary             | Powerful, expensive, operationally heavier.               |
+| App Runner                  | Container boot demo                                       | Externalized state                  | Service instance                  | Good demo path, poor default runtime plane.               |
+| AgentCore Runtime           | Managed agent runtime experiments                         | AgentCore session storage or memory | Isolated sessions                 | Adjacent managed option, not proven Gateway host.         |
+| Batch                       | Offline agent jobs                                        | S3, EFS, database                   | Job container                     | Companion for background work.                            |
+| Lambda and EventBridge      | Triggers, glue, token minting, wake calls                 | `/tmp`, S3, DynamoDB                | Invocation environment            | Surround OpenClaw with it, do not host the Gateway in it. |
+| EC2 Mac                     | macOS-only channels or Apple automation                   | EBS                                 | Dedicated host                    | Niche and expensive.                                      |
+
+## The architecture I would ship first
+
+For a personal or internal OpenClaw runtime, ship the EC2 Docker lane:
+
+- Private EC2 host.
+- EBS for state and workspace.
+- ECR for runtime images.
+- CodeBuild for builds.
+- Secrets Manager for runtime secrets.
+- SSM for shell access and port forwarding.
+- Instance role for Bedrock.
+- CloudWatch or OTLP for logs and traces.
+- Gateway health checks through a private tunnel.
+
+For a SaaS product, ship an EKS runtime plane:
+
+- Product backend owns auth, billing, policy, and user state.
+- Runtime control plane owns wake, suspend, endpoint cache, and pod lifecycle.
+- DynamoDB stores binding and runtime status.
+- S3 stores live runtime state and snapshots.
+- Redis or ElastiCache handles wake locks and endpoint cache.
+- Each user or workspace gets its own runtime boundary.
+- Pod Identity scopes Bedrock and S3 access.
+- NetworkPolicy and private load balancers keep runtime traffic internal.
+- Warm pools reduce first-message latency.
+
+Move to Kata only after you can explain the isolation requirement in one sentence and can afford the operational cost.
+
+## FAQ
+
+### Can OpenClaw run on AWS Lambda?
+
+Not as the full Gateway. Lambda is too short-lived and too constrained for an always-on Gateway, workspace, scheduled jobs, channel sockets, and local session state. Use Lambda for webhooks, token minting, wake triggers, and small deterministic tools.
+
+### Should I use ECS or EKS for OpenClaw?
+
+Use ECS when you have a small number of stable runtimes and want managed container operations. Use EKS when you need a runtime plane: per-user pods, wake and suspend behavior, private routing, NetworkPolicy, Pod Identity, warm pools, and lifecycle controllers.
+
+### How do I use Amazon Bedrock with OpenClaw?
+
+Use OpenClaw's `amazon-bedrock` provider. It uses the AWS SDK credential chain, so the right credential source depends on the host: local profile, EC2 instance role, ECS task role, EKS Pod Identity or IRSA, Lambda role, or AgentCore role.
+
+### Can one OpenClaw Gateway serve multiple customers?
+
+You can build a shared internal runtime, but it is the wrong default for a SaaS product. OpenClaw's workspace, sessions, skills, schedules, and tool state are personal. For customer-facing products, use one runtime boundary per user or workspace.
+
+### Do I need Kata Containers?
+
+Not on day one for most systems. Start with normal pods, least-privilege IAM, NetworkPolicy, private routing, backend policy, and state isolation. Add Kata when tenant isolation or compliance requirements justify the extra cost and operational complexity.
+
+### Should I use Bedrock AgentCore instead of OpenClaw?
+
+Evaluate it for managed agent hosting and isolated tool execution. Do not treat it as an OpenClaw Gateway host until you have proven Gateway lifecycle, WebSocket behavior, skills, cron, Control UI, and workspace compatibility inside AgentCore.
+
+## References
+
+1. OpenClaw, [Gateway runbook](https://docs.openclaw.ai/gateway/).
+2. OpenClaw, [Docker install guide](https://docs.openclaw.ai/install/docker.md).
+3. OpenClaw, [Kubernetes install guide](https://docs.openclaw.ai/install/kubernetes.md).
+4. OpenClaw, [Amazon Bedrock provider](https://docs.openclaw.ai/providers/bedrock.md).
+5. AWS Samples, [Multi-tenancy OpenClaw on EKS](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks).
+6. AWS Samples, [OpenClaw on EKS architecture](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/architecture.md).
+7. AWS Samples, [OpenClaw cold-start analysis](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/cold-start-analysis.md).
+8. AWS, [Host agents and tools with Amazon Bedrock AgentCore Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agents-tools-runtime.html).
+9. AWS, [Use isolated sessions for agents](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-sessions.html).
+10. AWS, [Amazon ECS launch types and capacity providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html).
+11. AWS, [Fargate task ephemeral storage for Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html).
+12. AWS, [Use Amazon EFS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html).
+13. AWS, [Use Amazon EBS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html).
+14. AWS, [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html).
+15. AWS, [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html).
+16. AWS, [AgentCore Runtime session storage public preview announcement](https://aws.amazon.com/about-aws/whats-new/2026/03/bedrock-agentcore-runtime-session-storage/).
+17. AWS, [Configure Lambda function timeout](https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html).
+18. AWS, [Configure Lambda function ephemeral storage](https://docs.aws.amazon.com/lambda/latest/dg/configuration-ephemeral-storage.html).
+19. AWS, [Create a Lambda function using a container image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html).
+20. AWS, [App Runner architecture and concepts](https://docs.aws.amazon.com/apprunner/latest/dg/architecture.html).
+21. AWS, [What is AWS Batch?](https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html).
+22. AWS, [Amazon EventBridge Scheduler](https://docs.aws.amazon.com/eventbridge/latest/userguide/using-eventbridge-scheduler.html).
+23. AWS, [Amazon EC2 Mac instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html).
