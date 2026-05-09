@@ -20,7 +20,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 - Research before planning. Inspect the current files, schemas, layouts, and local docs before writing a plan or changing code.
 - For autonomous trend/topic research, use Codex's available Exa MCP search tool when present. Do not add repo-level Exa SDK dependencies or `EXA_API_KEY` wiring unless the user asks for a standalone scheduled script outside Codex.
 - When a library detail is unclear, use Context7 for current docs. If Context7 is insufficient, use web search and cite external sources in the final answer.
-- Never create a git commit unless explicitly asked. If asked to commit, include only task-related files and exclude temporary plans, scratch files, generated support notes, and unrelated dirty files.
+- Never create a git commit unless explicitly asked. If asked to commit, include only task-related files and exclude temporary plans, scratch files, generated support notes, local-only `refs/` materials, and unrelated dirty files.
 - Preserve unrelated work. This repo may have generated or user-owned changes in the worktree; do not revert or stage them unless the user asks.
 
 ## Commands
@@ -256,5 +256,6 @@ Always state which validation ran and any validation that could not be run.
 - Do not commit unless explicitly asked.
 - Do not revert user changes.
 - Check `git status --short` before editing and before finalizing.
-- Keep generated files, plans, local notes, and temporary outputs out of commits unless explicitly requested.
+- When making changes and committing them to a PR, do not leave the local worktree dirty from your task. Before finalizing, confirm `git status --short` is clean or contains only unrelated pre-existing changes that were intentionally left untouched.
+- Keep generated files, plans, local notes, temporary outputs, and `refs/` local research materials out of commits unless explicitly requested.
 - If unrelated files are already dirty, mention that they were left untouched.
