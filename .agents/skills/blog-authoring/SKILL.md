@@ -1,6 +1,6 @@
 ---
 name: blog-authoring
-description: "Use this skill when the user wants to create a new blog post, start a new article, or write a blog. This skill automates the setup of the MDX file, frontmatter, and asset directories for the ylang-labs-blog project. If the post comes from or should create a GitHub content-calendar issue, use `github-content-calendar` to preserve content type, tags, target date, end date, slug, and description metadata. If the user asks for Anthropic-like, research-lab, measured, evidence-led, or caveat-heavy prose, combine this skill with `anthropic-blog-style`."
+description: 'Use this skill when the user wants to create a new blog post, start a new article, or write a blog. This skill automates the setup of the MDX file, frontmatter, and asset directories for the ylang-labs-blog project. Use `blog-writing-guide` as the primary Ylang Labs prose and editorial standard for every blog draft. If the post comes from or should create a GitHub content-calendar issue, use `github-content-calendar` to preserve content type, tags, target date, end date, slug, and description metadata.'
 ---
 
 # Blog Authoring Skill
@@ -11,9 +11,10 @@ This skill guides you through creating a new blog post for the `ylang-labs-blog`
 
 - Blog posts are stored in `data/blogs/*.mdx`.
 - Static assets (images) are stored in `public/static/images/blogs/[slug]/`.
+- Blog research and source provenance are stored in `refs/[topic]/`, usually with `[topic]` matching the final blog slug.
 - Authors are defined in `data/authors/*.mdx`.
 - Calendar-tracked posts are represented by GitHub issues and Project items through `.agents/skills/github-content-calendar/SKILL.md`.
-- Anthropic-style prose requests are handled through `.agents/skills/anthropic-blog-style/SKILL.md`; use it as a writing overlay, not as a replacement for this repo setup workflow.
+- Primary prose and editorial standards are handled through `.agents/skills/blog-writing-guide/SKILL.md`.
 
 ## 2. Information Gathering
 
@@ -26,7 +27,8 @@ Before creating the post, ensure you have the following information:
 - **Calendar Metadata** (Optional): GitHub issue URL/number, content type, canonical tag keys from `app/blog-tag-data.json`, target date, end date, slug, priority, and description.
 - **Summary**: A short description for the blog list view.
 - **TLDR**: A "Too Long; Didn't Read" summary.
-- **Style Direction** (Optional): If the user asks for Anthropic-like, research-lab, measured, evidence-led, or caveat-heavy prose, read `.agents/skills/anthropic-blog-style/SKILL.md` before drafting.
+- **Style Direction**: Read `.agents/skills/blog-writing-guide/SKILL.md` before drafting or revising Ylang Labs blog prose.
+- **Reference Topic**: A kebab-case folder name under `refs/`. Default to the final blog slug; use a working topic slug while researching if the title is not final.
 - **Bibliography** (Optional): Path to a `.bib` file if references are used.
 - **CanonicalUrl** (Optional): Original URL if this is a cross-post.
 
@@ -53,12 +55,22 @@ If the user references a GitHub issue, Project item, target date, end date, or c
 
 Convert the title to a kebab-case slug (e.g., "My New Blog" -> "my-new-blog").
 
-### Step 2: Create Asset Directory
+### Step 2: Create Reference Directory
+
+Create a source/reference packet for the blog topic when the post relies on external sources, current research, vendor docs, papers, datasets, social trend evidence, or user-provided background material:
+
+```text
+refs/[slug]/README.md
+```
+
+Use `refs/[working-topic]/README.md` while researching if the final title is unknown, then rename it or clearly cross-reference it once the final slug is chosen. The README should list each source with title, URL or local path, publisher/author when known, publication date when known, access date for web sources, and a short note on how the source supports the article. Keep extracted notes, short quotes, screenshots, PDFs, prompt transcripts, and datasets under the same `refs/[slug]/` folder when they are needed to reproduce the article's claims.
+
+### Step 3: Create Asset Directory
 
 Create a directory for the blog's images:
 `mkdir -p public/static/images/blogs/[slug]/`
 
-### Step 3: Static Assets and Naming Conventions
+### Step 4: Static Assets and Naming Conventions
 
 Follow these strict naming conventions for essential blog assets:
 
@@ -68,9 +80,19 @@ Follow these strict naming conventions for essential blog assets:
 
 Place all images in: `public/static/images/blogs/[slug]/`
 
-### Step 4: Create the MDX File
+For Ylang Labs blog posts, the cover/card image and blog header should be derived from source artwork generated or prompted through `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md`, unless the user explicitly provides a different source image or asks for a non-painterly visual direction.
 
-If the style direction is Anthropic-like, use `.agents/skills/anthropic-blog-style/SKILL.md` before drafting the `summary`, `tldr`, and article body. Keep this skill responsible for file structure, frontmatter, asset paths, and MDX conventions; let `anthropic-blog-style` shape the central question, evidence, caveats, limitations, and next steps.
+Recommended sequence:
+
+1. Use `beautiful-oil-painting-image-gen` to create a refined museum-quality oil-painting prompt that expresses the article's central technical metaphor.
+2. Save the generated source artwork as `public/static/images/blogs/[slug]/source-artwork.png`.
+3. Use `blog-image-creator` to crop that source artwork into:
+   - `public/static/images/blogs/[slug]/cardImage.png` exactly `1080x1920`
+   - `public/static/images/blogs/[slug]/blogHeader.png` exactly `1260x700`
+
+### Step 5: Create the MDX File
+
+Use `.agents/skills/blog-writing-guide/SKILL.md` before drafting the `summary`, `tldr`, and article body. Keep this skill responsible for file structure, frontmatter, asset paths, and MDX conventions; let `blog-writing-guide` shape the opening, reader-question structure, technical depth, section headings, banned-language cleanup, and editorial review pass.
 
 Create the file `data/blogs/[slug].mdx` with the following frontmatter:
 
@@ -97,7 +119,7 @@ layout: 'PostBanner'
 [Use custom components like <Image />, <Callout />, etc.]
 ```
 
-### Step 5: Component Usage Guide
+### Step 6: Component Usage Guide
 
 Recommend these components within the blog content:
 
@@ -117,12 +139,13 @@ Recommend these components within the blog content:
   </MermaidDiagram>
   ```
 
-### Step 6: References and Citations
+### Step 7: References and Citations
 
-The project supports two ways to handle references:
+The project uses `refs/[slug]/` as the source-of-truth workspace for research provenance. Keep source notes there first, then choose one of two rendered citation styles for the MDX post:
 
 1. **BibTeX (Preferred for Formal Citations)**:
 
+   - Keep source notes and retrieval details in `refs/[slug]/README.md`.
    - Add your citations to `data/references-data.bib`.
    - In the frontmatter, add `bibliography: references-data.bib`.
    - In the text, use `[@citationKey]` (e.g., `[@Nash1950]`).
@@ -130,6 +153,7 @@ The project supports two ways to handle references:
 
 2. **Manual References (Standard Markdown)**:
 
+   - Build the list from the source log in `refs/[slug]/README.md`.
    - Create a `## References` section at the end of the file.
    - Use a numbered list with links:
 
@@ -140,9 +164,11 @@ The project supports two ways to handle references:
      2. Author, _Title_, Publisher, Year. [Link](URL)
      ```
 
-## 4. Verification
+## 5. Verification
 
 - Confirm the directory `public/static/images/blogs/[slug]/` exists.
+- Confirm `refs/[slug]/README.md` exists when the post relies on external sources or research.
 - Confirm the file `data/blogs/[slug].mdx` exists with the correct frontmatter.
-- For Anthropic-style requests, confirm the draft opens with a central question/tension, includes concrete evidence, states limitations, and ends with implications or next steps.
+- Confirm rendered citations in `data/references-data.bib` or the MDX `## References` section line up with the source log in `refs/[slug]/README.md`.
+- Confirm the draft passes `blog-writing-guide`: it opens with the problem or conclusion, has specific headings, includes concrete technical detail, explains tradeoffs or limitations where relevant, avoids banned language, and ends with a useful next step.
 - Suggest that the user place `cardImage.png` and `blogHeader.png` in the new assets directory.

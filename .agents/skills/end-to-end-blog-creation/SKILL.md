@@ -1,6 +1,6 @@
 ---
 name: end-to-end-blog-creation
-description: "Orchestrate complete Ylang Labs blog creation from a user-provided blog idea or draft through generated oil-painting artwork, MDX post setup, cropped card/header images, LinkedIn/social copy, validation, draft PR publication, and optional GitHub content-calendar tracking. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want artwork, blog assets, social posts, scheduling, GitHub issues/projects, a PR, or a specific editorial style such as Anthropic-like prose handled together."
+description: 'Orchestrate complete Ylang Labs blog creation from a user-provided blog idea or draft through primary Ylang Labs blog writing guidance, generated oil-painting artwork, MDX post setup, cropped card/header images, LinkedIn/social copy, validation, draft PR publication, and optional GitHub content-calendar tracking. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want writing guidance, artwork, blog assets, social posts, scheduling, GitHub issues/projects, or a PR handled together.'
 ---
 
 # End-to-End Blog Creation
@@ -17,15 +17,15 @@ Read and apply these skills in this order:
 2. `github-content-calendar` when the user provides a calendar issue, asks to schedule/track the post, or wants the work represented in GitHub Issues/Projects.
    - Path: `.agents/skills/github-content-calendar/SKILL.md`
    - Purpose: create or update the content-calendar issue and Project item with content type, tags, target date, end date, slug, stage, and description.
-3. `anthropic-blog-style` when the user asks for Anthropic-like, research-lab, measured, evidence-led, or caveat-heavy prose.
-   - Path: `.agents/skills/anthropic-blog-style/SKILL.md`
-   - Purpose: shape the blog's central question, evidence, caveats, limitations, and next steps before the MDX draft is finalized.
-4. `beautiful-oil-painting-image-gen`
-   - Path: `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md`
-   - Purpose: generate the source artwork or a refined generation prompt for the blog hero image.
-5. `blog-authoring`
+3. `blog-writing-guide`
+   - Path: `.agents/skills/blog-writing-guide/SKILL.md`
+   - Purpose: apply the primary Ylang Labs blog voice, structure, technical quality bar, banned-language rules, title guidance, and review checklist before the MDX draft is finalized.
+4. `blog-authoring`
    - Path: `.agents/skills/blog-authoring/SKILL.md`
    - Purpose: create the MDX file, frontmatter, slug, asset directory, and content structure.
+5. `beautiful-oil-painting-image-gen`
+   - Path: `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md`
+   - Purpose: generate the source artwork or a refined generation prompt for the blog hero image.
 6. `blog-image-creator`
    - Path: `.agents/skills/blog-image-creator/SKILL.md`
    - Purpose: crop the generated source artwork into `cardImage.png` and `blogHeader.png`.
@@ -49,8 +49,9 @@ Derive missing details from the provided blog whenever possible instead of block
 - Target date and end date when the user wants scheduling metadata.
 - Publication date. Default to today's date in `YYYY-MM-DD`.
 - Draft status. Default to `draft: false` unless the user asks for a draft article.
-- Style direction. If the user asks for Anthropic-like prose, treat that as a writing overlay rather than a separate content pipeline.
+- Style direction. Default to `blog-writing-guide` for all Ylang Labs blog prose.
 - Any external references or canonical URL.
+- Reference topic slug for `refs/<topic>/`. Default to the final blog slug when the user does not provide one.
 - Artwork direction. If not specified, infer a tasteful oil-painting concept from the article's core technical metaphor.
 - Target branch or PR base if the user provides one. Otherwise verify the remote default branch before publishing.
 
@@ -59,6 +60,7 @@ Derive missing details from the provided blog whenever possible instead of block
 The workflow should produce this minimum file set:
 
 - `data/blogs/<slug>.mdx`
+- `refs/<slug>/README.md` when the blog uses external sources, current research, vendor docs, papers, datasets, social trend evidence, or user-provided background material
 - `public/static/images/blogs/<slug>/source-artwork.png` or another clearly named source artwork file
 - `public/static/images/blogs/<slug>/cardImage.png`
 - `public/static/images/blogs/<slug>/blogHeader.png`
@@ -77,6 +79,7 @@ Before writing files:
 - Inspect nearby posts in `data/blogs/` for style, frontmatter, tag, reference, and component patterns.
 - Read `DESIGN.md` before making visual or layout-sensitive choices.
 - Confirm the intended slug does not already exist in `data/blogs/` or `public/static/images/blogs/`.
+- Confirm whether `refs/<slug>/` already exists for the topic, and preserve or extend it instead of replacing prior research notes.
 - If the user references GitHub content-calendar tracking, read `.agents/skills/github-content-calendar/SKILL.md`, inspect the issue/Project item first, and preserve its content type, tags, target date, end date, slug, and description as workflow metadata.
 
 ### 2. Research Or Confirm The Topic
@@ -85,6 +88,7 @@ If the user asks for trending ideas, topic research, or help deciding what to wr
 
 - Read `.agents/skills/trending-blog-topic-research/SKILL.md` and follow its research workflow.
 - Produce exactly 5 ranked topic candidates with evidence, risks, and a recommended pick.
+- Put source logs, research notes, and provenance for the selected topic under `refs/<topic>/`.
 - Use the selected topic as the input brief for the rest of this end-to-end workflow.
 - If the user already provided a clear topic, draft, or outline, skip this research step and proceed directly to blog structure.
 
@@ -93,6 +97,7 @@ If the user asks for trending ideas, topic research, or help deciding what to wr
 Use `blog-authoring` to:
 
 - Create a kebab-case slug from the final title.
+- Create or update `refs/<slug>/README.md` with the source log for external references, current research, user-provided background material, and any sources used to support claims.
 - Create `public/static/images/blogs/<slug>/`.
 - Create `data/blogs/<slug>.mdx`.
 - Use `layout: 'PostBanner'` unless the content clearly needs another existing layout.
@@ -105,15 +110,16 @@ Use `blog-authoring` to:
 
 Keep the article concrete and technical. Prefer implementation details, architecture, tradeoffs, and citations over generic marketing language.
 
-If the user asked for Anthropic-like prose, apply `anthropic-blog-style` before finalizing the MDX draft:
+Apply `blog-writing-guide` before finalizing the MDX draft:
 
-- Start with a central question, claim, or tension.
-- Explain why the problem matters before introducing technical detail.
-- Use concrete examples and evidence before broad claims.
-- Include caveats or limitations that materially affect interpretation.
-- End with implications, availability, or next steps.
+- Open by stating the problem or conclusion in the first 2-3 sentences.
+- Structure the article around the reader's questions: problem, mechanics, tradeoffs, implementation, failed attempts, and known limitations where relevant.
+- Make section headings specific and information-bearing.
+- Prefer technical mechanisms, concrete examples, working code, numbers, diagrams, and caveats over generic marketing prose.
+- Remove banned language, vague superlatives, AI-prose tells, and unsupported hype.
+- End with something useful: docs, source code, an implementation path, or a concrete next step.
 
-After the first MDX draft exists, run one revision pass against `anthropic-blog-style` before generating images and social copy. Keep the style pass focused on prose, structure, and claim calibration; do not let it change frontmatter, asset paths, or repo workflow conventions owned by `blog-authoring`.
+After the first MDX draft exists, run one revision pass against `blog-writing-guide` before generating images and social copy. Keep the writing pass focused on prose, structure, title, technical quality, and claim calibration; do not let it change frontmatter, asset paths, or repo workflow conventions owned by `blog-authoring`.
 
 ### 4. Generate Source Artwork
 
@@ -125,6 +131,7 @@ The artwork prompt should:
 - Avoid text, UI mockups, logos, watermarks, signatures, and copied famous compositions.
 - Use an art-historical direction suited to the topic.
 - Preserve enough negative space and scene structure to crop into both portrait and wide formats.
+- Be the source for both the blog cover/card image and the blog header unless the user explicitly asks for a different visual direction.
 
 Save the original generated image under:
 
@@ -157,7 +164,7 @@ posts/social-media-<slug>.md
 
 Create 2-3 variations. For LinkedIn, prefer a professional and insight-led variation. Keep each post under 300 characters and include a `[URL]` placeholder unless the final URL is known.
 
-If Anthropic-like prose was requested for the article, let the social copy inherit the measured, evidence-led framing without forcing the full blog structure into short-form posts.
+Use `blog-writing-guide` as the baseline voice for social copy: specific, direct, technically useful, and free of generic hype.
 
 ### 7. Update The Content Calendar
 
@@ -175,6 +182,7 @@ If Project auth is missing, continue the repo work and report the exact auth blo
 At minimum:
 
 - Confirm frontmatter fields are declared in `contentlayer.config.ts`.
+- Confirm `refs/<slug>/README.md` exists for sourced posts and that MDX citations trace back to it.
 - Confirm every referenced image path exists.
 - Confirm `cardImage.png` is `1080x1920`.
 - Confirm `blogHeader.png` is `1260x700`.
@@ -190,7 +198,7 @@ When publishing is requested as part of the task:
 
 - Use `github:yeet` for the PR flow.
 - Check whether a PR already exists for the branch before creating a new one.
-- Commit only scoped files for the blog, image assets, social post file, and any necessary references/components.
+- Commit only scoped files for the blog, `refs/<slug>` source packet, image assets, social post file, and any necessary references/components.
 - Do not include unrelated generated files, scratch files, plans, or dirty worktree changes.
 - Open the PR as a draft unless the user explicitly asks for ready-for-review.
 
@@ -230,8 +238,9 @@ Before finalizing, confirm:
 
 - The MDX post builds against the Contentlayer schema.
 - The post uses the correct slug in the MDX path, asset folder, and public image paths.
+- Sourced claims have a `refs/<slug>/README.md` source log, and rendered citations line up with that reference packet.
 - The generated artwork matches the article's theme and avoids visible text artifacts.
-- Anthropic-style requests include a central question/tension, evidence, caveats or limitations, and implications or next steps.
+- The article passes `blog-writing-guide`: strong opening, specific headings, concrete technical detail, tradeoffs or limitations where relevant, no banned language, and a useful closing.
 - `cardImage.png` and `blogHeader.png` exist with exact required dimensions.
 - Social posts are saved under `posts/` and are included in the PR description when a PR is opened.
 - Unrelated worktree changes were not modified, staged, committed, or published.
