@@ -30,6 +30,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 - Build with `pnpm build`.
 - Serve a production build with `pnpm serve`.
 - Lint with `pnpm lint`.
+- Run unit tests with `pnpm test:unit`.
 - Analyze bundle output with `pnpm analyze`.
 
 Use `pnpm` because `package.json` pins `pnpm@9.12.2`. Do not switch package managers or edit lockfiles manually.
@@ -222,6 +223,14 @@ Blog-specific components live under `components/blogs/<slug>/`. Keep new post-sp
 - Prefer the latest stable dependency version unless the user or existing compatibility constraints require a specific version.
 - Before adding a dependency, check whether an existing dependency already solves the problem.
 
+## Testing Standards
+
+- Prefer test-driven development for code changes: write or update focused tests that describe the intended behavior before or alongside implementation.
+- Always write realistic test cases that exercise how the feature is actually used in this repo, including real content shapes, route inputs, component props, and failure modes where practical.
+- Do not stop at happy-path tests. Cover edge cases, invalid or missing inputs, empty content, dark/light mode or responsive variants when relevant, and regressions implied by the bug or feature request.
+- Keep tests scoped to the changed behavior. Avoid brittle snapshots or broad implementation-detail assertions unless they protect a real contract.
+- When a code change has no practical automated test path, explain why and compensate with the narrowest useful validation command or manual check.
+
 ## Validation
 
 For content-only changes:
@@ -233,6 +242,7 @@ For content-only changes:
 For code/layout changes:
 
 - Run `pnpm lint`.
+- Run `pnpm test:unit` when the change touches testable logic, components, forms, routing behavior, or shared utilities.
 - Run `pnpm build`.
 - If a local dev server is needed for visual validation, use `pnpm dev` and inspect the affected routes in a browser.
 
