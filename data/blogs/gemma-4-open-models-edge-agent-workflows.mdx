@@ -7,6 +7,7 @@ summary: 'A deployment-focused read of Gemma 4: why E2B, E4B, 26B A4B, and 31B d
 tldr: |
   - Gemma 4 is best understood as a deployment ladder, not a single flagship model.
   - E2B/E4B target edge agents with PLE, 26B A4B targets latency with MoE, and 31B dense targets maximum quality.
+  - Apache 2.0 changes the adoption story: teams can fine-tune, modify, and commercially deploy without the old Gemma-specific license friction.
   - The useful lesson for builders is architectural fit: context length, visual token budgets, active parameters, and runtime support matter more than leaderboard rank.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/gemma-4-open-models-edge-agent-workflows/cardImage.png'
@@ -18,6 +19,8 @@ layout: 'PostBanner'
 Gemma 4 is not interesting because Google made another open model bigger.
 
 It is interesting because the family exposes the deployment tradeoffs directly: edge memory, active parameters, long context, visual token budgets, and dense quality are split across different models instead of hidden behind one leaderboard number.
+
+The license matters too. Gemma 4 ships under Apache 2.0, which moves the release out of the awkward "open weights, but read the custom license carefully" category and into normal commercial engineering territory.
 
 That is the right shape for agent systems. A local assistant on a phone does not need the same model as a server-side coding agent. A batch document workflow does not have the same latency target as an on-device voice interface. Gemma 4 accepts those differences instead of pretending one model shape can cover everything.
 
@@ -40,7 +43,7 @@ The useful question is not "Which one is biggest?" It is "Which model shape matc
 
 ## Gemma 4 is a deployment ladder
 
-Gemma 4 ships as four related models:
+Gemma 4 ships as four related models. A simple way to read the lineup is two edge models and two workstation or server models:
 
 | Model     | Architecture                          | Context | Modalities                                   | Design center                   |
 | --------- | ------------------------------------- | ------- | -------------------------------------------- | ------------------------------- |
@@ -69,6 +72,8 @@ The more useful engineering split is active cost. The official model card lists 
 The smaller E2B and E4B models solve a different problem. They are built around on-device memory pressure and audio-capable multimodality. The "E" means effective parameters: E2B has 2.3B effective parameters and 5.1B total parameters with embeddings, while E4B has 4.5B effective parameters and 8B total parameters with embeddings.
 
 That language can sound like marketing unless you look at PLE.
+
+The release also includes pre-trained and instruction-tuned variants, which matters for teams that want to evaluate the base model for fine-tuning instead of only using the chat model as-is.
 
 ## Which Gemma 4 model should you use?
 
@@ -194,6 +199,8 @@ The audio path is similarly practical. The official model card lists approximate
 
 The model card adds one production detail worth preserving: audio inputs are currently for E2B and E4B, and audio length is capped at 30 seconds. Video support is handled as frames, with a maximum of 60 seconds assuming one frame per second.
 
+For product teams, this changes the pipeline shape. Some workflows that would otherwise look like separate OCR, ASR, vision, and LLM calls can start as a single Gemma 4 evaluation. A dedicated ASR or OCR model may still win for specialized workloads, but the baseline architecture is less glued together than the old "bolt a tool in front of a text model" pattern.
+
 ## Why this matters for agent workflows
 
 Agent systems need:
@@ -207,7 +214,11 @@ Agent systems need:
 
 Gemma 4 directly targets that list. The launch blog calls out native function calling, structured JSON output, system instructions, code generation, longer context, and multimodal input. The model card lists thinking mode, function calling, coding, image understanding, video understanding, and multilingual support for 35+ languages after pre-training across 140+ languages.
 
+That native support matters because agent systems are already fragile enough. If function calling, structured output, and system instructions are part of the model behavior, the application does not have to rely as heavily on a prompt template hoping the model emits the right JSON shape.
+
 The cloud and runtime story matters too. Google lists AI Studio and Vertex AI for hosted 31B and 26B prototyping, while model weights are available through Hugging Face, Kaggle, and Ollama. Hugging Face documents day-one support across Transformers, llama.cpp, MLX, WebGPU, Rust, fine-tuning workflows, and local agent integrations ([Hugging Face Gemma 4 blog](https://huggingface.co/blog/gemma4)). Google's edge post adds AI Edge Gallery and LiteRT-LM, including on-device Agent Skills experiments powered by Gemma 4 ([Google Developers Blog](https://developers.googleblog.com/bring-state-of-the-art-agentic-skills-to-the-edge-with-gemma-4/)).
+
+For teams that want serverless serving instead of local inference, Google Cloud says Gemma 4 can run on Cloud Run with NVIDIA RTX PRO 6000 Blackwell GPUs and 96GB of vGPU memory, including the 31B instruction-tuned model ([Google Cloud Blog](https://cloud.google.com/blog/products/ai-machine-learning/gemma-4-available-on-google-cloud)).
 
 The license is part of the architecture story. Apache 2.0 makes the family more usable for commercial application teams than the earlier Gemma license posture. It does not mean the training data is open, and it does not remove the need for safety evaluation, but it materially lowers adoption friction.
 
