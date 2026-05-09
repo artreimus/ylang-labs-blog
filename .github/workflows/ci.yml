@@ -16,6 +16,7 @@ permissions:
 
 env:
   NEXT_TELEMETRY_DISABLED: '1'
+  NEXT_PUBLIC_WEB3_FORMS_ACCESS_KEY: 'ci-placeholder'
 
 jobs:
   verify:
