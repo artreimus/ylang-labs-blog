@@ -1,12 +1,13 @@
 ---
-title: 'OpenClaw on AWS: EC2, ECS, EKS, AgentCore, and the Tradeoffs That Matter'
+title: 'OpenClaw on AWS'
 date: '2026-05-08'
 tags: ['AI/ML', 'Agents', 'Cloud']
 draft: false
-summary: 'A practical decision guide for running OpenClaw on AWS, from one private EC2 host to ECS, EKS, Kata isolation, AgentCore, Batch, Lambda, and Bedrock.'
+summary: 'A practical decision guide for running OpenClaw on AWS, from the official Lightsail blueprint to EC2, ECS, EKS, Kata isolation, AgentCore, Batch, Lambda, and Bedrock.'
 tldr: |
   - OpenClaw is a stateful Gateway plus workspace, sessions, skills, scheduled jobs, and provider credentials. Storage and lifecycle design matter as much as compute.
-  - EC2 with EBS, SSM, and Bedrock IAM is the fastest honest AWS deployment. Docker, ECR, and CodeBuild make that path repeatable.
+  - OpenClaw on Amazon Lightsail is the easiest official AWS starter path: a preconfigured blueprint with Bedrock as the default model provider.
+  - EC2 with EBS, SSM, and Bedrock IAM is the more customizable single-runtime lane. Docker, ECR, and CodeBuild make that path repeatable.
   - ECS Fargate can run small stable fleets, but persistence, sandbox behavior, and replacement semantics need deliberate design.
   - EKS is the production shape for SaaS: one runtime boundary per user or workspace, private routing, DynamoDB binding state, S3 snapshots, Pod Identity, NetworkPolicy, and warm pools.
   - AgentCore, Lambda, Batch, EventBridge, and App Runner are useful around OpenClaw. They are not proven drop-in replacements for the OpenClaw Gateway.
@@ -36,7 +37,7 @@ It is about deciding how much of a stateful agent runtime you want AWS to own. O
 
 The useful answer is not one deployment. It is a decision tree.
 
-If you want your own OpenClaw in AWS this weekend, use EC2. If you want a repeatable internal lane, use EC2 with Docker, ECR, CodeBuild, EBS, Secrets Manager, and Systems Manager. If you want a small managed container fleet, consider ECS. If you want to sell a product where every customer gets a dedicated OpenClaw runtime, start thinking in EKS terms.
+If you want your own OpenClaw in AWS this weekend, start with the Lightsail blueprint. If you want a more customizable single-runtime lane, use EC2 with Docker, ECR, CodeBuild, EBS, Secrets Manager, and Systems Manager. If you want a small managed container fleet, consider ECS. If you want to sell a product where every customer gets a dedicated OpenClaw runtime, start thinking in EKS terms.
 
 AgentCore, Lambda, Batch, EventBridge, and App Runner all matter too, but mostly as surrounding pieces. They are not the default place to put the full Gateway.
 
@@ -74,9 +75,33 @@ It is the wrong fit when a browser or mobile client needs backend-owned access, 
 
 Use this language carefully: this is AWS-powered OpenClaw, not OpenClaw hosted in AWS.
 
-## The fastest honest deployment is EC2
+## The easiest official starter path is Lightsail
 
-The simplest real AWS deployment is one EC2 instance, one OpenClaw Gateway, and one persistent volume.
+Amazon Lightsail is now the easiest official AWS path for a personal OpenClaw instance.
+
+AWS launched OpenClaw on Lightsail as a preconfigured blueprint. You create a Lightsail instance, choose the Linux/Unix platform, select the OpenClaw blueprint, pick an instance plan, and wait for the instance to reach `Running`. AWS recommends the 4 GB memory plan for optimal performance.
+
+The important difference from a hand-built EC2 host is that the OpenClaw instance already comes configured for the basic path:
+
+- OpenClaw is available as a Lightsail blueprint.
+- Amazon Bedrock is the default AI model provider.
+- The setup flow pairs your browser with the OpenClaw instance through the Lightsail SSH welcome message and Gateway token.
+- A CloudShell setup script enables the Bedrock API access needed for the assistant.
+- Messaging channels such as Telegram and WhatsApp are part of the documented setup path.
+
+That makes Lightsail the right answer when the question is, "what is the shortest AWS-hosted path for one private OpenClaw?"
+
+It is not automatically the right answer for a product team. Lightsail optimizes the first run. EC2 gives you deeper control over private subnet topology, image promotion, SSM-first operations, EBS layout, custom packaging, observability, and runtime hardening. EKS is still the better model when every user or workspace needs its own runtime boundary.
+
+So the simple ladder looks like this:
+
+1. Use Lightsail when you want the official preconfigured starter path.
+2. Use EC2 Docker when you want a repeatable operator lane with more control.
+3. Use EKS when OpenClaw becomes a multi-user runtime plane.
+
+## The customizable single-runtime path is EC2
+
+The simplest fully controlled AWS deployment is one EC2 instance, one OpenClaw Gateway, and one persistent volume.
 
 Recommended shape:
 
@@ -89,7 +114,7 @@ Recommended shape:
 - Gateway token in Secrets Manager or OpenClaw SecretRefs.
 - Logs shipped to CloudWatch or an OpenTelemetry collector.
 
-This is the path I would use for a personal assistant, a staging runtime, or a single internal operator host.
+This is the path I would use for a staging runtime, a single internal operator host, or a personal assistant where Lightsail's managed starter shape is too constrained.
 
 Use a native systemd install when you want the closest match to a personal server. Use Docker when you want image promotion, faster rollback by tag, and a cleaner way to package plugin dependencies.
 
@@ -285,8 +310,9 @@ EC2 Mac is the niche option for macOS-only surfaces, such as iMessage or Apple-s
 | Option                      | Best for                                                  | Persistence                         | Isolation                         | Verdict                                                   |
 | --------------------------- | --------------------------------------------------------- | ----------------------------------- | --------------------------------- | --------------------------------------------------------- |
 | Local OpenClaw with Bedrock | Developers who want AWS models without moving the runtime | Local disk                          | Local machine                     | Use when AWS is the model provider, not the host.         |
-| Single EC2                  | Personal assistant, staging, internal operator host       | EBS                                 | One host                          | Best simple AWS path.                                     |
-| EC2 Docker                  | Repeatable single-runtime lane                            | EBS plus image promotion            | One host and one container        | Best tutorial and MVP path.                               |
+| Lightsail OpenClaw          | Fastest official starter instance                         | Instance disk plus documented setup | One instance                      | Best simple AWS-hosted path.                              |
+| Single EC2                  | Personal assistant, staging, internal operator host       | EBS                                 | One host                          | Best fully controlled simple path.                        |
+| EC2 Docker                  | Repeatable single-runtime lane                            | EBS plus image promotion            | One host and one container        | Best customizable tutorial and MVP path.                  |
 | ECS Fargate                 | Small stable Gateway fleets                               | EFS, EBS, or external state         | Task boundary                     | Good if state and sandbox limits are handled.             |
 | ECS on EC2                  | ECS scheduling with host control                          | EBS or EFS                          | Task plus host                    | Useful before Kubernetes if host behavior matters.        |
 | Simple EKS                  | One internal Gateway in Kubernetes                        | PVC, EFS, or EBS                    | Pod boundary                      | Good cluster baseline, not SaaS by itself.                |
@@ -300,7 +326,16 @@ EC2 Mac is the niche option for macOS-only surfaces, such as iMessage or Apple-s
 
 ## The architecture I would ship first
 
-For a personal or internal OpenClaw runtime, ship the EC2 Docker lane:
+For a personal OpenClaw runtime, start with Lightsail unless you already know you need custom host control:
+
+- OpenClaw Lightsail blueprint.
+- 4 GB memory plan if you want the AWS-recommended performance baseline.
+- Bedrock as the default model provider.
+- Browser pairing through the Lightsail SSH welcome-message flow.
+- Bedrock API access enabled through the documented CloudShell setup script.
+- Messaging channels added after the base assistant is working.
+
+For an internal operator runtime, ship the EC2 Docker lane:
 
 - Private EC2 host.
 - EBS for state and workspace.
@@ -336,6 +371,10 @@ Not as the full Gateway. Lambda is too short-lived and too constrained for an al
 
 Use ECS when you have a small number of stable runtimes and want managed container operations. Use EKS when you need a runtime plane: per-user pods, wake and suspend behavior, private routing, NetworkPolicy, Pod Identity, warm pools, and lifecycle controllers.
 
+### Should I use Lightsail or EC2 for OpenClaw?
+
+Use Lightsail when you want the fastest official AWS-hosted starter path and are comfortable with the blueprint-led setup. Use EC2 when you need deeper control over networking, image promotion, persistent disk layout, operator access, and runtime hardening.
+
 ### How do I use Amazon Bedrock with OpenClaw?
 
 Use OpenClaw's `amazon-bedrock` provider. It uses the AWS SDK credential chain, so the right credential source depends on the host: local profile, EC2 instance role, ECS task role, EKS Pod Identity or IRSA, Lambda role, or AgentCore role.
@@ -358,22 +397,24 @@ Evaluate it for managed agent hosting and isolated tool execution. Do not treat 
 2. OpenClaw, [Docker install guide](https://docs.openclaw.ai/install/docker.md).
 3. OpenClaw, [Kubernetes install guide](https://docs.openclaw.ai/install/kubernetes.md).
 4. OpenClaw, [Amazon Bedrock provider](https://docs.openclaw.ai/providers/bedrock.md).
-5. AWS Samples, [Multi-tenancy OpenClaw on EKS](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks).
-6. AWS Samples, [OpenClaw on EKS architecture](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/architecture.md).
-7. AWS Samples, [OpenClaw cold-start analysis](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/cold-start-analysis.md).
-8. AWS, [Host agents and tools with Amazon Bedrock AgentCore Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agents-tools-runtime.html).
-9. AWS, [Use isolated sessions for agents](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-sessions.html).
-10. AWS, [Amazon ECS launch types and capacity providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html).
-11. AWS, [Fargate task ephemeral storage for Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html).
-12. AWS, [Use Amazon EFS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html).
-13. AWS, [Use Amazon EBS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html).
-14. AWS, [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html).
-15. AWS, [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html).
-16. AWS, [AgentCore Runtime session storage public preview announcement](https://aws.amazon.com/about-aws/whats-new/2026/03/bedrock-agentcore-runtime-session-storage/).
-17. AWS, [Configure Lambda function timeout](https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html).
-18. AWS, [Configure Lambda function ephemeral storage](https://docs.aws.amazon.com/lambda/latest/dg/configuration-ephemeral-storage.html).
-19. AWS, [Create a Lambda function using a container image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html).
-20. AWS, [App Runner architecture and concepts](https://docs.aws.amazon.com/apprunner/latest/dg/architecture.html).
-21. AWS, [What is AWS Batch?](https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html).
-22. AWS, [Amazon EventBridge Scheduler](https://docs.aws.amazon.com/eventbridge/latest/userguide/using-eventbridge-scheduler.html).
-23. AWS, [Amazon EC2 Mac instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html).
+5. AWS, [Introducing OpenClaw on Amazon Lightsail to run your autonomous private AI agents](https://aws.amazon.com/blogs/aws/introducing-openclaw-on-amazon-lightsail-to-run-your-autonomous-private-ai-agents/).
+6. AWS, [Get started with OpenClaw on Lightsail](https://docs.aws.amazon.com/lightsail/latest/userguide/amazon-lightsail-quick-start-guide-openclaw.html).
+7. AWS Samples, [Multi-tenancy OpenClaw on EKS](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks).
+8. AWS Samples, [OpenClaw on EKS architecture](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/architecture.md).
+9. AWS Samples, [OpenClaw cold-start analysis](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/cold-start-analysis.md).
+10. AWS, [Host agents and tools with Amazon Bedrock AgentCore Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agents-tools-runtime.html).
+11. AWS, [Use isolated sessions for agents](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-sessions.html).
+12. AWS, [Amazon ECS launch types and capacity providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html).
+13. AWS, [Fargate task ephemeral storage for Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html).
+14. AWS, [Use Amazon EFS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html).
+15. AWS, [Use Amazon EBS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html).
+16. AWS, [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html).
+17. AWS, [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html).
+18. AWS, [AgentCore Runtime session storage public preview announcement](https://aws.amazon.com/about-aws/whats-new/2026/03/bedrock-agentcore-runtime-session-storage/).
+19. AWS, [Configure Lambda function timeout](https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html).
+20. AWS, [Configure Lambda function ephemeral storage](https://docs.aws.amazon.com/lambda/latest/dg/configuration-ephemeral-storage.html).
+21. AWS, [Create a Lambda function using a container image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html).
+22. AWS, [App Runner architecture and concepts](https://docs.aws.amazon.com/apprunner/latest/dg/architecture.html).
+23. AWS, [What is AWS Batch?](https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html).
+24. AWS, [Amazon EventBridge Scheduler](https://docs.aws.amazon.com/eventbridge/latest/userguide/using-eventbridge-scheduler.html).
+25. AWS, [Amazon EC2 Mac instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html).
