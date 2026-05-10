@@ -168,22 +168,13 @@ In the Hero Corp AI demo described by the notes, the executor initially thinks a
 
 Put together, the session sketches a practical architecture for production agents:
 
-<MermaidDiagram>
-  {`
-    flowchart LR
-      User["User request"] --> Cache["Prompt caching<br/>stable prefix"]
-      Cache --> ToolSearch["Tool search<br/>deferred catalog"]
-      ToolSearch --> ToolRun["Tool execution<br/>external systems"]
-      ToolRun --> Programmatic["Programmatic extraction<br/>code over raw results"]
-      Programmatic --> Reason["Executor model<br/>active context only"]
-      Reason --> Advisor{"High impact<br/>or uncertain?"}
-      Advisor -->|yes| Review["Advisor model<br/>plan or correction"]
-      Review --> Reason
-      Advisor -->|no| Output["Action or answer"]
-      Reason --> Compact["Compaction<br/>old turns to state"]
-      Compact --> Cache
-  `}
-</MermaidDiagram>
+<Image
+  alt="Production AI agent context engineering pipeline showing prompt caching, tool search, execution, compaction, and advisor review"
+  src="/static/images/blogs/context-engineering-production-claude-agents/production-pattern.png"
+  width={1600}
+  height={900}
+  className="mx-auto rounded-md bg-white"
+/>
 
 <DiagramSubtitle>
   A production agent should treat context as a managed resource. Each step decides what enters the

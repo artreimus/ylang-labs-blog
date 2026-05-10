@@ -22,3 +22,4 @@ Avoid: photorealistic 3D render, stock illustration, cartoon style, glossy gradi
 - `public/static/images/blogs/context-engineering-production-claude-agents/source-diagram.png`
 - `public/static/images/blogs/context-engineering-production-claude-agents/blogHeader.png`
 - `public/static/images/blogs/context-engineering-production-claude-agents/cardImage.png`
+- `public/static/images/blogs/context-engineering-production-claude-agents/production-pattern.png`

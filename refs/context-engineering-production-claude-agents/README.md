@@ -78,6 +78,7 @@ This article is based on a paraphrased, timestamped transcript outline supplied 
 - Final blog assets:
   - `public/static/images/blogs/context-engineering-production-claude-agents/blogHeader.png` at 1260x700
   - `public/static/images/blogs/context-engineering-production-claude-agents/cardImage.png` at 1080x1920
+  - `public/static/images/blogs/context-engineering-production-claude-agents/production-pattern.png` at 1600x900
 
 ## Editorial Notes
 
