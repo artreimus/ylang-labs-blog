@@ -1,9 +1,9 @@
 ---
-name: technical-diagram-image-gen
+name: technical-blog-image-generator
 description: Create beautiful, repeatable image-generation prompts and raster images for Ylang Labs technical blog posts. Use this skill when the user asks for blog images, cover art, card images, headers, inline technical diagrams, exploded views, blueprint diagrams, architecture plates, process maps, system diagrams, product-teardown visuals, spec sheets, or OpenAI image-generation prompts in the clean editorial technical style of the provided reference images. Always pair generation with OpenAI's `imagegen` skill and the latest official GPT Image / ChatGPT image generation path; do not create SVG/vector/code-native diagram sources as part of this skill unless the user explicitly asks for manual vector work.
 ---
 
-# Technical Diagram Image Generation
+# Technical Blog Image Generator
 
 Use this skill to create technical diagram imagery for Ylang Labs posts using OpenAI image generation: clean, precise, editorial, and repeatable. The output should feel like a technical manual, blueprint plate, museum catalog, and engineering blog cover had the same design system.
 
@@ -17,7 +17,7 @@ Use OpenAI image generation as the production path.
 - Keep exact text out of the image when possible. Put exact labels, numbers, citations, and long captions in the MDX body or `DiagramSubtitle`.
 - When labels are necessary inside the image, keep them short, large, and redundant with the surrounding caption because image-generation models can still make text and layout mistakes.
 - Repeatability comes from a normalized prompt recipe, fixed diagram mode, fixed palette, explicit canvas target, and a saved final prompt, not from generated SVG/vector sources.
-- For Ylang Labs blog cover/card assets, generate a high-resolution source image first, then use `blog-image-creator` to produce `cardImage.png` and `blogHeader.png` unless the user explicitly asks for a single target image.
+- For Ylang Labs blog cover/card assets, generate a high-resolution source image first, then use `blog-image-cropper` to produce `cardImage.png` and `blogHeader.png` unless the user explicitly asks for a single target image.
 
 ## OpenAI Imagegen Pairing
 
@@ -187,7 +187,7 @@ Use this pattern for each requested image so future runs can reproduce the same 
 3. Generate the source image with OpenAI `imagegen`:
    - `public/static/images/blogs/[slug]/source-diagram.png` for reusable source artwork, or
    - a descriptive inline asset name such as `architecture-teardown.png`.
-4. For cover assets, use `blog-image-creator` to create:
+4. For cover assets, use `blog-image-cropper` to create:
    - `public/static/images/blogs/[slug]/cardImage.png` at exactly `1080x1920`
    - `public/static/images/blogs/[slug]/blogHeader.png` at exactly `1260x700`
 5. Confirm the MDX frontmatter references:
