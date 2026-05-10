@@ -1,9 +1,9 @@
 ---
-name: blog-social-post-generator
-description: Generate concise, engaging social media posts (Twitter, LinkedIn, Instagram) for blog posts and projects. This skill triggers when you are asked to "create a tweet", "write a LinkedIn post", or "generate social media content" for a blog or project. It ensures a captivating hook, a summary, and a clear call-to-action (CTA).
+name: blog-social-copy
+description: Generate concise social launch copy for Ylang Labs blog posts and projects. Use this skill when asked to create a tweet, write a LinkedIn post, draft launch copy, or generate social media content for a blog or project. It produces 2-3 short variations with a hook, summary, and clear call-to-action.
 ---
 
-# Blog Social Post Generator
+# Blog Social Copy
 
 Use this skill to create punchy and exciting social media variations for blogs or project updates.
 
