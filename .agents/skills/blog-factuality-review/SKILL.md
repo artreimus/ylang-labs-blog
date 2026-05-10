@@ -1,9 +1,9 @@
 ---
-name: blog-review
-description: 'Review, critique, fact-check, and validate Ylang Labs blog drafts or published posts. Use this skill when the user asks to review a blog, check factual accuracy, assess MDX/frontmatter/assets/citations, find unsupported claims, or provide editorial feedback before publishing. Use `blog-writing-guide` as the primary editorial rubric for Ylang Labs blog prose.'
+name: blog-factuality-review
+description: 'Review, critique, fact-check, and validate Ylang Labs blog drafts or published posts with a factuality-first standard. Use this skill when the user asks to review a blog, check factual accuracy, assess MDX/frontmatter/assets/citations, find unsupported claims, flag overlong drafts, or provide editorial feedback before publishing. Use `blog-writing-guide` as the primary editorial rubric for Ylang Labs blog prose.'
 ---
 
-# Blog Review
+# Blog Factuality Review
 
 Use this skill to review Ylang Labs blog posts with a factuality-first standard. The goal is to identify material problems, unsupported claims, repo-contract issues, and practical improvements without fabricating certainty.
 
@@ -42,10 +42,10 @@ Always inspect:
 
 Load related skills only when relevant:
 
-- `.agents/skills/blog-authoring/SKILL.md` for frontmatter, citations, asset paths, MDX component conventions, and publishing contracts.
+- `.agents/skills/blog-mdx-authoring/SKILL.md` for frontmatter, citations, asset paths, MDX component conventions, and publishing contracts.
 - `.agents/skills/blog-writing-guide/SKILL.md` for the primary Ylang Labs prose, structure, title, and editorial quality bar.
-- `.agents/skills/blog-image-creator/SKILL.md` when reviewing cover/header assets or dimensions.
-- `.agents/skills/trending-blog-topic-research/SKILL.md` when reviewing claims based on current technical discourse.
+- `.agents/skills/blog-image-cropper/SKILL.md` when reviewing cover/header assets or dimensions.
+- `.agents/skills/blog-topic-research/SKILL.md` when reviewing claims based on current technical discourse.
 
 ## Review Workflow
 
@@ -108,6 +108,7 @@ Check for:
 - Evidence before impact claims.
 - Accurate caveats and limitations.
 - Concrete takeaways in `summary` and `tldr`.
+- Default reading time of 5 minutes or less unless the user explicitly allowed a longer post.
 - Claims calibrated to the proof surface.
 - No hype language without evidence.
 - No unnecessary marketing prose, vague superlatives, or buzzword stacking.
@@ -127,7 +128,7 @@ For sourced posts:
 
 - `P0`: False or unsupported claim that creates major legal, safety, security, reputational, or publishing risk.
 - `P1`: Material factual error, broken build, missing primary asset, invalid frontmatter, or citation failure that should block publishing.
-- `P2`: Unsupported or overstated claim, missing caveat, unclear technical explanation, non-blocking asset/reference issue, or meaningful editorial weakness.
+- `P2`: Unsupported or overstated claim, missing caveat, unclear technical explanation, non-blocking asset/reference issue, draft longer than 5 minutes without user approval, or meaningful editorial weakness.
 - `P3`: Polish issue, minor wording improvement, weak transition, small metadata refinement, or optional enhancement.
 
 Lead with findings ordered by severity. Do not bury important factual problems under compliments.
@@ -186,6 +187,7 @@ Before finalizing a review, confirm:
 - Relevant repo instructions and local skills were checked.
 - Factual claims were separated from editorial judgments.
 - `blog-writing-guide` was used as the primary editorial rubric.
+- The draft is 5 minutes or less by default, or the review explicitly notes that the user approved a longer post.
 - High-risk claims were verified against primary or current sources.
 - Unsupported claims were explicitly marked instead of silently accepted.
 - Recommended rewrites are more accurate than the original.
