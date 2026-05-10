@@ -1,11 +1,11 @@
 ---
-name: anthropic-blog-style
+name: anthropic-style-writing
 description: "Write, revise, or critique Ylang Labs blog posts in an Anthropic-like voice: calm, precise, evidence-led, research-lab prose with clear claims, plain-language technical explanation, concrete examples, caveats, limitations, safety or values framing, and practical next steps. Use when asked to write in Anthropic's style, make a draft more Anthropic-like, create an Anthropic-style prompt/template, or turn AI engineering, product, research, or policy notes into a measured blog post."
 ---
 
-# Anthropic Blog Style
+# Anthropic-Style Writing
 
-Use this skill as a writing-style layer for Ylang Labs blog work. Pair it with `.agents/skills/blog-authoring/SKILL.md` when creating MDX files, and with `.agents/skills/end-to-end-blog-creation/SKILL.md` when the user wants the full post, images, social copy, validation, and PR flow.
+Use this skill as a writing-style layer for Ylang Labs blog work. Pair it with `.agents/skills/blog-mdx-authoring/SKILL.md` when creating MDX files, and with `.agents/skills/blog-publishing-workflow/SKILL.md` when the user wants the full post, images, social copy, validation, and PR flow.
 
 Do not claim the post is written by Anthropic or affiliated with Anthropic. Use the observed style as inspiration: calm, clear, evidence-led, and transparent about limits. Do not copy Anthropic passages except for short attributed quotes when the user explicitly needs quotation.
 
