@@ -1,9 +1,9 @@
 ---
-name: blog-image-creator
+name: blog-image-cropper
 description: Crop and prepare provided source images for Ylang Labs blog artwork, especially `cardImage.png` and `blogHeader.png`, for posts in the ylang-labs-blog project. Use this skill whenever the user provides an image and asks to make blog images, crop blog artwork, create a card image, create a blog header, resize a header, fit an image to blog requirements, or update article thumbnails. The agent must visually analyze the provided picture first and choose the best crop for each required aspect ratio instead of blindly center-cropping.
 ---
 
-# Blog Image Creator
+# Blog Image Cropper
 
 Use this skill to turn a provided source image into the two required Ylang Labs blog assets:
 
@@ -46,7 +46,7 @@ Before editing, inspect the source image with `view_image` or another visual ins
 
 For Ylang Labs blog art, the preferred house style remains a beautiful painting-like background with a central conceptual illustration or diagram. When the provided image already has that structure, preserve it. When it does not, still crop it cleanly; do not invent new artwork unless the user asks for generation.
 
-If no source artwork has been provided yet, generate or prompt the source artwork through `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md` before creating `cardImage.png` and `blogHeader.png`. The card and header should come from that oil-painting source artwork unless the user explicitly asks for a different style or supplies an image that must be used.
+If no source artwork has been provided yet, generate or prompt the source artwork through `.agents/skills/oil-painting-image-generator/SKILL.md` before creating `cardImage.png` and `blogHeader.png`. The card and header should come from that oil-painting source artwork unless the user explicitly asks for a different style or supplies an image that must be used.
 
 ## Crop Strategy
 
