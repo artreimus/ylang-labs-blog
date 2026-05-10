@@ -1,9 +1,9 @@
 ---
-name: blog-authoring
-description: 'Use this skill when the user wants to create a new blog post, start a new article, or write a blog. This skill automates the setup of the MDX file, frontmatter, and asset directories for the ylang-labs-blog project. Use `blog-writing-guide` as the primary Ylang Labs prose and editorial standard for every blog draft. If the post comes from or should create a GitHub content-calendar issue, use `github-content-calendar` to preserve content type, tags, target date, end date, slug, and description metadata.'
+name: blog-mdx-authoring
+description: 'Create and structure Ylang Labs blog MDX posts, including slug selection, frontmatter, asset directories, reference packets, and MDX component conventions. Use this skill when the user wants to create a new blog post file, start a Ylang Labs article, set up blog assets, or convert a content brief into repo-ready MDX. Use `blog-writing-guide` as the prose standard and `content-calendar-management` when the post comes from or should create a calendar issue.'
 ---
 
-# Blog Authoring Skill
+# Blog MDX Authoring
 
 This skill guides you through creating a new blog post for the `ylang-labs-blog` project, ensuring consistency in frontmatter, image placement, and component usage.
 
@@ -13,7 +13,7 @@ This skill guides you through creating a new blog post for the `ylang-labs-blog`
 - Static assets (images) are stored in `public/static/images/blogs/[slug]/`.
 - Blog research and source provenance are stored in `refs/[topic]/`, usually with `[topic]` matching the final blog slug.
 - Authors are defined in `data/authors/*.mdx`.
-- Calendar-tracked posts are represented by GitHub issues and Project items through `.agents/skills/github-content-calendar/SKILL.md`.
+- Calendar-tracked posts are represented by GitHub issues and Project items through `.agents/skills/content-calendar-management/SKILL.md`.
 - Primary prose and editorial standards are handled through `.agents/skills/blog-writing-guide/SKILL.md`.
 
 ## 2. Information Gathering
@@ -28,6 +28,7 @@ Before creating the post, ensure you have the following information:
 - **Summary**: A short description for the blog list view.
 - **TLDR**: A "Too Long; Didn't Read" summary.
 - **Style Direction**: Read `.agents/skills/blog-writing-guide/SKILL.md` before drafting or revising Ylang Labs blog prose.
+- **Reading Time**: Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - **Reference Topic**: A kebab-case folder name under `refs/`. Default to the final blog slug; use a working topic slug while researching if the title is not final.
 - **Bibliography** (Optional): Path to a `.bib` file if references are used.
 - **CanonicalUrl** (Optional): Original URL if this is a cross-post.
@@ -44,7 +45,7 @@ The project provides three distinct layouts for blog posts. Choose the one that 
 
 ### Step 0: Preserve Calendar Metadata
 
-If the user references a GitHub issue, Project item, target date, end date, or content calendar, read `.agents/skills/github-content-calendar/SKILL.md` before creating the MDX file.
+If the user references a GitHub issue, Project item, target date, end date, or content calendar, read `.agents/skills/content-calendar-management/SKILL.md` before creating the MDX file.
 
 - Use the calendar issue description as the draft brief.
 - Use the calendar slug if one is present.
@@ -80,13 +81,13 @@ Follow these strict naming conventions for essential blog assets:
 
 Place all images in: `public/static/images/blogs/[slug]/`
 
-For Ylang Labs blog posts, the cover/card image and blog header should be derived from source artwork generated or prompted through `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md`, unless the user explicitly provides a different source image or asks for a non-painterly visual direction.
+For Ylang Labs blog posts, the cover/card image and blog header should be derived from source artwork generated or prompted through `.agents/skills/oil-painting-image-generator/SKILL.md`, unless the user explicitly provides a different source image or asks for a non-painterly visual direction.
 
 Recommended sequence:
 
-1. Use `beautiful-oil-painting-image-gen` to create a refined museum-quality oil-painting prompt that expresses the article's central technical metaphor.
+1. Use `oil-painting-image-generator` to create a refined museum-quality oil-painting prompt that expresses the article's central technical metaphor.
 2. Save the generated source artwork as `public/static/images/blogs/[slug]/source-artwork.png`.
-3. Use `blog-image-creator` to crop that source artwork into:
+3. Use `blog-image-cropper` to crop that source artwork into:
    - `public/static/images/blogs/[slug]/cardImage.png` exactly `1080x1920`
    - `public/static/images/blogs/[slug]/blogHeader.png` exactly `1260x700`
 
@@ -170,5 +171,5 @@ The project uses `refs/[slug]/` as the source-of-truth workspace for research pr
 - Confirm `refs/[slug]/README.md` exists when the post relies on external sources or research.
 - Confirm the file `data/blogs/[slug].mdx` exists with the correct frontmatter.
 - Confirm rendered citations in `data/references-data.bib` or the MDX `## References` section line up with the source log in `refs/[slug]/README.md`.
-- Confirm the draft passes `blog-writing-guide`: it opens with the problem or conclusion, has specific headings, includes concrete technical detail, explains tradeoffs or limitations where relevant, avoids banned language, and ends with a useful next step.
+- Confirm the draft passes `blog-writing-guide`: it opens with the problem or conclusion, stays at 5 minutes or less by default, has specific headings, includes concrete technical detail, explains tradeoffs or limitations where relevant, avoids banned language, and ends with a useful next step.
 - Suggest that the user place `cardImage.png` and `blogHeader.png` in the new assets directory.
