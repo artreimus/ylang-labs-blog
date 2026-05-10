@@ -11,7 +11,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 - Check relevant local skills before starting. For this repo, prefer:
   - `blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
   - `content-calendar-management` when asked to use GitHub Issues/Projects as the editorial calendar, create content briefs, schedule posts/projects/social content, or audit planned work.
-  - `blog-publishing-workflow` when asked to turn a blog idea or draft into a complete post with generated artwork, blog assets, social copy, and PR publication.
+  - `blog-publishing-workflow` when asked to turn a blog idea or draft into a complete post with optional artwork, blog assets, social copy, and PR publication.
   - `blog-writing-guide` as the primary Ylang Labs writing, rewriting, editing, and editorial review standard for blog posts.
   - `blog-factuality-review` when asked to review, critique, fact-check, validate, or assess publication readiness for Ylang Labs blog drafts.
   - `blog-mdx-authoring` for creating or structuring new blog posts.
@@ -125,7 +125,13 @@ Blog writing standards:
 - The publication focuses on AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, and practical implementation lessons.
 - Default blog posts to 5 minutes or less unless the user explicitly asks for or approves a longer post. If a topic needs more depth, narrow the scope, split follow-up posts, or confirm the longer format before drafting past the default.
 - Prefer concrete technical explanations, architecture diagrams, examples, and citations over generic marketing prose.
-- Use the existing editorial pattern: clear intro, technical sections, diagrams or images where useful, and references when relying on external sources.
+- Use post-type structures rather than one universal article template:
+  - Engineering deep dive: problem, mechanism, architecture, tradeoffs, failure modes, practical application, references.
+  - Migration/build story: outcome metrics, old system, constraints, migration design, validation, results, what changed in hindsight.
+  - AI research/explainer: definition, why now, how it works, evaluation, limitations, practical guidance, references.
+  - Opinion/strategy essay: claim, tension, principle, examples, implications, closing stance.
+- Use information-bearing headings. Avoid generic placeholders such as `Introduction`, `Background`, `Section 1`, and `Conclusion` unless the topic makes that wording genuinely useful.
+- Do not add a manual "Key Takeaways" section to the article body when using `PostBanner`; the layout already renders `tldr` or `summary` as "Key Takeaways".
 - For formal references, add entries to `data/references-data.bib`, set `bibliography: references-data.bib`, and cite with `[@citationKey]`.
 - Manual `## References` sections are acceptable for simpler posts.
 - Keep `summary` concise for listing/search/SEO. Use `tldr` for multi-bullet takeaways in `PostBanner`.
