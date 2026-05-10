@@ -1,6 +1,6 @@
 ---
 name: blog-publishing-workflow
-description: 'Coordinate the complete Ylang Labs blog publishing workflow from idea or draft through writing guidance, MDX setup, generated artwork, cropped card/header images, social copy, validation, draft PR publication, and optional content-calendar tracking. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want writing, artwork, assets, social posts, scheduling, GitHub issues/projects, or a PR handled together.'
+description: 'Coordinate the complete Ylang Labs blog publishing workflow from idea or draft through writing guidance, MDX setup, optional artwork or technical visuals, cropped card/header images, social copy, validation, draft PR publication, and optional content-calendar tracking. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want writing, assets, social posts, scheduling, GitHub issues/projects, or a PR handled together.'
 ---
 
 # Blog Publishing Workflow
@@ -23,16 +23,19 @@ Read and apply these skills in this order:
 4. `blog-mdx-authoring`
    - Path: `.agents/skills/blog-mdx-authoring/SKILL.md`
    - Purpose: create the MDX file, frontmatter, slug, asset directory, and content structure.
-5. `oil-painting-image-generator`
+5. `oil-painting-image-generator` when the user asks for painterly artwork or a metaphor-led cover is the best visual direction.
    - Path: `.agents/skills/oil-painting-image-generator/SKILL.md`
    - Purpose: generate the source artwork or a refined generation prompt for the blog hero image.
-6. `blog-image-cropper`
+6. `technical-blog-image-generator` when a diagram, architecture plate, process map, or technical cover is better than painterly artwork.
+   - Path: `.agents/skills/technical-blog-image-generator/SKILL.md`
+   - Purpose: create technical visuals or image-generation prompts for technical blog assets.
+7. `blog-image-cropper` when a source image needs to be cropped into standard card/header assets.
    - Path: `.agents/skills/blog-image-cropper/SKILL.md`
    - Purpose: crop the generated source artwork into `cardImage.png` and `blogHeader.png`.
-7. `blog-social-copy`
+8. `blog-social-copy`
    - Path: `.agents/skills/blog-social-copy/SKILL.md`
    - Purpose: create 2-3 short social post variations and save them under `posts/`.
-8. `github:yeet` when the user wants the workflow published as a PR.
+9. `github:yeet` when the user wants the workflow published as a PR.
    - Purpose: commit only scoped task files, push the branch, and open a draft PR.
 
 If one of these skills is unavailable, continue with the closest repo-native workflow and clearly state the gap.
@@ -53,21 +56,24 @@ Derive missing details from the provided blog whenever possible instead of block
 - Reading time. Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - Any external references or canonical URL.
 - Reference topic slug for `refs/<topic>/`. Default to the final blog slug when the user does not provide one.
-- Artwork direction. If not specified, infer a tasteful oil-painting concept from the article's core technical metaphor.
+- Visual direction. Prefer diagrams, architecture visuals, benchmark figures, or real screenshots when they explain the technical idea better than decorative artwork. Use painterly cover art only when requested or when a metaphor-led image is clearly appropriate.
 - Target branch or PR base if the user provides one. Otherwise verify the remote default branch before publishing.
 
 ## Output Files
 
-The workflow should produce this minimum file set:
+The workflow should always produce or update the core article files:
 
 - `data/blogs/<slug>.mdx`
 - `refs/<slug>/README.md` when the blog uses external sources, current research, vendor docs, papers, datasets, social trend evidence, or user-provided background material
-- `public/static/images/blogs/<slug>/source-artwork.png` or another clearly named source artwork file
 - `public/static/images/blogs/<slug>/cardImage.png`
 - `public/static/images/blogs/<slug>/blogHeader.png`
-- `posts/social-media-<slug>.md`
 
-Only add other files when the blog actually needs them, such as extra diagrams, BibTeX entries, or supporting images.
+Add other files only when the post or publishing request needs them:
+
+- `public/static/images/blogs/<slug>/source-artwork.png` for generated cover artwork
+- Additional diagrams, benchmark figures, screenshots, or supporting images
+- `posts/social-media-<slug>.md` when social launch copy is requested or the task is an end-to-end publishing package
+- BibTeX entries or custom MDX components when the post needs formal citations or interactive visuals
 
 ## Workflow
 
@@ -108,6 +114,11 @@ Use `blog-mdx-authoring` to:
 - Use `summary` for the listing/SEO summary.
 - Use `tldr` for concise Key Takeaways.
 - Use existing MDX components such as `Callout`, `Image`, `DiagramSubtitle`, and `MermaidDiagram` when they make the article clearer.
+- Choose the body scaffold by post type:
+  - Engineering deep dive: problem, mechanism, architecture, tradeoffs, failure modes, practical application, references.
+  - Migration/build story: outcome metrics, old system, constraints, migration design, validation, results, hindsight.
+  - AI research/explainer: definition, why now, how it works, evaluation, limitations, practical guidance, references.
+  - Opinion/strategy essay: claim, tension, principle, examples, implications, closing stance.
 
 Keep the article concrete and technical. Prefer implementation details, architecture, tradeoffs, and citations over generic marketing language.
 
@@ -117,23 +128,30 @@ Apply `blog-writing-guide` before finalizing the MDX draft:
 - Open by stating the problem or conclusion in the first 2-3 sentences.
 - Structure the article around the reader's questions: problem, mechanics, tradeoffs, implementation, failed attempts, and known limitations where relevant.
 - Make section headings specific and information-bearing.
+- Remove generic placeholders such as `Introduction`, `Background`, `Section 1`, and `Conclusion` unless that exact wording is genuinely the clearest heading.
+- Do not add a manual "Key Takeaways" section when `layout: 'PostBanner'`; `tldr` already renders as "Key Takeaways".
 - Prefer technical mechanisms, concrete examples, working code, numbers, diagrams, and caveats over generic marketing prose.
 - Remove banned language, vague superlatives, AI-prose tells, and unsupported hype.
 - End with something useful: docs, source code, an implementation path, or a concrete next step.
 
 After the first MDX draft exists, run one revision pass against `blog-writing-guide` before generating images and social copy. Keep the writing pass focused on prose, structure, title, technical quality, and claim calibration; do not let it change frontmatter, asset paths, or repo workflow conventions owned by `blog-mdx-authoring`.
 
-### 4. Generate Source Artwork
+### 4. Create The Visual Assets
 
-Use `oil-painting-image-generator` to create a museum-quality oil-painting concept for the article.
+Choose the visual workflow based on the post:
 
-The artwork prompt should:
+- Use real screenshots or product captures when the post is about an interface, workflow, or shipped project.
+- Use diagrams, architecture plates, benchmark charts, or process maps when the post is about systems, migrations, evaluations, or implementation details.
+- Use `technical-blog-image-generator` when a technical visual needs to be generated or prompted.
+- Use `oil-painting-image-generator` when the user asks for painterly art or the article is best represented by a visual metaphor.
 
-- Represent the article's core idea as a clear visual metaphor.
+If using generated artwork, the prompt should:
+
+- Represent the article's core idea as a clear visual metaphor or technical scene.
 - Avoid text, UI mockups, logos, watermarks, signatures, and copied famous compositions.
-- Use an art-historical direction suited to the topic.
+- Use a visual direction suited to the topic.
 - Preserve enough negative space and scene structure to crop into both portrait and wide formats.
-- Be the source for both the blog cover/card image and the blog header unless the user explicitly asks for a different visual direction.
+- Be usable as the source for both the blog cover/card image and the blog header unless the user explicitly asks for a different visual direction.
 
 Save the original generated image under:
 
@@ -143,20 +161,20 @@ public/static/images/blogs/<slug>/source-artwork.png
 
 If the image-generation tool returns a different filename or format, save or convert a stable source image in the blog asset directory before cropping.
 
-### 5. Create Blog Assets
+### 5. Crop Or Finalize Blog Assets
 
-Use `blog-image-cropper` with the generated source artwork.
+Use `blog-image-cropper` with the selected source image when cropping is needed.
 
 Required outputs:
 
 - `public/static/images/blogs/<slug>/cardImage.png` exactly `1080x1920`
 - `public/static/images/blogs/<slug>/blogHeader.png` exactly `1260x700`
 
-Inspect the source artwork visually before cropping. Choose separate crop regions for the card and header when needed. Verify both final dimensions and visually inspect the crops.
+Inspect the source image visually before cropping. Choose separate crop regions for the card and header when needed. Verify both final dimensions and visually inspect the crops.
 
 ### 6. Create Social Posts
 
-Use `blog-social-copy` after the MDX content is drafted.
+Use `blog-social-copy` after the MDX content is drafted when the user asked for social copy or the task is an end-to-end publishing package.
 
 Save variations to:
 
@@ -173,7 +191,7 @@ Use `blog-writing-guide` as the baseline voice for social copy: specific, direct
 When the user asked for calendar tracking or the workflow started from a calendar issue, use `content-calendar-management` to update the GitHub issue/Project item after each meaningful handoff:
 
 - Move to `Drafting` once the MDX draft exists.
-- Move to `Assets` while source artwork, card image, and header are being produced.
+- Move to `Assets` while the visual source, card image, and header are being produced.
 - Move to `Scheduled` when content, assets, social copy, target date, and end date are ready.
 - Move to `Published` only after the final public URL is known and linked in the issue.
 
@@ -186,8 +204,9 @@ At minimum:
 - Confirm frontmatter fields are declared in `contentlayer.config.ts`.
 - Confirm `refs/<slug>/README.md` exists for sourced posts and that MDX citations trace back to it.
 - Confirm every referenced image path exists.
-- Confirm `cardImage.png` is `1080x1920`.
-- Confirm `blogHeader.png` is `1260x700`.
+- Confirm `cardImage.png` is `1080x1920` when generated or cropped assets are used.
+- Confirm `blogHeader.png` is `1260x700` when generated or cropped assets are used.
+- Confirm the selected visual approach fits the post type: technical visuals for systems/evaluations/migrations unless a metaphor-led cover is intentional.
 - Confirm the draft is 5 minutes or less by default. If it is longer, confirm the user explicitly approved a longer post and state that in the final summary.
 - Run `pnpm build` when feasible.
 
@@ -211,7 +230,7 @@ The PR description should include:
 ## Summary
 
 - Added `<title>` as a new Ylang Labs blog post.
-- Added generated oil-painting blog artwork and cropped card/header assets.
+- Added blog visual assets and cropped card/header images.
 - Added social post variations for launch copy.
 
 ## Social Post Options
@@ -242,9 +261,9 @@ Before finalizing, confirm:
 - The MDX post builds against the Contentlayer schema.
 - The post uses the correct slug in the MDX path, asset folder, and public image paths.
 - Sourced claims have a `refs/<slug>/README.md` source log, and rendered citations line up with that reference packet.
-- The generated artwork matches the article's theme and avoids visible text artifacts.
-- The article passes `blog-writing-guide`: strong opening, specific headings, concrete technical detail, tradeoffs or limitations where relevant, no banned language, and a useful closing.
+- The selected visuals match the article's theme and avoid visible text artifacts.
+- The article passes `blog-writing-guide`: strong opening, correct post-type scaffold, specific headings, concrete technical detail, tradeoffs or limitations where relevant, no duplicate Key Takeaways body section, no banned language, and a useful closing.
 - The article stays at 5 minutes or less unless the user explicitly approved a longer post.
 - `cardImage.png` and `blogHeader.png` exist with exact required dimensions.
-- Social posts are saved under `posts/` and are included in the PR description when a PR is opened.
+- Social posts are saved under `posts/` and are included in the PR description when requested or when a PR is opened for an end-to-end publishing package.
 - Unrelated worktree changes were not modified, staged, committed, or published.
