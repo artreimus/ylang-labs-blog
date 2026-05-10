@@ -5,7 +5,7 @@ description: 'Create and structure Ylang Labs blog MDX posts, including slug sel
 
 # Blog MDX Authoring
 
-This skill guides you through creating a new blog post for the `ylang-labs-blog` project, ensuring consistency in frontmatter, image placement, and component usage.
+This skill guides you through creating a new blog post for the `ylang-labs-blog` project, ensuring consistency in frontmatter, image placement, component usage, and post-type structure.
 
 ## 1. Prerequisites
 
@@ -26,7 +26,7 @@ Before creating the post, ensure you have the following information:
 - **Tags**: A list of tags. Common tags in this project: `AI/ML`, `Agents`, `Generative AI`, `DeepSeek`, `Pydantic`, `Multi-Agent Systems`, `Context Engineering`, `RAG`.
 - **Calendar Metadata** (Optional): GitHub issue URL/number, content type, canonical tag keys from `app/blog-tag-data.json`, target date, end date, slug, priority, and description.
 - **Summary**: A short description for the blog list view.
-- **TLDR**: A "Too Long; Didn't Read" summary.
+- **TLDR**: Multi-bullet key takeaways for `PostBanner`. Do not duplicate these as a manual "Key Takeaways" section in the body.
 - **Style Direction**: Read `.agents/skills/blog-writing-guide/SKILL.md` before drafting or revising Ylang Labs blog prose.
 - **Reading Time**: Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - **Reference Topic**: A kebab-case folder name under `refs/`. Default to the final blog slug; use a working topic slug while researching if the title is not final.
@@ -37,9 +37,9 @@ Before creating the post, ensure you have the following information:
 
 The project provides three distinct layouts for blog posts. Choose the one that best fits your content:
 
-- **`PostLayout` (Default)**: A professional two-column layout. The left sidebar displays author details and tags, while the main column contains the content. Ideal for most standard blog posts.
+- **`PostBanner` (Default)**: Features a prominent full-width banner image at the top (uses the first image in the `images` array). It renders `tldr` or `summary` as "Key Takeaways" and is the preferred layout for polished Ylang Labs posts.
+- **`PostLayout`**: A professional two-column layout. The left sidebar displays author details and tags, while the main column contains the content. Use when the author/sidebar frame matters more than a banner image.
 - **`PostSimple`**: A clean, single-column centered layout. It focuses entirely on the text with minimal distractions. Best for short updates or prose-heavy pieces.
-- **`PostBanner`**: Features a prominent full-width banner image at the top (uses the first image in the `images` array). It includes a "Key Takeaways" section at the start and is best for deep dives or visually-rich announcements.
 
 ## 4. Workflow
 
@@ -81,9 +81,15 @@ Follow these strict naming conventions for essential blog assets:
 
 Place all images in: `public/static/images/blogs/[slug]/`
 
-For Ylang Labs blog posts, the cover/card image and blog header should be derived from source artwork generated or prompted through `.agents/skills/oil-painting-image-generator/SKILL.md`, unless the user explicitly provides a different source image or asks for a non-painterly visual direction.
+Choose the visual that best helps the reader understand or remember the post:
 
-Recommended sequence:
+- For systems, migrations, evaluations, and implementation posts, prefer diagrams, architecture visuals, benchmark figures, or real product screenshots when those are more useful than decorative art.
+- Use `.agents/skills/oil-painting-image-generator/SKILL.md` when the user asks for painterly artwork or when a metaphor-led cover is clearly better than a technical visual.
+- For generated/cropped cover art, keep the standard outputs:
+  - `public/static/images/blogs/[slug]/cardImage.png` exactly `1080x1920`
+  - `public/static/images/blogs/[slug]/blogHeader.png` exactly `1260x700`
+
+Optional generated-art sequence:
 
 1. Use `oil-painting-image-generator` to create a refined museum-quality oil-painting prompt that expresses the article's central technical metaphor.
 2. Save the generated source artwork as `public/static/images/blogs/[slug]/source-artwork.png`.
@@ -110,15 +116,89 @@ cardImage: '/static/images/blogs/[slug]/cardImage.png'
 images: ['/static/images/blogs/[slug]/blogHeader.png']
 layout: 'PostBanner'
 ---
-
-## Introduction
-
-[Your content here...]
-
-## Section 1
-
-[Use custom components like <Image />, <Callout />, etc.]
 ```
+
+Then choose the body scaffold by post type. These scaffolds define the job of each section, not literal required headings. Replace every placeholder heading with a specific, information-bearing H2.
+
+### Engineering Deep Dive
+
+Use for architecture, implementation, debugging, systems, and agent-infrastructure posts.
+
+```mdx
+[Open with the problem or conclusion in 2-3 sentences.]
+
+## [Why this problem matters now]
+
+## [How the mechanism actually works]
+
+## [The architecture or implementation path]
+
+## [The tradeoff most teams miss]
+
+## [Where this breaks down]
+
+## [How to apply this in practice]
+```
+
+### Migration Or Build Story
+
+Use for migrations, rewrites, scale work, performance projects, and "how we built it" posts.
+
+```mdx
+[Open with the outcome, scope, or hard constraint.]
+
+## [The result in numbers]
+
+## [What the old system could not handle]
+
+## [The migration or build design]
+
+## [How we validated it]
+
+## [What changed after launch]
+
+## [What we would do differently]
+```
+
+### AI Research Or Explainer
+
+Use for model releases, papers, evaluations, frameworks, and conceptual explainers.
+
+```mdx
+[Open with the practical question the reader needs answered.]
+
+## [What this is]
+
+## [Why it matters now]
+
+## [How it works]
+
+## [How it was evaluated]
+
+## [Limitations and failure modes]
+
+## [Practical guidance]
+```
+
+### Opinion Or Strategy Essay
+
+Use for founder/operator perspective, product strategy, engineering principles, and market interpretation.
+
+```mdx
+[Open with the claim.]
+
+## [The tension]
+
+## [The principle]
+
+## [What this looks like in practice]
+
+## [What this changes]
+
+## [The closing stance]
+```
+
+Do not use generic placeholder headings such as `Introduction`, `Background`, `Section 1`, or `Conclusion` unless that exact wording is genuinely the clearest heading for the topic.
 
 ### Step 6: Component Usage Guide
 
@@ -171,5 +251,6 @@ The project uses `refs/[slug]/` as the source-of-truth workspace for research pr
 - Confirm `refs/[slug]/README.md` exists when the post relies on external sources or research.
 - Confirm the file `data/blogs/[slug].mdx` exists with the correct frontmatter.
 - Confirm rendered citations in `data/references-data.bib` or the MDX `## References` section line up with the source log in `refs/[slug]/README.md`.
-- Confirm the draft passes `blog-writing-guide`: it opens with the problem or conclusion, stays at 5 minutes or less by default, has specific headings, includes concrete technical detail, explains tradeoffs or limitations where relevant, avoids banned language, and ends with a useful next step.
-- Suggest that the user place `cardImage.png` and `blogHeader.png` in the new assets directory.
+- Confirm the draft passes `blog-writing-guide`: it opens with the problem or conclusion, stays at 5 minutes or less by default, uses the correct post-type scaffold, has specific headings, includes concrete technical detail, explains tradeoffs or limitations where relevant, avoids banned language, and ends with a useful next step.
+- Confirm `PostBanner` posts do not duplicate the rendered "Key Takeaways" callout with a manual body section.
+- Confirm `cardImage.png` and `blogHeader.png` exist when frontmatter references them, or clearly report that the image assets still need to be created.
