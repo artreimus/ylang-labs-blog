@@ -1,9 +1,9 @@
 ---
-name: end-to-end-blog-creation
-description: 'Orchestrate complete Ylang Labs blog creation from a user-provided blog idea or draft through primary Ylang Labs blog writing guidance, generated oil-painting artwork, MDX post setup, cropped card/header images, LinkedIn/social copy, validation, draft PR publication, and optional GitHub content-calendar tracking. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want writing guidance, artwork, blog assets, social posts, scheduling, GitHub issues/projects, or a PR handled together.'
+name: blog-publishing-workflow
+description: 'Coordinate the complete Ylang Labs blog publishing workflow from idea or draft through writing guidance, MDX setup, generated artwork, cropped card/header images, social copy, validation, draft PR publication, and optional content-calendar tracking. Use this skill whenever the user asks to create, publish, prepare, or turn a blog idea/draft into a full Ylang Labs blog post, especially when they want writing, artwork, assets, social posts, scheduling, GitHub issues/projects, or a PR handled together.'
 ---
 
-# End-to-End Blog Creation
+# Blog Publishing Workflow
 
 Use this skill to coordinate the complete Ylang Labs blog workflow. It does not replace the specialized skills; it sequences them and verifies the handoffs between them.
 
@@ -11,26 +11,26 @@ Use this skill to coordinate the complete Ylang Labs blog workflow. It does not 
 
 Read and apply these skills in this order:
 
-1. `trending-blog-topic-research` when the user wants topic ideation before creating the post.
-   - Path: `.agents/skills/trending-blog-topic-research/SKILL.md`
+1. `blog-topic-research` when the user wants topic ideation before creating the post.
+   - Path: `.agents/skills/blog-topic-research/SKILL.md`
    - Purpose: research current technical conversations and produce exactly 5 Ylang Labs topic candidates that can be handed off into this workflow.
-2. `github-content-calendar` when the user provides a calendar issue, asks to schedule/track the post, or wants the work represented in GitHub Issues/Projects.
-   - Path: `.agents/skills/github-content-calendar/SKILL.md`
+2. `content-calendar-management` when the user provides a calendar issue, asks to schedule/track the post, or wants the work represented in GitHub Issues/Projects.
+   - Path: `.agents/skills/content-calendar-management/SKILL.md`
    - Purpose: create or update the content-calendar issue and Project item with content type, tags, target date, end date, slug, stage, and description.
 3. `blog-writing-guide`
    - Path: `.agents/skills/blog-writing-guide/SKILL.md`
    - Purpose: apply the primary Ylang Labs blog voice, structure, technical quality bar, banned-language rules, title guidance, and review checklist before the MDX draft is finalized.
-4. `blog-authoring`
-   - Path: `.agents/skills/blog-authoring/SKILL.md`
+4. `blog-mdx-authoring`
+   - Path: `.agents/skills/blog-mdx-authoring/SKILL.md`
    - Purpose: create the MDX file, frontmatter, slug, asset directory, and content structure.
-5. `beautiful-oil-painting-image-gen`
-   - Path: `.agents/skills/beautiful-oil-painting-image-gen/SKILL.md`
+5. `oil-painting-image-generator`
+   - Path: `.agents/skills/oil-painting-image-generator/SKILL.md`
    - Purpose: generate the source artwork or a refined generation prompt for the blog hero image.
-6. `blog-image-creator`
-   - Path: `.agents/skills/blog-image-creator/SKILL.md`
+6. `blog-image-cropper`
+   - Path: `.agents/skills/blog-image-cropper/SKILL.md`
    - Purpose: crop the generated source artwork into `cardImage.png` and `blogHeader.png`.
-7. `blog-social-post-generator`
-   - Path: `.agents/skills/blog-social-post-generator/SKILL.md`
+7. `blog-social-copy`
+   - Path: `.agents/skills/blog-social-copy/SKILL.md`
    - Purpose: create 2-3 short social post variations and save them under `posts/`.
 8. `github:yeet` when the user wants the workflow published as a PR.
    - Purpose: commit only scoped task files, push the branch, and open a draft PR.
@@ -50,6 +50,7 @@ Derive missing details from the provided blog whenever possible instead of block
 - Publication date. Default to today's date in `YYYY-MM-DD`.
 - Draft status. Default to `draft: false` unless the user asks for a draft article.
 - Style direction. Default to `blog-writing-guide` for all Ylang Labs blog prose.
+- Reading time. Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - Any external references or canonical URL.
 - Reference topic slug for `refs/<topic>/`. Default to the final blog slug when the user does not provide one.
 - Artwork direction. If not specified, infer a tasteful oil-painting concept from the article's core technical metaphor.
@@ -80,13 +81,13 @@ Before writing files:
 - Read `DESIGN.md` before making visual or layout-sensitive choices.
 - Confirm the intended slug does not already exist in `data/blogs/` or `public/static/images/blogs/`.
 - Confirm whether `refs/<slug>/` already exists for the topic, and preserve or extend it instead of replacing prior research notes.
-- If the user references GitHub content-calendar tracking, read `.agents/skills/github-content-calendar/SKILL.md`, inspect the issue/Project item first, and preserve its content type, tags, target date, end date, slug, and description as workflow metadata.
+- If the user references GitHub content-calendar tracking, read `.agents/skills/content-calendar-management/SKILL.md`, inspect the issue/Project item first, and preserve its content type, tags, target date, end date, slug, and description as workflow metadata.
 
 ### 2. Research Or Confirm The Topic
 
-If the user asks for trending ideas, topic research, or help deciding what to write before creating the post, use `trending-blog-topic-research` first.
+If the user asks for trending ideas, topic research, or help deciding what to write before creating the post, use `blog-topic-research` first.
 
-- Read `.agents/skills/trending-blog-topic-research/SKILL.md` and follow its research workflow.
+- Read `.agents/skills/blog-topic-research/SKILL.md` and follow its research workflow.
 - Produce exactly 5 ranked topic candidates with evidence, risks, and a recommended pick.
 - Put source logs, research notes, and provenance for the selected topic under `refs/<topic>/`.
 - Use the selected topic as the input brief for the rest of this end-to-end workflow.
@@ -94,7 +95,7 @@ If the user asks for trending ideas, topic research, or help deciding what to wr
 
 ### 3. Prepare The Blog Structure
 
-Use `blog-authoring` to:
+Use `blog-mdx-authoring` to:
 
 - Create a kebab-case slug from the final title.
 - Create or update `refs/<slug>/README.md` with the source log for external references, current research, user-provided background material, and any sources used to support claims.
@@ -112,6 +113,7 @@ Keep the article concrete and technical. Prefer implementation details, architec
 
 Apply `blog-writing-guide` before finalizing the MDX draft:
 
+- Keep the draft at 5 minutes or less by default unless the user explicitly asked for or approved a longer post.
 - Open by stating the problem or conclusion in the first 2-3 sentences.
 - Structure the article around the reader's questions: problem, mechanics, tradeoffs, implementation, failed attempts, and known limitations where relevant.
 - Make section headings specific and information-bearing.
@@ -119,11 +121,11 @@ Apply `blog-writing-guide` before finalizing the MDX draft:
 - Remove banned language, vague superlatives, AI-prose tells, and unsupported hype.
 - End with something useful: docs, source code, an implementation path, or a concrete next step.
 
-After the first MDX draft exists, run one revision pass against `blog-writing-guide` before generating images and social copy. Keep the writing pass focused on prose, structure, title, technical quality, and claim calibration; do not let it change frontmatter, asset paths, or repo workflow conventions owned by `blog-authoring`.
+After the first MDX draft exists, run one revision pass against `blog-writing-guide` before generating images and social copy. Keep the writing pass focused on prose, structure, title, technical quality, and claim calibration; do not let it change frontmatter, asset paths, or repo workflow conventions owned by `blog-mdx-authoring`.
 
 ### 4. Generate Source Artwork
 
-Use `beautiful-oil-painting-image-gen` to create a museum-quality oil-painting concept for the article.
+Use `oil-painting-image-generator` to create a museum-quality oil-painting concept for the article.
 
 The artwork prompt should:
 
@@ -143,7 +145,7 @@ If the image-generation tool returns a different filename or format, save or con
 
 ### 5. Create Blog Assets
 
-Use `blog-image-creator` with the generated source artwork.
+Use `blog-image-cropper` with the generated source artwork.
 
 Required outputs:
 
@@ -154,7 +156,7 @@ Inspect the source artwork visually before cropping. Choose separate crop region
 
 ### 6. Create Social Posts
 
-Use `blog-social-post-generator` after the MDX content is drafted.
+Use `blog-social-copy` after the MDX content is drafted.
 
 Save variations to:
 
@@ -168,7 +170,7 @@ Use `blog-writing-guide` as the baseline voice for social copy: specific, direct
 
 ### 7. Update The Content Calendar
 
-When the user asked for calendar tracking or the workflow started from a calendar issue, use `github-content-calendar` to update the GitHub issue/Project item after each meaningful handoff:
+When the user asked for calendar tracking or the workflow started from a calendar issue, use `content-calendar-management` to update the GitHub issue/Project item after each meaningful handoff:
 
 - Move to `Drafting` once the MDX draft exists.
 - Move to `Assets` while source artwork, card image, and header are being produced.
@@ -186,6 +188,7 @@ At minimum:
 - Confirm every referenced image path exists.
 - Confirm `cardImage.png` is `1080x1920`.
 - Confirm `blogHeader.png` is `1260x700`.
+- Confirm the draft is 5 minutes or less by default. If it is longer, confirm the user explicitly approved a longer post and state that in the final summary.
 - Run `pnpm build` when feasible.
 
 For code or component changes, also run `pnpm lint`.
@@ -241,6 +244,7 @@ Before finalizing, confirm:
 - Sourced claims have a `refs/<slug>/README.md` source log, and rendered citations line up with that reference packet.
 - The generated artwork matches the article's theme and avoids visible text artifacts.
 - The article passes `blog-writing-guide`: strong opening, specific headings, concrete technical detail, tradeoffs or limitations where relevant, no banned language, and a useful closing.
+- The article stays at 5 minutes or less unless the user explicitly approved a longer post.
 - `cardImage.png` and `blogHeader.png` exist with exact required dimensions.
 - Social posts are saved under `posts/` and are included in the PR description when a PR is opened.
 - Unrelated worktree changes were not modified, staged, committed, or published.
