@@ -1,9 +1,9 @@
 ---
-name: trending-blog-topic-research
-description: Autonomously research current technical conversations across Hacker News, Twitter/X, Reddit, and supporting web sources, then propose exactly 5 strong Ylang Labs blog topic candidates. Use this skill whenever the user asks for trending blog ideas, topic research, what to write about next, Hacker News/Twitter/Reddit trend scans, content ideation from social signals, or a shortlist of possible posts. If the user wants those topics added to the GitHub content calendar, handed off as issues, scheduled, or tracked, use `github-content-calendar` after the shortlist is produced.
+name: blog-topic-research
+description: Autonomously research current technical conversations across Hacker News, Twitter/X, Reddit, and supporting web sources, then propose exactly 5 strong Ylang Labs blog topic candidates. Use this skill whenever the user asks for trending blog ideas, topic research, what to write about next, Hacker News/Twitter/Reddit trend scans, content ideation from social signals, or a shortlist of possible posts. If the user wants those topics added to the GitHub content calendar, handed off as issues, scheduled, or tracked, use `content-calendar-management` after the shortlist is produced.
 ---
 
-# Trending Blog Topic Research
+# Blog Topic Research
 
 Use this skill to autonomously turn current technical discourse into five blog ideas that fit the Ylang Labs publication: practical AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, developer tooling, and implementation lessons.
 
@@ -20,7 +20,7 @@ Default assumptions:
 - Scan Hacker News, Twitter/X or credible proxies, Reddit, and supporting web sources.
 - Return exactly 5 blog topic candidates, ranked strongest to weakest.
 - Include source links, dates or recency notes, and source limitations.
-- Prefer practical article angles that can later hand off to `blog-authoring` or `end-to-end-blog-creation`.
+- Prefer practical article angles that can later hand off to `blog-mdx-authoring` or `blog-publishing-workflow`.
 
 If a platform is inaccessible, continue with the best available public substitutes and clearly label the limitation. Never fabricate unavailable social posts, engagement counts, authors, or quotes.
 
@@ -86,13 +86,13 @@ Use recency filters when available. For trend research, default to the last 7-14
    - Avoid pure news summaries, celebrity/company gossip, investment takes, culture-war bait, and posts that cannot be verified with primary sources.
 
 7. Prepare next-step handoff.
-   - If the user wants to proceed with one topic, hand off to `blog-authoring` or `end-to-end-blog-creation`.
-   - If the user wants the shortlist or selected topic tracked in GitHub, hand off to `github-content-calendar` at `.agents/skills/github-content-calendar/SKILL.md`.
+   - If the user wants to proceed with one topic, hand off to `blog-mdx-authoring` or `blog-publishing-workflow`.
+   - If the user wants the shortlist or selected topic tracked in GitHub, hand off to `content-calendar-management` at `.agents/skills/content-calendar-management/SKILL.md`.
    - If working inside the Ylang Labs blog repo, save the final shortlist to `posts/topic-research-YYYY-MM-DD.md` unless the user asked for chat-only output or the environment is read-only.
 
 ## Content Calendar Handoff
 
-When the user asks to add researched topics to the content calendar, read `github-content-calendar` and create or update GitHub issues after the research output is complete.
+When the user asks to add researched topics to the content calendar, read `content-calendar-management` and create or update GitHub issues after the research output is complete.
 
 For each calendarized topic, map the research output into:
 
