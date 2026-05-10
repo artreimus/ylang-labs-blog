@@ -49,7 +49,7 @@ This article is based on a paraphrased, timestamped transcript outline supplied 
    - URL: https://platform.claude.com/docs/en/build-with-claude/compaction
    - Publisher: Anthropic
    - Accessed: 2026-05-10
-   - Use: Confirms server-side compaction behavior for long-running conversations and agentic workflows.
+   - Use: Confirms server-side compaction behavior for long-running conversations and agentic workflows, including beta status and beta-header requirements.
 
 7. Advisor tool
 

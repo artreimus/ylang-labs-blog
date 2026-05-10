@@ -124,6 +124,8 @@ They plan, call tools, revise the plan, call more tools, hit errors, recover, te
 
 Compaction is the blunt tool for that moment. Anthropic's docs describe server-side compaction as automatically summarizing older context when a long-running conversation approaches a configured token threshold. The API creates a `compaction` block, continues from the summary, and later requests can drop message blocks before that compaction point ([Anthropic compaction docs](https://platform.claude.com/docs/en/build-with-claude/compaction)).
 
+As of May 10, 2026, Anthropic lists server-side compaction as beta and requires the `compact-2026-01-12` beta header, so treat it as a gated production feature rather than an invisible default.
+
 The key is that compaction is not only a token cap workaround. Long histories also degrade focus. The model may be able to technically fit the previous 80 turns, but it may not benefit from carrying every intermediate mistake, every failed tool call, every stale branch of reasoning, and every old partial result.
 
 Good compaction preserves:
@@ -216,7 +218,7 @@ Then apply the techniques in order:
 1. Add prompt caching around stable prefixes.
 2. Move rarely used tools behind tool search once the tool catalog gets large.
 3. Stop dumping raw tool results into the prompt. Extract structured evidence first.
-4. Add compaction before long histories force emergency truncation.
+4. Add gated compaction before long histories force emergency truncation.
 5. Add advisor calls only for decisions where a better plan changes the task outcome.
 
 That order matters. If your cache hit rate is terrible, an advisor model will not fix your economics. If your tool results are huge, a bigger context window will delay the pain rather than remove it.
