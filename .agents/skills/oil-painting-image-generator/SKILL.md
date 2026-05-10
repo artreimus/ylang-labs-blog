@@ -1,9 +1,9 @@
 ---
-name: beautiful-oil-painting-image-gen
+name: oil-painting-image-generator
 description: Generate or prompt beautiful museum-quality oil-painting images. Use this skill whenever the user asks for an oil painting, classical painting, painterly portrait, landscape, still life, mythological scene, historical scene, Renaissance, Baroque, Romantic, Impressionist, Post-Impressionist, Symbolist, Dutch Golden Age, museum-quality artwork, or a photo transformed into an oil painting. Also use it when the user wants a refined image-generation prompt in an art-historical oil-painting style. Do not use it for logos, UI mockups, diagrams, photorealistic photography, or generic digital illustration unless the user explicitly asks for an oil-painting treatment.
 ---
 
-# Beautiful Oil Painting Image Generation
+# Oil Painting Image Generator
 
 Use this skill when the user asks to generate a beautiful oil painting, classical painting, museum-quality artwork, painterly portrait, landscape, still life, historical scene, mythological scene, or emotionally rich visual inspired by famous oil-painting traditions.
 
@@ -32,7 +32,7 @@ Required flow:
 
 1. Create a refined oil-painting prompt for the article's central technical metaphor.
 2. Generate or save the source artwork as `public/static/images/blogs/[slug]/source-artwork.png`.
-3. Use `blog-image-creator` to crop the source artwork into:
+3. Use `blog-image-cropper` to crop the source artwork into:
    - `cardImage.png` at exactly `1080x1920`
    - `blogHeader.png` at exactly `1260x700`
 
