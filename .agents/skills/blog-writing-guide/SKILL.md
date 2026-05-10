@@ -54,6 +54,18 @@ Structure every post around what the reader is actually wondering, not your inte
 
 For engineering deep-dives, also address: 5. **What did we try that didn't work?** (Builds trust) 6. **What are the known limitations?** (Shows intellectual honesty)
 
+## Default Reading Time
+
+Default every Ylang Labs blog post to 5 minutes or less unless the user explicitly asks for a longer piece or approves a longer deep dive.
+
+Treat this as a scope constraint, not a reason to make posts shallow:
+
+- Prefer sharper scope over broader coverage.
+- Cut repeated setup, generic background, repeated examples, and low-value transitions before cutting technical substance.
+- Keep one strong technical argument instead of trying to cover every adjacent idea.
+- If the topic genuinely needs more than 5 minutes, ask for approval or clearly confirm the user wants a longer post before drafting past that limit.
+- When editing an existing draft that is over 5 minutes and no longer length was requested, shorten it by narrowing scope, moving side paths to follow-up posts, or replacing long exposition with a diagram or compact example.
+
 ## Formatting for Skimmability
 
 People scroll. Shorter paragraphs are almost always better for keeping people reading.
@@ -195,7 +207,7 @@ Posts worth sharing contain at least one of:
 6. If you discuss a decision, explain what you didn't choose and why.
 7. Every post must have a clear "who is this for" in the author's mind before writing.
 8. Changelogs belong in the changelog. Blog posts should offer something more.
-9. When in doubt, go deeper. The risk of being too shallow is far greater than being too detailed.
+9. When in doubt, sharpen the scope before adding length. Depth beats breadth, but the default post still stays at 5 minutes or less unless the user approves a longer piece.
 10. Write the post you wish existed when you were trying to solve this problem.
 
 ## When Reviewing or Editing a Draft
@@ -216,7 +228,7 @@ Run through both checklists:
 - Passes the "would I share this?" test
 - No corporate language, filler, or fluff
 - Headings convey information
-- Right length (not padded, not too thin)
+- Right length: 5 minutes or less by default, unless the user explicitly allowed a longer post
 - Title is specific and compelling
 
 **Final Check:**
