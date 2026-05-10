@@ -1,0 +1,277 @@
+---
+title: 'HyperFrames Turns HTML Into the Video Timeline for AI Agents'
+date: '2026-05-10'
+tags: ['AI/ML', 'Agents', 'Generative AI']
+draft: false
+summary: 'HyperFrames makes video authoring look less like a closed editor and more like the web: plain HTML, data attributes, seekable animation runtimes, and deterministic rendering that coding agents can operate.'
+tldr: |
+  - HyperFrames treats an HTML document as a video composition, with `data-*` attributes controlling timing, duration, tracks, media, and nested scenes.
+  - Its renderer seeks each frame instead of relying on wall-clock playback, which is the key move for deterministic agent-driven video pipelines.
+  - Frame Adapters let GSAP, CSS animations, Lottie, Three.js, WebGL, and other runtimes answer the one question video rendering needs: what should frame N look like?
+  - The revolutionary part is not replacing every video tool. It is giving agents and humans a shared, editable source of truth: the DOM.
+  - The limits matter: HyperFrames is single-machine today, the adapter API is still v0, and experimental browser features need fallback paths.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/hyperframes-html-video-for-ai-agents/cardImage.png'
+images: ['/static/images/blogs/hyperframes-html-video-for-ai-agents/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+The revolutionary thing about HyperFrames is not that it renders HTML.
+
+It is that it treats HTML as the video timeline. A coding agent can write a normal web document, preview it in a browser, and render a deterministic MP4 without learning a proprietary editor, translating into React, or pretending a GUI is an API.
+
+That sounds small until you try to automate video production. Then it looks like the obvious missing layer.
+
+<Image
+  alt="A technical diagram of the HyperFrames HTML-to-video rendering pipeline"
+  src="/static/images/blogs/hyperframes-html-video-for-ai-agents/source-diagram-header.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  HyperFrames is interesting because the DOM, timing attributes, frame adapters, browser capture,
+  and encoder all become parts of one inspectable rendering pipeline.
+</DiagramSubtitle>
+
+<div className="not-prose my-8 rounded-lg border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-900/60">
+  <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-secondary-700 dark:text-secondary-300">
+    Contents
+  </p>
+  <ol className="m-0 list-decimal space-y-2 pl-5 text-gray-700 dark:text-gray-200">
+    <li>
+      <a className="no-underline hover:text-primary-600 dark:hover:text-primary-400" href="#what-is-hyperframes">
+        What is HyperFrames?
+      </a>
+    </li>
+    <li>
+      <a className="no-underline hover:text-primary-600 dark:hover:text-primary-400" href="#why-html-is-a-radical-video-format">
+        Why HTML is a radical video format
+      </a>
+    </li>
+    <li>
+      <a className="no-underline hover:text-primary-600 dark:hover:text-primary-400" href="#how-hyperframes-renders-video-without-trusting-real-time">
+        How HyperFrames renders video without trusting real time
+      </a>
+    </li>
+    <li>
+      <a className="no-underline hover:text-primary-600 dark:hover:text-primary-400" href="#the-agent-workflow-is-the-main-event">
+        The agent workflow is the main event
+      </a>
+    </li>
+    <li>
+      <a className="no-underline hover:text-primary-600 dark:hover:text-primary-400" href="#where-hyperframes-fits-next-to-remotion">
+        Where HyperFrames fits next to Remotion
+      </a>
+    </li>
+    <li>
+      <a className="no-underline hover:text-primary-600 dark:hover:text-primary-400" href="#what-to-build-first">
+        What to build first
+      </a>
+    </li>
+  </ol>
+</div>
+
+## What is HyperFrames?
+
+HyperFrames is an open-source framework from HeyGen for turning HTML into deterministic, frame-by-frame rendered video. The authoring surface is plain web technology: HTML, CSS, JavaScript, media tags, `data-*` attributes, and animation libraries such as GSAP, Lottie, CSS animations, Three.js, or the Web Animations API.
+
+The smallest useful composition looks more like a web page than a video-project file:
+
+```html
+<div
+  id="root"
+  data-composition-id="launch-card"
+  data-start="0"
+  data-width="1920"
+  data-height="1080"
+>
+  <h1
+    id="title"
+    class="clip"
+    data-start="0"
+    data-duration="5"
+    data-track-index="0"
+  >
+    Ship the demo
+  </h1>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script>
+    const tl = gsap.timeline({ paused: true })
+    tl.from('#title', { opacity: 0, y: 48, duration: 0.8 }, 0)
+
+    window.__timelines = window.__timelines || {}
+    window.__timelines['launch-card'] = tl
+  </script>
+</div>
+```
+
+The rules are intentionally boring. A composition has an ID, dimensions, timed clips, tracks, durations, and a paused timeline the renderer can seek. HyperFrames then previews that page in the browser or renders it to MP4, MOV, WebM, or a PNG sequence through Chrome and FFmpeg.
+
+That boringness is the point.
+
+Agents are already fluent in web pages. Humans can inspect them. Designers can edit the DOM. Engineers can lint them, diff them, test them, and keep them in Git. Video becomes source code without forcing everything through a React component model or a closed timeline format.
+
+## Why HTML is a radical video format
+
+Most code-to-video systems start by inventing a video API. HyperFrames starts with the browser.
+
+That choice changes the failure mode. Instead of asking an agent to operate a visual editor or generate a framework-specific composition, you ask it to produce HTML. The same artifact can be:
+
+- played in a browser preview,
+- edited by a human in Studio,
+- linted by the CLI,
+- rendered by a producer service,
+- versioned in Git,
+- reused as a nested composition,
+- passed variables at render time.
+
+<MermaidDiagram>
+  {`
+    flowchart LR
+      A["Prompt or brief"] --> B["HTML composition"]
+      B --> C["Data attributes<br/>timing, tracks, media"]
+      B --> D["Frame Adapters<br/>GSAP, CSS, Lottie, Three.js"]
+      C --> E["Seek-driven renderer"]
+      D --> E
+      E --> F["Chrome frame capture"]
+      F --> G["FFmpeg encode"]
+      G --> H["MP4, MOV, WebM, PNG sequence"]
+      B --> I["Studio and browser preview"]
+      I --> B
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  The important loop is not prompt to pixels. It is prompt to editable DOM to deterministic render.
+</DiagramSubtitle>
+
+The docs call out a few attributes that make the format concrete. `data-start` determines when a clip begins. `data-duration` determines how long it lasts. `data-track-index` controls track order and overlap rules. `class="clip"` tells the runtime to manage element visibility.
+
+That gives agents a compact grammar. They do not need to infer what a video timeline is. They can write one into the DOM.
+
+## How HyperFrames renders video without trusting real time
+
+The hardest part of browser video rendering is that browsers are built for playback, not reproducible capture. A web animation normally moves according to wall-clock time. That is fine for a user watching a page. It is a problem when a renderer needs frame 139 to be exactly frame 139 every time.
+
+HyperFrames solves this by making rendering seek-driven.
+
+For each frame, the engine computes the frame time from `frame / fps`, asks adapters to seek their runtimes to that frame, captures the browser output, and sends the frames into FFmpeg. The renderer is not waiting for a timeline to play. It is interrogating the composition one frame at a time.
+
+That is why Frame Adapters are the architectural center of the project. An adapter gives an animation runtime a deterministic answer to one question:
+
+<Callout>
+  What should the screen look like at frame N?
+</Callout>
+
+The first-party adapter list is a useful map of the ambition: GSAP, Anime.js, CSS keyframes, Lottie, Three.js, WebGL, and the Web Animations API. The docs also mark the Adapter API as v0, so this is still an evolving extension point. The stable idea is the contract: adapters should be paused, seekable, idempotent, finite, and free of wall-clock dependencies.
+
+That is a very different mental model from recording the browser while it plays. Recording asks, "What happened while we watched?" HyperFrames asks, "What must this exact frame be?"
+
+## The agent workflow is the main event
+
+The quickstart is revealing. The recommended path is not "open the editor and click around." It is:
+
+```bash
+npx skills add heygen-com/hyperframes
+npx hyperframes init my-video --non-interactive --example blank
+npx hyperframes preview
+npx hyperframes render --output output.mp4
+```
+
+The docs recommend Node.js 22 or later and FFmpeg for local rendering. They also describe agent skills that teach Claude Code, Cursor, Gemini CLI, and Codex the framework-specific rules: timed elements need `class="clip"`, GSAP timelines must be paused and registered, videos should be muted while audio is handled separately, and random values should be seeded if they affect render output.
+
+That is the part that feels new.
+
+Video creation has usually forced agents into one of two bad shapes: drive a UI like a brittle intern, or write code against a specialized rendering framework that narrows the creative vocabulary. HyperFrames gives the agent the same medium the browser consumes. Then it adds a command-line loop that agents can actually run.
+
+This also changes how you iterate. A human can ask for editor-like changes in language:
+
+- make the title larger,
+- add a lower third at 0:03,
+- change the transition energy,
+- turn this CSV into a bar chart race,
+- export a transparent lower third as ProRes MOV.
+
+The agent edits the source HTML. The human previews the result. The renderer produces the final asset.
+
+That is not magic. It is a better contract.
+
+## Where HyperFrames fits next to Remotion
+
+The clean comparison is not "HyperFrames wins, Remotion loses." Remotion proved that headless Chrome can be a serious video renderer, and it has mature distributed rendering through Remotion Lambda. If your team already has a React component system and needs production-scale Lambda rendering today, Remotion remains a strong choice.
+
+HyperFrames makes a different bet. It optimizes for HTML as the source of truth, agents as first-class authors, and visual editing against the same DOM the renderer consumes.
+
+| Decision | HyperFrames bet | Why it matters |
+| --- | --- | --- |
+| Authoring surface | HTML, CSS, JavaScript, `data-*` attributes | Agents and humans can read and edit the same artifact |
+| Animation model | Seekable runtimes through Frame Adapters | GSAP, Lottie, CSS, and WebGL can be driven frame by frame |
+| Build model | `index.html` can play as-is | Fewer moving parts for generated projects and CI |
+| Editing model | DOM as render source and data source | Studio-style direct manipulation maps back to the rendered source |
+| Rendering scale | Single-machine today | Good for local and service renders, not yet Remotion Lambda scale |
+
+That last row matters. HyperFrames is exciting because the abstraction is right for agents, not because every production gap is closed. The docs are clear that distributed rendering is not where HyperFrames leads today. The same goes for the Frame Adapter API, which is experimental until v1.
+
+The honest take is stronger than the hype: HyperFrames is not the final video stack. It is a credible foundation for one.
+
+## HTML-in-Canvas is the wild card
+
+The HTML-in-Canvas guide is where HyperFrames starts to look less like "HTML video" and more like a browser-native VFX system.
+
+The idea is to capture live DOM into canvas, then use it as a texture in WebGL or Three.js. That means a dashboard, form, landing page, or app UI can become material for shaders, 3D transforms, and post-processing effects while still being authored as HTML.
+
+There is an important caveat. The underlying `drawElementImage` API is experimental and requires a browser flag for live preview, though HyperFrames enables the needed flag automatically during rendering. That makes it powerful, but not something to treat as plain old web platform behavior yet.
+
+Still, the direction is obvious. The browser already knows how to render the richest interface surface humans have ever standardized. HyperFrames asks: why flatten that into screenshots before the creative work starts?
+
+## What to build first
+
+If you want to understand HyperFrames quickly, do not start with a full product launch film. Start with something that proves the model:
+
+1. A transparent lower third exported as MOV for a video editor.
+2. A product-card reveal with GSAP timing and sound.
+3. A data chart animation generated from CSV.
+4. A website-to-video pass over a real landing page.
+5. A 3D device shot where a live HTML screen becomes a WebGL texture.
+
+Then evaluate the boring things:
+
+- Does the preview match the render?
+- Can the agent make small changes without damaging timing?
+- Does `npx hyperframes lint` catch structure mistakes?
+- Are assets local before render time?
+- Does Docker mode matter for your reproducibility bar?
+- Do transparent exports work in the editor you actually use?
+
+That is the difference between a demo and a workflow.
+
+## Why this feels like a real turn
+
+The last decade of video tooling made timelines more programmable. HyperFrames pushes in the other direction too: it makes programmable video more editable.
+
+That is the reason it feels revolutionary. Not because the first version replaces every video editor, render farm, or creative director. It does not. It feels revolutionary because the core artifact is finally something both sides of the new production loop can touch.
+
+Agents get HTML.
+
+Humans get the DOM.
+
+The renderer gets deterministic frames.
+
+That triangle is much more interesting than another prompt box.
+
+## References
+
+1. [HyperFrames documentation index](https://hyperframes.heygen.com/llms.txt)
+2. [HyperFrames introduction](https://hyperframes.heygen.com/introduction)
+3. [HyperFrames quickstart](https://hyperframes.heygen.com/quickstart)
+4. [HyperFrames compositions](https://hyperframes.heygen.com/concepts/compositions)
+5. [HyperFrames data attributes](https://hyperframes.heygen.com/concepts/data-attributes)
+6. [HyperFrames deterministic rendering](https://hyperframes.heygen.com/concepts/determinism)
+7. [HyperFrames frame adapters](https://hyperframes.heygen.com/concepts/frame-adapters)
+8. [HyperFrames HTML-in-Canvas](https://hyperframes.heygen.com/guides/html-in-canvas)
+9. [HyperFrames rendering guide](https://hyperframes.heygen.com/guides/rendering)
+10. [HyperFrames vs Remotion](https://hyperframes.heygen.com/guides/hyperframes-vs-remotion)
