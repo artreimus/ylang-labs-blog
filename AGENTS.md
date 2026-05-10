@@ -9,13 +9,20 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 ## Required First Steps
 
 - Check relevant local skills before starting. For this repo, prefer:
-  - `trending-blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
-  - `end-to-end-blog-creation` when asked to turn a blog idea or draft into a complete post with generated artwork, blog assets, social copy, and PR publication.
+  - `blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
+  - `content-calendar-management` when asked to use GitHub Issues/Projects as the editorial calendar, create content briefs, schedule posts/projects/social content, or audit planned work.
+  - `blog-publishing-workflow` when asked to turn a blog idea or draft into a complete post with generated artwork, blog assets, social copy, and PR publication.
   - `blog-writing-guide` as the primary Ylang Labs writing, rewriting, editing, and editorial review standard for blog posts.
-  - `blog-authoring` for creating or structuring new blog posts.
-  - `blog-image-creator` for preparing `cardImage.png` and `blogHeader.png`.
-  - `blog-social-post-generator` when asked for social copy tied to a post or project.
-  - `beautiful-oil-painting-image-gen` when asked for oil-painting-style generated artwork.
+  - `blog-factuality-review` when asked to review, critique, fact-check, validate, or assess publication readiness for Ylang Labs blog drafts.
+  - `blog-mdx-authoring` for creating or structuring new blog posts.
+  - `blog-image-cropper` for preparing `cardImage.png` and `blogHeader.png`.
+  - `technical-blog-image-generator` when asked to create technical blog images, cover art, headers, architecture plates, process maps, or image-generation prompts for technical visuals.
+  - `technical-blog-image-review` when asked to independently review generated technical blog images for factuality, technical accuracy, readability, crop safety, or design quality.
+  - `blog-social-copy` when asked for social copy tied to a post or project.
+  - `oil-painting-image-generator` when asked for oil-painting-style generated artwork.
+  - `anthropic-style-writing` when asked to write, revise, or critique Ylang Labs content in an Anthropic-like voice.
+- Repo-owned skills live under `.agents/skills/<name>/SKILL.md`. Use clear kebab-case names in the form `<domain>-<job>[-<artifact-or-mode>]`, avoid abbreviations such as `gen`, and keep the directory name aligned with the `name:` frontmatter.
+- Do not rename lockfile-managed imported skills unless intentionally forking them. When renaming a skill, update its directory, `name:` frontmatter, cross-skill references, and this skill list in the same change.
 - Research before planning. Inspect the current files, schemas, layouts, and local docs before writing a plan or changing code.
 - For autonomous trend/topic research, use Codex's available Exa MCP search tool when present. Do not add repo-level Exa SDK dependencies or `EXA_API_KEY` wiring unless the user asks for a standalone scheduled script outside Codex.
 - When a library detail is unclear, use Context7 for current docs. If Context7 is insufficient, use web search and cite external sources in the final answer.
@@ -116,6 +123,7 @@ Blog asset standards:
 Blog writing standards:
 
 - The publication focuses on AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, and practical implementation lessons.
+- Default blog posts to 5 minutes or less unless the user explicitly asks for or approves a longer post. If a topic needs more depth, narrow the scope, split follow-up posts, or confirm the longer format before drafting past the default.
 - Prefer concrete technical explanations, architecture diagrams, examples, and citations over generic marketing prose.
 - Use the existing editorial pattern: clear intro, technical sections, diagrams or images where useful, and references when relying on external sources.
 - For formal references, add entries to `data/references-data.bib`, set `bibliography: references-data.bib`, and cite with `[@citationKey]`.
@@ -236,6 +244,7 @@ For content-only changes:
 
 - Confirm frontmatter matches `contentlayer.config.ts`.
 - Confirm referenced images exist under `public/static/images/...`.
+- Confirm blog drafts stay at 5 minutes or less by default, or explicitly note that the user approved a longer post.
 - Run `pnpm build` when feasible, especially for new MDX, citations, components, or route-visible content.
 
 For code/layout changes:
