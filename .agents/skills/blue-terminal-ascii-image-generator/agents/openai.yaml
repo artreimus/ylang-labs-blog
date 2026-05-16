@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blue Terminal ASCII Image Generator"
+  short_description: "Create blue terminal ASCII-style images"
+  default_prompt: "Create a blue terminal ASCII-style image prompt for this subject."
