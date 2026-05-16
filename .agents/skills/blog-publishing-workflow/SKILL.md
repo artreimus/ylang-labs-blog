@@ -151,8 +151,9 @@ If using generated cover artwork, the prompt should:
 - Represent the article's core idea as a clear visual metaphor or technical scene.
 - Avoid text, UI mockups, logos, watermarks, signatures, and copied famous compositions.
 - Use a visual direction suited to the topic.
-- Preserve enough negative space and scene structure to crop into both portrait and wide formats.
-- Be usable as the source for both the blog cover/card image and the blog header unless the user explicitly asks for a different visual direction.
+- Preserve enough negative space and scene structure for the requested cover format.
+- Keep cover assets separate from inline section diagrams unless the user explicitly asks to reuse an inline diagram as the cover.
+- `blogHeader.png` and the first section image do not need to be the same image or use the same source. Do not make them match by default.
 
 Save the original generated cover image under:
 
@@ -163,6 +164,9 @@ public/static/images/blogs/<slug>/source-artwork.png
 If the image-generation tool returns a different filename or format, save or convert a stable source image in the blog asset directory before cropping.
 
 If using generated section visuals, save each final technical image under a descriptive filename in the same blog asset directory and document the prompt or visual spec in `refs/<slug>/README.md` when reproducibility matters.
+
+When the request is only for inline section visuals, do not update `cardImage.png` or `blogHeader.png`.
+Do not derive `blogHeader.png` from the first section visual unless the user explicitly asks for the header to reuse that image.
 
 ### 5. Crop Or Finalize Blog Assets
 

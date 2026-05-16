@@ -112,10 +112,8 @@ For Ylang Labs blog visuals:
 
 - Store final raster assets under `public/static/images/blogs/[slug]/`.
 - Use descriptive inline filenames such as `scientific-blueprint-system-map.png`, `accelerator-style-agent-loop.png`, or `planetary-atlas-architecture.png`.
-- For a requested scientific-blueprint cover, generate separate portrait and wide compositions when possible, then use `blog-image-cropper` for:
-  - `cardImage.png` at `1080x1920`
-  - `blogHeader.png` at `1260x700`
-- Do not force this style for normal blog covers unless the user requests it. The default cover-art path may still be `oil-painting-image-generator`.
+- Treat inline diagrams and cover assets as separate surfaces. Do not update `cardImage.png` or `blogHeader.png` unless the user explicitly asks for cover assets.
+- `blogHeader.png` and the first section image do not need to match. Do not reuse, crop, or derive the header from section 1 artwork unless the user explicitly asks for that relationship.
 
 ## Reference Image Handling
 
