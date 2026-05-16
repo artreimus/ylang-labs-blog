@@ -288,4 +288,5 @@ Always state which validation ran and any validation that could not be run.
 - When making changes and committing them to a PR, do not leave the local worktree dirty from your task. Before finalizing, confirm `git status --short` is clean or contains only unrelated pre-existing changes that were intentionally left untouched.
 - When making changes and committing them, do not leave the worktree dirty with those same task-related changes after they are already committed. Clean up task-owned generated output, staged leftovers, and duplicate dirty files before finalizing, while preserving unrelated pre-existing work.
 - Keep generated files, plans, local notes, temporary outputs, and `refs/` local research materials out of commits unless explicitly requested.
+- Never commit changes under the `/refs` folder, even when committing other task-related files.
 - If unrelated files are already dirty, mention that they were left untouched.
