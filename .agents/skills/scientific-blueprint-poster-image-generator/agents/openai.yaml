@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scientific Blueprint Poster"
+  short_description: "Create white-on-blue scientific poster images"
+  default_prompt: "Create a white-on-blue scientific blueprint poster image prompt for this subject."
