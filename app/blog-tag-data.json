@@ -1,1 +1,7 @@
-{ "aiml": 17, "agents": 9, "generative-ai": 2, "context-engineering": 2, "security": 1 }
+{
+  "agents": 9,
+  "aiml": 17,
+  "context-engineering": 2,
+  "generative-ai": 2,
+  "security": 1
+}
