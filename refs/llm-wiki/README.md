@@ -2,7 +2,7 @@
 
 Source packet for `data/blogs/llm-wiki.mdx`.
 
-Access date: 2026-05-15
+Access date: 2026-05-16
 
 ## Sources Used
 
@@ -25,6 +25,45 @@ Access date: 2026-05-15
 - Used for:
   - The claim that `qmd` provides local Markdown search with BM25, vector search, and reranking.
   - The practical note that search can sit under the maintained wiki when `index.md` is no longer enough.
+  - The note that current qmd exposes agent-friendly outputs and an MCP server.
+
+### Synthadoc, LLM knowledge compilation engine
+
+- URL: https://github.com/axoviq-ai/synthadoc
+- Publisher: GitHub repository
+- Accessed: 2026-05-16
+- Used for:
+  - Candidate staging for low-confidence or not-yet-reviewed wiki pages.
+  - Routing, audit trail, source ingest, and linting concepts in larger LLM Wiki-style systems.
+
+### OpenKB, open LLM knowledge base
+
+- URL: https://github.com/VectifyAI/OpenKB
+- Publisher: GitHub repository
+- Accessed: 2026-05-16
+- Used for:
+  - The compiled-wiki framing around source summaries, concepts, cross-links, index updates, log updates, and lint loops.
+  - The note that a single source can touch many wiki pages during compilation.
+
+### nvk/llm-wiki, topic-isolated LLM Wiki implementation
+
+- URL: https://github.com/nvk/llm-wiki
+- Project site: https://llm-wiki.net/
+- Publisher: GitHub repository
+- Accessed: 2026-05-16
+- Used for:
+  - Isolated topic wikis under a lightweight hub.
+  - The practical recommendation to start with a scoped topic wiki rather than a universal wiki.
+
+### Ss1024sS/LLM-wiki, setup and ingest pipeline
+
+- URL: https://github.com/Ss1024sS/LLM-wiki
+- Ingest pipeline reference: https://raw.githubusercontent.com/Ss1024sS/LLM-wiki/main/docs/ingest-pipeline.md
+- Publisher: GitHub repository
+- Accessed: 2026-05-16
+- Used for:
+  - Deterministic raw intake before LLM synthesis.
+  - Source hashes, duplicate detection, stale reporting, manifest output, and cheap local metadata extraction.
 
 ### Vannevar Bush, "As We May Think"
 
@@ -43,44 +82,18 @@ Access date: 2026-05-15
 
 ## Generated Visuals
 
-Visuals use two durable repo-backed paths:
-
-- **Deterministic SVG source plates rendered to PNG** for the hero/card and architecture image.
-- **Built-in OpenAI `imagegen` output copied into the repo** for the three section plates, following
-  the `technical-blog-image-generator` workflow.
+Visuals are committed as PNG assets. Earlier SVG source notes were removed because the final tracked asset directory only contains the rendered PNGs.
 
 Committed visual inventory:
 
-| Asset                                                                       | Durable source or prompt record                | Use                                                    |
-| --------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------ |
-| `public/static/images/blogs/llm-wiki/blogHeader.svg`                        | SVG source in repo                             | Wide hero source                                       |
-| `public/static/images/blogs/llm-wiki/blogHeader.png`                        | Rendered from `blogHeader.svg`                 | `images[0]` / post hero                                |
-| `public/static/images/blogs/llm-wiki/card-artwork.svg`                      | SVG source in repo                             | Card source                                            |
-| `public/static/images/blogs/llm-wiki/cardImage.png`                         | Rendered from `card-artwork.svg`               | Blog listing card                                      |
-| `public/static/images/blogs/llm-wiki/source-diagram.svg`                    | SVG source in repo                             | Architecture source                                    |
-| `public/static/images/blogs/llm-wiki/llm-wiki-architecture.png`             | Rendered from `source-diagram.svg`             | Architecture image in "compiler for knowledge" section |
-| `public/static/images/blogs/llm-wiki/rag-vs-llm-wiki-writeback.png`         | Prompt spec below                              | RAG versus writeback section image                     |
-| `public/static/images/blogs/llm-wiki/llm-wiki-operating-contract.png`       | Prompt spec below                              | Operating contract section image                       |
-| `public/static/images/blogs/llm-wiki/llm-wiki-failure-modes-guardrails.png` | Prompt spec below plus local label repair note | Failure modes section image                            |
-
-Deterministic SVG plate specs:
-
-1. **Hero/header and card**
-
-   - Mode: editorial technical framework poster.
-   - Subject: LLM Wiki as a knowledge compilation pipeline.
-   - Palette: Ylang paper, graphite ink, faint grid, Ylang yellow for the agent compiler, Ylang green for maintained wiki artifacts.
-   - Structure: raw sources, agent compiler, maintained wiki, schema, answer/writeback.
-   - Outputs:
-     - `blogHeader.svg` -> `blogHeader.png` at `1260x700`.
-     - `card-artwork.svg` -> `cardImage.png` at `1080x1920`.
-
-2. **Architecture source diagram**
-
-   - Mode: process architecture sheet.
-   - Subject: raw sources, schema, agent compiler, maintained wiki, answer, and writeback loop.
-   - Palette: Ylang paper, graphite ink, faint grid, Ylang yellow for compiler work, Ylang green for persisted wiki artifacts.
-   - Output: `source-diagram.svg` -> `llm-wiki-architecture.png` at `1600x900`.
+| Asset                                                                       | Durable source or prompt record                | Use                                                  |
+| --------------------------------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------- |
+| `public/static/images/blogs/llm-wiki/blogHeader.png`                        | Generated artwork, final PNG                   | `images[0]` / post hero                              |
+| `public/static/images/blogs/llm-wiki/cardImage.png`                         | Generated artwork, final PNG                   | Blog listing card at `1080x1920`                     |
+| `public/static/images/blogs/llm-wiki/llm-wiki-architecture.png`             | Generated architecture artwork, final PNG      | Architecture image in "build one topic wiki" section |
+| `public/static/images/blogs/llm-wiki/rag-vs-llm-wiki-writeback.png`         | Prompt spec below                              | RAG versus writeback section image                   |
+| `public/static/images/blogs/llm-wiki/llm-wiki-operating-contract.png`       | Prompt spec below                              | Operating contract section image                     |
+| `public/static/images/blogs/llm-wiki/llm-wiki-failure-modes-guardrails.png` | Prompt spec below plus local label repair note | Failure modes section image                          |
 
 Prompt specs:
 
