@@ -1,6 +1,6 @@
 ---
 name: oil-painting-image-generator
-description: Generate or prompt beautiful museum-quality oil-painting images. Use this skill whenever the user asks for an oil painting, classical painting, painterly portrait, landscape, still life, mythological scene, historical scene, Renaissance, Baroque, Romantic, Impressionist, Post-Impressionist, Symbolist, Dutch Golden Age, museum-quality artwork, or a photo transformed into an oil painting. Also use it when the user wants a refined image-generation prompt in an art-historical oil-painting style. Do not use it for logos, UI mockups, diagrams, photorealistic photography, or generic digital illustration unless the user explicitly asks for an oil-painting treatment.
+description: Generate or prompt beautiful museum-quality oil-painting images. Use this skill whenever the user asks for an oil painting, classical painting, painterly portrait, landscape, still life, mythological scene, historical scene, Renaissance, Baroque, Romantic, Impressionist, Post-Impressionist, Symbolist, Dutch Golden Age, museum-quality artwork, or a photo transformed into an oil painting. Also use it for normal Ylang Labs blog cover artwork, `cardImage.png`, `blogHeader.png`, and source artwork unless the user explicitly requests a different cover style. Do not use it for logos, UI mockups, diagrams, photorealistic photography, or generic digital illustration unless the user explicitly asks for an oil-painting treatment.
 ---
 
 # Oil Painting Image Generator
@@ -37,6 +37,8 @@ Required flow:
    - `blogHeader.png` at exactly `1260x700`
 
 The source painting should work in both portrait and wide crops: place the main subject near the center, preserve readable negative space around the subject, avoid important details near the edges, and avoid any text or logo-like marks because the crop targets are reused across listings, social cards, and the PostBanner hero.
+
+Use `technical-blog-image-generator` separately for section-level diagrams, architecture plates, process maps, and inline technical figures. Do not create SVG/vector/code-native sources for cover artwork unless the user explicitly asks for manual vector work.
 
 ## Core Principle
 

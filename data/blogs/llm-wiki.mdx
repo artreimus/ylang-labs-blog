@@ -1,0 +1,205 @@
+---
+title: 'LLM Wiki'
+date: '2026-05-15'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'LLM Wiki is a practical pattern for agentic knowledge work: raw sources stay immutable, an agent maintains a Markdown wiki, and good answers write back into durable context.'
+tldr: |
+  - LLM Wiki is an agent-maintained Markdown layer between raw sources and answers, not a finished product.
+  - The useful shift is writeback: ingests, questions, contradictions, and good analyses update persistent pages instead of dying in chat.
+  - RAG still matters at scale, but it becomes search infrastructure under a maintained knowledge layer.
+  - Teams should treat the schema, source log, lint pass, and human review loop as the real system.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/llm-wiki/cardImage.png'
+images: ['/static/images/blogs/llm-wiki/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Andrej Karpathy's LLM Wiki gist is useful because it names a pattern many agent builders have been circling: stop treating documents as a stateless pile of chunks. Let the model maintain an explicit knowledge layer.
+
+The important part is not Obsidian, Markdown, or a particular search tool. It is writeback. Every ingest, good answer, contradiction, and new source can become a durable change to the wiki.
+
+Karpathy published the gist on April 4, 2026 as an "idea file" for agents such as Codex, Claude Code, OpenCode, and Pi, not as a package to install ([Karpathy LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)). That framing matters. The implementation is supposed to be adapted to the domain.
+
+## The pattern is a compiler for knowledge
+
+The core architecture has three layers:
+
+- **Raw sources**: articles, papers, transcripts, PDFs, images, datasets, and notes. The agent reads these but does not rewrite them.
+- **The wiki**: Markdown pages owned by the agent. This layer contains summaries, entity pages, concept pages, decisions, comparisons, contradictions, and synthesis.
+- **The schema**: the operating contract, often `CLAUDE.md` or `AGENTS.md`, that tells the agent how to ingest, query, cite, update, and lint the wiki.
+
+That is a compiler shape. Raw sources are input files. The wiki is the compiled artifact. The schema is the build system plus style guide.
+
+<Image
+  alt="LLM Wiki architecture showing raw sources, schema rules, agent compilation, wiki pages, index, log, and answer writeback"
+  src="/static/images/blogs/llm-wiki/llm-wiki-architecture.png"
+  width={1600}
+  height={900}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The useful unit is not a chat answer. It is a maintained knowledge artifact that can be read,
+  linked, checked, and revised later.
+</DiagramSubtitle>
+
+The wiki sits between retrieval and reasoning. When you add a source, the agent should not only index it. It should read it, compare it to existing pages, update the relevant summaries, create missing entity pages, note contradictions, and append the operation to a log.
+
+When you ask a question, the answer can also write back. A useful comparison table, an explanation you finally got right, or a decision made during the discussion should become a page or an update. Otherwise the best part of the session disappears into chat history.
+
+## LLM Wiki is not anti-RAG
+
+The lazy version of this take is "RAG is dead." That is wrong.
+
+RAG is a read path. It retrieves relevant context at query time, then asks the model to synthesize an answer. That is still useful, especially when the source set is large, fast-moving, or permissioned.
+
+The problem is that ordinary RAG does not automatically accumulate synthesis. If a question requires five sources and a careful reconciliation, the system may repeat the same reconstruction every time. The answer can be good and still leave no durable trace.
+
+LLM Wiki adds a write path:
+
+<Image
+  alt="Technical diagram comparing ordinary RAG as a query-time read path with LLM Wiki as a compile and writeback path"
+  src="/static/images/blogs/llm-wiki/rag-vs-llm-wiki-writeback.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  RAG repeats a read path per query. LLM Wiki adds a write path, so useful analysis can return to
+  the maintained corpus.
+</DiagramSubtitle>
+
+Karpathy notes that an `index.md` file can work surprisingly well at moderate scale, roughly around 100 sources and hundreds of pages, before you need heavier retrieval infrastructure. Past that point, the wiki can still use local search. The gist points at `qmd`, a local Markdown search engine that combines BM25, vector search, and reranking ([qmd on GitHub](https://github.com/tobi/qmd)).
+
+The practical design is not RAG versus wiki. It is:
+
+1. Use raw sources as the source of truth.
+2. Use the wiki as the maintained knowledge layer.
+3. Use search when the wiki becomes too large to read by index.
+4. Use citations and logs so every compiled claim can be traced back.
+
+## The operations matter more than the folder names
+
+The folder layout can be simple:
+
+```txt
+AGENTS.md
+raw/
+  sources/
+  assets/
+wiki/
+  index.md
+  log.md
+  topics/
+  entities/
+  decisions/
+  contradictions/
+manifests/
+  sources.csv
+  permissions.csv
+```
+
+The more important part is the contract you give the agent.
+
+```ts
+type IngestSource = (sourcePath: string) => {
+  sourceId: string
+  touchedPages: string[]
+  newClaims: string[]
+  contradictedClaims: string[]
+  reviewNotes: string[]
+}
+
+type AnswerQuestion = (question: string) => {
+  answerPath?: string
+  citedPages: string[]
+  citedSources: string[]
+  proposedWriteback: string[]
+}
+
+type LintWiki = () => {
+  stalePages: string[]
+  orphanPages: string[]
+  uncitedClaims: string[]
+  missingPages: string[]
+}
+```
+
+<Image
+  alt="Technical blueprint of an LLM Wiki operating contract showing ingest, query, lint, source manifest, wiki page stack, diff review, and operator log"
+  src="/static/images/blogs/llm-wiki/llm-wiki-operating-contract.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The operating contract should make each agent action inspectable: source IDs, citations, diffs,
+  lint reports, and log entries.
+</DiagramSubtitle>
+
+Those shapes are not meant to become a library. They are meant to make the workflow reviewable. If an ingest touches 14 pages, the agent should say which pages changed and why. If a query produces a useful new synthesis, it should propose the writeback instead of silently rewriting the knowledge base.
+
+<Callout type="note" title="The wiki should be editable, not magical">
+  Let the agent draft updates, but keep the raw sources immutable and the git diff visible. The
+  system earns trust when a human can inspect exactly which claims were added, changed, or retired.
+</Callout>
+
+## The schema is where teams should spend their effort
+
+For a personal wiki, a loose schema may be enough. For a team, the schema is the product.
+
+It should define page types, citation style, permissions, review states, and the difference between "the source says this" and "we infer this." It should also define when the agent is allowed to write directly, when it must create a draft, and when a human has to approve the diff.
+
+A useful team schema usually needs these rules:
+
+- Every page has frontmatter: `owner`, `status`, `last_verified_at`, `source_ids`, and `confidence`.
+- Every source gets a stable `source_id`, origin URL or local path, access date, owner, and permission level.
+- Every answer cites wiki pages and raw sources separately.
+- Every ingest appends to `wiki/log.md` with a predictable heading format.
+- Every lint pass reports stale pages, orphan pages, uncited claims, unresolved contradictions, and missing concept pages.
+- Permission labels flow from source to wiki page. A public summary should not accidentally compile private customer notes into something globally readable.
+
+This is where Karpathy's idea connects directly to context engineering. The wiki is not only documentation. It is a context substrate for agents that need to make decisions across weeks of changing source material.
+
+## Where LLM Wiki fails
+
+The biggest failure mode is hallucination propagation. A wrong synthesis can become a stable page, then future answers cite it because it looks canonical. The fix is boring but necessary: source IDs, citation requirements, review states, and git diffs.
+
+The second failure mode is stale confidence. A page that was true in April can become wrong in May. Linting should not be optional. Pages need `last_verified_at`, source counts, and contradiction notes so the agent knows what deserves suspicion.
+
+The third failure mode is permission collapse. Team knowledge is not uniformly shareable. If raw sources have access controls, compiled pages need equivalent or stricter controls. Otherwise the wiki becomes a data leak with nicer backlinks.
+
+The fourth failure mode is wiki sprawl. Link graphs help humans browse, but agents also need mechanical entry points: `index.md`, manifests, grep-friendly logs, and eventually search. Karpathy's point about `log.md` being parseable with simple Unix tools is a good instinct. Agent memory gets easier when the memory is boring text.
+
+<Image
+  alt="Technical diagram of LLM Wiki failure modes and guardrails: hallucination, stale pages, permissions, sprawl, source IDs, verification dates, access labels, and lint health"
+  src="/static/images/blogs/llm-wiki/llm-wiki-failure-modes-guardrails.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The boring controls are the important ones: source IDs, verification dates, access labels, and
+  lint health checks keep compiled knowledge from quietly becoming wrong.
+</DiagramSubtitle>
+
+## The practical takeaway
+
+If you build an LLM Wiki, do not start by choosing a vector database. Start by choosing what is allowed to become durable knowledge.
+
+For a personal research workflow, that might be chapter summaries, source notes, and topic pages. For a product team, it might be decisions, customer facts, architectural constraints, experiment results, and open contradictions. For an AI agent platform, it might be the operating memory that tells future sessions what changed and why.
+
+The test is simple: after three sessions, can the agent answer "what did we already learn?" without you replaying the whole history?
+
+If the answer is yes, you have something more useful than a chat transcript. You have a knowledge base that compounds.
+
+## References
+
+- [Andrej Karpathy, "LLM Wiki"](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
+- [qmd, local hybrid search for Markdown knowledge bases](https://github.com/tobi/qmd)
+- [Vannevar Bush, "As We May Think"](https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/)

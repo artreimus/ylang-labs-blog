@@ -15,11 +15,11 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
   - `blog-writing-guide` as the primary Ylang Labs writing, rewriting, editing, and editorial review standard for blog posts.
   - `blog-factuality-review` when asked to review, critique, fact-check, validate, or assess publication readiness for Ylang Labs blog drafts.
   - `blog-mdx-authoring` for creating or structuring new blog posts.
-  - `blog-image-cropper` for preparing `cardImage.png` and `blogHeader.png`.
-  - `technical-blog-image-generator` when asked to create technical blog images, cover art, headers, architecture plates, process maps, or image-generation prompts for technical visuals.
+  - `oil-painting-image-generator` for oil-painting-style generated artwork and normal generated blog cover artwork, `cardImage.png`, `blogHeader.png`, and source artwork unless the user explicitly requests a different cover style.
+  - `blog-image-cropper` for preparing `cardImage.png` and `blogHeader.png` from generated or provided source artwork.
+  - `technical-blog-image-generator` when asked to create section images, inline technical diagrams, architecture plates, process maps, or image-generation prompts for technical visuals. Use it for cover/card/header assets only when the user explicitly requests a technical-diagram cover.
   - `technical-blog-image-review` when asked to independently review generated technical blog images for factuality, technical accuracy, readability, crop safety, or design quality.
   - `blog-social-copy` when asked for social copy tied to a post or project.
-  - `oil-painting-image-generator` when asked for oil-painting-style generated artwork.
   - `anthropic-style-writing` when asked to write, revise, or critique Ylang Labs content in an Anthropic-like voice.
 - Repo-owned skills live under `.agents/skills/<name>/SKILL.md`. Use clear kebab-case names in the form `<domain>-<job>[-<artifact-or-mode>]`, avoid abbreviations such as `gen`, and keep the directory name aligned with the `name:` frontmatter.
 - Do not rename lockfile-managed imported skills unless intentionally forking them. When renaming a skill, update its directory, `name:` frontmatter, cross-skill references, and this skill list in the same change.
@@ -118,7 +118,10 @@ Blog asset standards:
 - Use `blogHeader.png` for the post banner.
 - Use descriptive names for inline images, diagrams, and figures.
 - Reference images with absolute public paths such as `/static/images/blogs/<slug>/diagram.png`.
+- For generated cover/card/header art, create the source artwork with `oil-painting-image-generator` first unless the user explicitly asks for another cover style.
 - For generated/cropped blog art, `cardImage.png` should be `1080x1920` and `blogHeader.png` should be `1260x700` unless the user explicitly asks otherwise.
+- For section-level diagrams, architecture plates, process maps, and inline technical figures, use `technical-blog-image-generator`.
+- Do not create SVG/vector/code-native image sources unless the user explicitly asks for manual vector work.
 
 Blog writing standards:
 
