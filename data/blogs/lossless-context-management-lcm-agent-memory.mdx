@@ -1,0 +1,121 @@
+---
+title: 'Lossless Context Management: Compaction That Can Walk Back to Source'
+date: '2026-05-10'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'A practical read on Lossless Context Management: why flat compaction fails, how the LCM summary DAG works, and what production agent teams should copy carefully.'
+tldr: |
+  - LCM treats old context as recoverable state, not disposable prompt text.
+  - The key move is separating immutable message storage from the active context window the model sees each turn.
+  - Summaries are materialized views over raw history: D0 nodes capture local detail, D1/D2 nodes capture longer arcs, and every layer keeps pointers back to source messages.
+  - Recall is tool-mediated. The model searches, describes, and expands specific parts of the DAG instead of dragging the whole session back into context.
+  - The tradeoff is operational complexity: storage, indexing, integrity checks, summary prompts, token thresholds, and expansion policy become part of the agent runtime.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/lossless-context-management-lcm-agent-memory/cardImage.png'
+images: ['/static/images/blogs/lossless-context-management-lcm-agent-memory/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+Flat compaction is where long-running agents quietly lose their minds.
+
+The runtime replaced fifty turns of source material with one polite paragraph and threw the originals out of the active conversation. The next time the agent needs the exact constraint, test result, file path, or decision rationale, it has a summary-shaped rumor.
+
+Lossless Context Management, or LCM, changes that contract. The summary is an index card with a pointer.
+
+<Image
+  alt="Dark technical overview of the Lossless Context Management active context, summary DAG, immutable store, and recall tools"
+  src="/static/images/blogs/lossless-context-management-lcm-agent-memory/source-diagram.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md border border-gray-200 bg-black dark:border-gray-700"
+/>
+
+<DiagramSubtitle>
+  LCM keeps the active context compact while retaining pointer paths from high-level summaries back
+  to raw messages.
+</DiagramSubtitle>
+
+## LCM makes summaries reversible
+
+Most agent runtimes handle a full context window with one of three blunt tools: truncate old messages, replace old messages with one flat summary, or move old material into retrieval where fragments lose the conversation structure that made them meaningful.
+
+That breaks down when the agent needs to remember edits, test failures, file paths, user preferences, failed attempts, and decisions that still matter hours later.
+
+The LCM site describes the replacement as hierarchical summarization where every message is preserved and recoverable. The paper is more precise: "lossless" means every message is retained verbatim and remains reachable through tools such as `lcm_grep` and `lcm_expand`.
+
+That does not mean infinite context goes into the prompt. The model usually sees summaries plus a fresh tail of recent raw messages. Older raw turns stay outside the active prompt until a recall path asks for them.
+
+## The useful architecture is two states, not one
+
+LCM separates memory into two surfaces.
+
+The immutable store is the ground truth: user messages, assistant messages, tool results, and large-file references. The active context is the prompt window for the next model turn: recent raw messages, called the fresh tail, plus summary nodes standing in for older work.
+
+A flat summary collapses history into one irreversible object. A summary DAG gives the model a map. D0 summaries preserve local details, D1 summaries condense several D0 nodes, and D2 summaries turn longer history into durable narrative state. Each layer is smaller than the raw material beneath it, but the pointer chain remains intact.
+
+## Compaction stays reversible through pointers
+
+The LCM control loop watches token pressure. Below the soft threshold, the store is mostly a passive logger and the model gets normal recent context. When the window approaches the threshold, older messages outside the fresh tail are compacted in the background.
+
+The key move is atomic replacement. Old raw items leave the active context, a summary node enters, and the source links remain in the database.
+
+<Image
+  alt="Process architecture plate showing raw messages, protected fresh tail, threshold compaction, summary DAG condensation, and targeted retrieval back to source"
+  src="/static/images/blogs/lossless-context-management-lcm-agent-memory/compaction-cycle.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md border border-gray-200 bg-black dark:border-gray-700"
+/>
+
+<DiagramSubtitle>
+  A reversible compaction cycle: raw turns are stored first, summaries replace older context only
+  inside the active prompt, and recall tools trace a selected path back to exact source messages.
+</DiagramSubtitle>
+
+The paper also handles a failure mode anyone who has built compaction has seen: summaries can come back too large. LCM escalates from normal summary, to aggressive summary, to deterministic truncation. If compaction is a correctness mechanism, "ask the model nicely again" is not enough.
+
+## Recall is a tool flow, not nostalgia
+
+Once a summary is in the prompt, the model needs a way to drill down without flooding the main context. The LCM tool surface is deliberately small:
+
+- `lcm_grep` searches the stored history and summaries.
+- `lcm_describe` returns metadata and summary contents for a node.
+- `lcm_expand` or `lcm_expand_query` walks from a summary back to source messages, usually through a bounded sub-agent so the main context does not get flooded.
+
+This is where LCM differs from "just use RAG." RAG can find semantically related fragments, but a fragment often loses order and causality: who asked, what changed afterward, which assumption was rejected, and which decision still stands.
+
+LCM's DAG keeps a multi-resolution timeline first, then uses exact retrieval under it. The model is expected to know when to inspect the map.
+
+## The mechanism matters more than the benchmark headline
+
+The Voltropy paper reports that Volt, their LCM-augmented coding agent, outperformed Claude Code on OOLONG with Opus 4.6 at every tested context length from 32K to 1M tokens. The reported decontaminated average was 74.8 for Volt versus 70.3 for Claude Code.
+
+The portable lesson is architectural: keep recent work raw, compress older history without destroying source fidelity, provide navigable summaries, and move large aggregation out of the active prompt.
+
+## What I would copy, and what I would not
+
+The part to copy first is the state model: immutable source, compact active context, summary DAG, and explicit recall tools.
+
+That design is useful even if you do not adopt Volt or lossless-claw directly. It forces the right engineering questions: where source messages live, which recent turns are never compacted, what thresholds trigger async versus blocking compaction, how summary nodes retain parent pointers, who may expand large spans, and how corrupt summaries get repaired.
+
+Do not copy every default blindly. The OpenClaw lossless-claw README documents a `freshTailCount` default of 64 and a `contextThreshold` default of 0.75, but those are workload decisions, not universal laws.
+
+## How to try it without pretending compaction is solved
+
+The fastest hands-on path is the OpenClaw plugin:
+
+```bash
+openclaw plugins install @martian-engineering/lossless-claw
+```
+
+Then test it the way agents actually fail: run a long session, wait for compaction, ask about an exact early detail, and inspect whether the agent searches or expands source.
+
+LCM's strongest idea is not that summaries are good. Summaries are lossy by nature. They should act as navigation, not memory itself.
+
+## References
+
+1. [LCM: Lossless Context Management](https://www.losslesscontext.ai/)
+2. Clint Ehrlich and Theodore Blackman, [LCM: Lossless Context Management](https://papers.voltropy.com/LCM), Voltropy PBC, 2026.
+3. [lossless-claw README](https://github.com/martian-engineering/lossless-claw/blob/main/README.md)
+4. [ArgentOS LCM documentation](https://docs.argentos.ai/memory/lcm)
