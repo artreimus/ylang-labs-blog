@@ -18,6 +18,8 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
   - `oil-painting-image-generator` for oil-painting-style generated artwork and normal generated blog cover artwork, `cardImage.png`, `blogHeader.png`, and source artwork unless the user explicitly requests a different cover style.
   - `blog-image-cropper` for preparing `cardImage.png` and `blogHeader.png` from generated or provided source artwork.
   - `technical-blog-image-generator` when asked to create section images, inline technical diagrams, architecture plates, process maps, or image-generation prompts for technical visuals. Use it for cover/card/header assets only when the user explicitly requests a technical-diagram cover.
+  - `blueprint-image-generator` when asked for blueprint, engineering drawing, CAD sheet, patent plate, orthographic, exploded-view, or white-line-on-blue generated images.
+  - `blue-terminal-ascii-image-generator` when asked for blue terminal, ASCII-like, dot-matrix, CRT, monospace glyph, or command-line poster generated images.
   - `technical-blog-image-review` when asked to independently review generated technical blog images for factuality, technical accuracy, readability, crop safety, or design quality.
   - `blog-social-copy` when asked for social copy tied to a post or project.
   - `anthropic-style-writing` when asked to write, revise, or critique Ylang Labs content in an Anthropic-like voice.

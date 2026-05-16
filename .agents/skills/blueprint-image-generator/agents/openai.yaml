@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blueprint Image Generator"
+  short_description: "Create blueprint-style image prompts"
+  default_prompt: "Create a blueprint-style image prompt for this subject."
