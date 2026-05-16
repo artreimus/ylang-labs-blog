@@ -17,6 +17,8 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
   - `blog-mdx-authoring` for creating or structuring new blog posts.
   - `blog-image-cropper` for preparing `cardImage.png` and `blogHeader.png`.
   - `technical-blog-image-generator` when asked to create technical blog images, cover art, headers, architecture plates, process maps, or image-generation prompts for technical visuals.
+  - `blueprint-image-generator` when asked for blueprint, engineering drawing, CAD sheet, patent plate, orthographic, exploded-view, or white-line-on-blue generated images.
+  - `blue-terminal-ascii-image-generator` when asked for blue terminal, ASCII-like, dot-matrix, CRT, monospace glyph, or command-line poster generated images.
   - `technical-blog-image-review` when asked to independently review generated technical blog images for factuality, technical accuracy, readability, crop safety, or design quality.
   - `blog-social-copy` when asked for social copy tied to a post or project.
   - `oil-painting-image-generator` when asked for oil-painting-style generated artwork.
