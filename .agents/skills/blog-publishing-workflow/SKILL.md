@@ -23,12 +23,12 @@ Read and apply these skills in this order:
 4. `blog-mdx-authoring`
    - Path: `.agents/skills/blog-mdx-authoring/SKILL.md`
    - Purpose: create the MDX file, frontmatter, slug, asset directory, and content structure.
-5. `oil-painting-image-generator` when the user asks for painterly artwork or a metaphor-led cover is the best visual direction.
+5. `oil-painting-image-generator` for Ylang Labs blog cover artwork, `cardImage.png`, `blogHeader.png`, and source artwork unless the user explicitly requests a different cover style.
    - Path: `.agents/skills/oil-painting-image-generator/SKILL.md`
-   - Purpose: generate the source artwork or a refined generation prompt for the blog hero image.
-6. `technical-blog-image-generator` when a diagram, architecture plate, process map, or technical cover is better than painterly artwork.
+   - Purpose: generate the source painting or a refined generation prompt for the blog hero/card image.
+6. `technical-blog-image-generator` for inline section images, diagrams, architecture plates, process maps, and other technical figures.
    - Path: `.agents/skills/technical-blog-image-generator/SKILL.md`
-   - Purpose: create technical visuals or image-generation prompts for technical blog assets.
+   - Purpose: create technical visuals or image-generation prompts for section-level blog assets. Use it for cover/card/header assets only when the user explicitly asks for a technical-diagram cover.
 7. `blog-image-cropper` when a source image needs to be cropped into standard card/header assets.
    - Path: `.agents/skills/blog-image-cropper/SKILL.md`
    - Purpose: crop the generated source artwork into `cardImage.png` and `blogHeader.png`.
@@ -56,7 +56,7 @@ Derive missing details from the provided blog whenever possible instead of block
 - Reading time. Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - Any external references or canonical URL.
 - Reference topic slug for `refs/<topic>/`. Default to the final blog slug when the user does not provide one.
-- Visual direction. Prefer diagrams, architecture visuals, benchmark figures, or real screenshots when they explain the technical idea better than decorative artwork. Use painterly cover art only when requested or when a metaphor-led image is clearly appropriate.
+- Visual direction. Use `oil-painting-image-generator` for normal cover/card/header artwork. Use `technical-blog-image-generator` for section images, architecture visuals, benchmark figures, process maps, and other technical figures. Use a technical-diagram cover only when the user explicitly requests that cover style.
 - Target branch or PR base if the user provides one. Otherwise verify the remote default branch before publishing.
 
 ## Output Files
@@ -141,25 +141,32 @@ After the first MDX draft exists, run one revision pass against `blog-writing-gu
 Choose the visual workflow based on the post:
 
 - Use real screenshots or product captures when the post is about an interface, workflow, or shipped project.
-- Use diagrams, architecture plates, benchmark charts, or process maps when the post is about systems, migrations, evaluations, or implementation details.
-- Use `technical-blog-image-generator` when a technical visual needs to be generated or prompted.
-- Use `oil-painting-image-generator` when the user asks for painterly art or the article is best represented by a visual metaphor.
+- Use `oil-painting-image-generator` for normal Ylang Labs blog cover/card/header artwork, including metaphor-led technical covers.
+- Use `technical-blog-image-generator` for inline section images, architecture plates, benchmark charts, diagrams, process maps, and implementation-detail figures.
+- Use `technical-blog-image-generator` for cover/card/header assets only when the user explicitly requests a technical-diagram cover style.
+- Do not create SVG/vector/code-native image sources unless the user explicitly asks for manual vector work.
 
-If using generated artwork, the prompt should:
+If using generated cover artwork, the prompt should:
 
 - Represent the article's core idea as a clear visual metaphor or technical scene.
 - Avoid text, UI mockups, logos, watermarks, signatures, and copied famous compositions.
 - Use a visual direction suited to the topic.
-- Preserve enough negative space and scene structure to crop into both portrait and wide formats.
-- Be usable as the source for both the blog cover/card image and the blog header unless the user explicitly asks for a different visual direction.
+- Preserve enough negative space and scene structure for the requested cover format.
+- Keep cover assets separate from inline section diagrams unless the user explicitly asks to reuse an inline diagram as the cover.
+- `blogHeader.png` and the first section image do not need to be the same image or use the same source. Do not make them match by default.
 
-Save the original generated image under:
+Save the original generated cover image under:
 
 ```text
 public/static/images/blogs/<slug>/source-artwork.png
 ```
 
 If the image-generation tool returns a different filename or format, save or convert a stable source image in the blog asset directory before cropping.
+
+If using generated section visuals, save each final technical image under a descriptive filename in the same blog asset directory and document the prompt or visual spec in `refs/<slug>/README.md` when reproducibility matters.
+
+When the request is only for inline section visuals, do not update `cardImage.png` or `blogHeader.png`.
+Do not derive `blogHeader.png` from the first section visual unless the user explicitly asks for the header to reuse that image.
 
 ### 5. Crop Or Finalize Blog Assets
 

@@ -58,6 +58,15 @@ const computedFields: ComputedFields = {
 }
 
 /**
+ * Write generated JSON in the same shape Prettier/lint-staged expects, so
+ * Contentlayer builds do not leave formatting-only git diffs behind.
+ */
+function writeGeneratedJson(filePath: string, data: Record<string, number>) {
+  const sortedData = Object.fromEntries(Object.entries(data).sort(([a], [b]) => a.localeCompare(b)))
+  writeFileSync(filePath, `${JSON.stringify(sortedData, null, 2)}\n`)
+}
+
+/**
  * Count the occurrences of all tags across blog posts and write to json file
  */
 function createTagCount(allBlogs) {
@@ -74,7 +83,7 @@ function createTagCount(allBlogs) {
       })
     }
   })
-  writeFileSync('./app/blog-tag-data.json', JSON.stringify(tagCount))
+  writeGeneratedJson('./app/blog-tag-data.json', tagCount)
 }
 
 function createProjectTagCount(allProjects) {
@@ -91,7 +100,7 @@ function createProjectTagCount(allProjects) {
       })
     }
   })
-  writeFileSync('./app/project-tag-data.json', JSON.stringify(tagCount))
+  writeGeneratedJson('./app/project-tag-data.json', tagCount)
 }
 
 function createSearchIndex(allBlogs, allProjects) {
