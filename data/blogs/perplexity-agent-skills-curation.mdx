@@ -1,0 +1,85 @@
+---
+title: "Perplexity's Skill Guide Gets the Hard Part Right"
+date: '2026-05-17'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: "Perplexity's guide to Agent Skills is a useful correction: good Skills are not docs or scripts. They are routing-sensitive, token-budgeted context infrastructure that must be evaluated and maintained."
+tldr: |
+  - A Skill is not a README for agents. It is a routing surface, context budget, file hierarchy, and maintenance loop.
+  - Perplexity's strongest point is that Skill descriptions are trigger logic, not documentation.
+  - The best Skill content is opinionated, compressed, and full of gotchas the model would otherwise miss.
+  - Evals should come before the body text, especially positive loads, forbidden loads, and accessory-file reads.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/perplexity-agent-skills-curation/cardImage.png'
+images: ['/static/images/blogs/perplexity-agent-skills-curation/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+Perplexity's new Agent Skills guide is useful because it says the uncomfortable part out loud: most Skill work is not writing instructions. It is deciding what context deserves to exist.
+
+We already wrote a broader explainer on [Agent Skills as a portable format](/blogs/agent-skills). Perplexity's piece is the sharper follow-up, less about the format and more about the discipline required once Skills become production infrastructure.
+
+## Skills are context infrastructure, not docs
+
+Perplexity defines a Skill as four things at once: a directory, a format, an invocable runtime object, and a progressive context system. That framing prevents the common failure mode: treating `SKILL.md` like a human-facing README.
+
+A README can be generous. A Skill cannot. Its description sits in the always-on index. Its body enters working context when loaded. Its accessory files only help if the model knows when to read them.
+
+Perplexity gives useful numbers for its Computer implementation: roughly 100 tokens per Skill in the index, roughly 5,000 tokens for the loaded body, and an unbounded runtime tier for `scripts/`, `references/`, `assets/`, and special-case files. Idle Skills are not free. Loaded Skills are definitely not free.
+
+That turns Skill authoring into a compression problem. The question is not "Can I explain this workflow?" It is "Would the agent get this wrong without this sentence?"
+
+## Routing is the hard part
+
+Perplexity's best practical advice is that the `description` field is routing logic, not documentation. It should say when to load the Skill, in language close to what users actually say.
+
+`Monitors pull requests and GitHub Actions checks` is clear to a human, but weak for an agent. It describes the implementation category. `Load when the user asks to watch CI, babysit a PR, keep checking a pull request, wait for checks, or make sure a branch lands` gives the router better hooks because it includes the phrases someone types when they are tired of refreshing GitHub.
+
+This is where Skills start to feel like product design. The description is a tiny interface. A broad verb can make the Skill load on the wrong work. A missing phrase can make it invisible when it is needed most.
+
+## The body should carry judgment
+
+Perplexity argues that a Skill should not recite what the model already knows. A list of basic Git commands is mostly wasting context. Modern coding agents know Git mechanics. What they often miss is local policy: cherry-pick the requested fix onto a clean branch, preserve unrelated dirty work, and stop instead of resetting files if the branch cannot land cleanly.
+
+That is better Skill content because it adds judgment. It names the failure mode and compresses the workflow into the decision the model is likely to mishandle.
+
+## Hierarchy needs evals
+
+The post's tax example is the most interesting systems detail. Perplexity reports that dumping all 1,945 sections of the U.S. Internal Revenue Code into one folder performed worse than not loading the Skill at all. Organizing the material into a curated three-level hierarchy made the Skill useful.
+
+That should make every agent team pause before saying, "Just give the model more context." Hierarchy is not automatically better. It adds indirection. A good hierarchy earns its keep by reducing the branching factor at each decision point.
+
+Perplexity starts the build process with evals, before the description and before the body. That is the right order because the first question is not "Can the agent follow the Skill?" It is "Will the agent load the right Skill at the right time?"
+
+A serious Skill eval suite should include positive loads, forbidden loads for adjacent tasks, accessory-file reads, and end-to-end task success. Loading is part of correctness. If the Skill improves the final output but activates on the wrong work, it is still damaging the system.
+
+The [SkillsBench paper](https://arxiv.org/abs/2602.12670) is useful context here. Its authors report that curated Skills improved average pass rate by 16.2 percentage points, but self-generated Skills did not help on average. A Skill can make an agent better. A bad Skill can make the system worse.
+
+## Maintenance should be append-mostly
+
+Perplexity's model is simple:
+
+- If the agent fails inside the domain, add a gotcha.
+- If the Skill loads off target, tighten the description and add negative evals.
+- If the Skill does not load when it should, add real trigger language and positive evals.
+
+The important constraint is that descriptions should not churn casually after merge. The description is the routing contract. Changing it can affect every other Skill because the model is choosing among all of them.
+
+That creates action at a distance. You can break a code-review Skill by adding a deployment Skill with a sloppy description. Skill maintenance is closer to maintaining search relevance than maintaining a static document. Preserve the stable routing surface, append the gotcha, and expand the eval set.
+
+## The bar should be high
+
+Perplexity's final lesson is the one most teams will ignore first: not every workflow deserves a Skill. You probably need one when the agent repeatedly gets a domain wrong, when durable knowledge is not in the model, or when local taste and policy matter. You probably do not need one when the content changes faster than you can maintain it or repeats the global system prompt.
+
+The best test remains brutally simple: would the agent get this wrong without this instruction?
+
+If the answer is no, delete the sentence. If the answer is yes, keep it, test it, and put it at the cheapest layer where it can still do the job.
+
+That is the shift Perplexity's guide makes concrete. Agent Skills are not a new place to dump docs. They are a scarce context interface for procedural knowledge. Treat them with the same review discipline as code.
+
+## References
+
+1. [Designing, Refining, and Maintaining Agent Skills at Perplexity](https://research.perplexity.ai/articles/designing-refining-and-maintaining-agent-skills-at-perplexity), Perplexity Research, May 1, 2026.
+2. [Agent Skills Overview](https://agentskills.io/home), Agent Skills documentation.
+3. [SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks](https://arxiv.org/abs/2602.12670), arXiv:2602.12670.
