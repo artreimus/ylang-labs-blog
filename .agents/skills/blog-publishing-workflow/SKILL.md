@@ -189,7 +189,7 @@ Save variations to:
 posts/social-media-<slug>.md
 ```
 
-Create 2-3 variations. For LinkedIn, prefer a professional and insight-led variation. Keep each post under 300 characters and include a `[URL]` placeholder unless the final URL is known.
+Create 2-3 variations. For LinkedIn, prefer a professional, insight-led narrative variation in the 500-900 character range with short paragraphs, concrete technical stakes, and a natural CTA. Include one short X/Twitter-ready variation only when useful, and include a `[URL]` placeholder unless the final URL is known.
 
 Use `blog-writing-guide` as the baseline voice for social copy: specific, direct, technically useful, and free of generic hype.
 
