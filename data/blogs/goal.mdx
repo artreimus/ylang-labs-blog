@@ -1,0 +1,131 @@
+---
+title: 'The /goal Loop: How Agents Stop Drifting and Start Finishing'
+date: '2026-05-21'
+tags: ['AI/ML', 'Agents']
+draft: false
+summary: 'A practical look at /goal as the control layer for coding agents, Ralph loops, and Hermes-style assistants.'
+tldr: |
+  - `/goal` turns a loose agent conversation into a durable contract: objective, scope, state, and evidence.
+  - Codex and Claude Code already work across files, commands, tests, and PRs; goals make that work easier to steer.
+  - Ralph shows the loop version: pick the next PRD story, start fresh, verify, commit, and repeat.
+  - Hermes needs the same goal layer for errands, inbox triage, calendar work, and follow-through.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/goal/cardImage.png'
+images: ['/static/images/blogs/goal/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+Most agent failures are orientation failures. The agent starts with a useful instruction, finds side quests, fixes one adjacent problem, and reports something that does not match what you wanted.
+
+`/goal` pins the outcome, tracks state, and forces "done" to mean evidence.
+
+This matters because coding agents have escaped autocomplete. Codex can read, edit, run code, and handle background tasks ([OpenAI Codex docs](https://developers.openai.com/codex/cloud)). Claude Code reads codebases, edits files, runs commands, and works across terminal, IDE, desktop, and browser surfaces ([Claude Code docs](https://code.claude.com/docs)).
+
+Once an agent can act, the question becomes: can it stay pointed at done?
+
+## A goal is a contract for the whole run
+
+A prompt is an instruction for the next move. A goal is a contract: objective, scope, success criteria, state, and evidence.
+
+Without that structure, agents optimize for the current turn. With `/goal`, every plan, tool call, edit, check, and final response can be compared with one question: did this move the goal closer to done?
+
+The loop is simple: define the goal, plan the smallest useful step, act, verify, update state, and repeat until the evidence satisfies the criteria.
+
+## Codex and Claude need goals because they already do work
+
+Codex can work from a repository, run tests and linters, and provide terminal evidence before review or pull request creation ([Introducing Codex](https://openai.com/index/introducing-codex/)). Claude Code covers the same developer loop: tests, lint errors, merge conflicts, pull requests, MCP tools, instructions, skills, and hooks ([Claude Code docs](https://code.claude.com/docs)).
+
+That is exactly where vague prompting starts to hurt.
+
+For example: `/goal Improve dashboard mobile usability` should name allowed routes, preserve desktop density, forbid navigation redesign, require viewport checks, run `pnpm lint` and `pnpm build`, and ask for files plus screenshot evidence.
+
+Now the agent can reason like an operator. The model still needs judgment, but the goal keeps the work bounded.
+
+Good coding goals are ordinary: bug repair with a reproduction and test, PR comments with scoped patches, dependency upgrades limited to one package family, mobile polish backed by screenshots, and docs syncs tied to live code.
+
+Reduce the agent's degrees of freedom before you increase autonomy.
+
+## Ralph is the while loop version of /goal
+
+Ralph is what happens when a goal stops being a chat instruction and becomes an execution loop.
+
+The `snarktank/ralph` README describes Ralph as an autonomous AI agent loop that runs coding tools like Amp or Claude Code until every PRD item is complete. Each iteration starts fresh, while memory persists through git history, `progress.txt`, and `prd.json` ([snarktank/ralph](https://github.com/snarktank/ralph)).
+
+The loop is concrete: create a PRD, convert it into `prd.json`, pick the highest-priority story where `passes: false`, implement one story, run checks, commit, mark it passing, append learnings to `progress.txt`, and repeat.
+
+Ralph exposes the hard rule every agent team learns: story size is destiny. The README says each PRD item should fit inside one context window and gives "build the entire dashboard" as the kind of task that should be split ([snarktank/ralph](https://github.com/snarktank/ralph)). A good goal follows the same rule.
+
+If tests are weak or criteria are vague, the loop will preserve confusion. `/goal` gives you a place to write the stop condition first.
+
+## Hermes needs goals for personal work too
+
+Hermes, the personal assistant shape of this pattern, has a different surface area: email, calendar, notes, errands, follow-ups, travel, receipts, reminders, and decisions across tools. "Help me with my week" is not a task.
+
+For example: `/goal Get my Friday ready` should define inspectable tools, forbid sends without approval, require conflict recommendations, meeting prep notes, email drafts, grouped errands, and a one-screen brief.
+
+Hermes-style goals include morning briefs, meeting prep, travel admin, inbox cleanup, and life-ops planning. The common thread is approval: the assistant can gather and draft, but risky actions stay with you.
+
+The best personal assistant knows when a goal needs approval, when it needs more context, and when to stop.
+
+## Autonomy has to earn its loop
+
+There are two bad versions of `/goal`: a todo label that changes nothing, and unchecked autonomy that keeps acting until something looks done. The useful middle is strict: reject unrelated work, define the next action and stop condition, keep state outside model context, verify before completion language, and show evidence.
+
+For Codex, that evidence might be files, logs, tests, and a PR. For Claude Code, commits, checks, output, and diff review. For Ralph, `prd.json`, `progress.txt`, git history, and passing stories. For Hermes, drafts, notes, reminders, and an approval queue.
+
+Different agents, same control problem.
+
+## Start with one goal that can fail
+
+Do not start with "build the app", "manage my life", or "make this repo good." Start with a goal that can fail: `/goal Resolve the three actionable PR comments and prove CI still passes.`
+
+That goal has a boundary, a verification path, and a natural final report. It can be delegated to Codex, worked through in Claude Code, executed as one Ralph story, or adapted into Hermes.
+
+The point is not that every agent needs the exact `/goal` command. Every useful agent eventually needs the same primitive: a durable objective, a bounded loop, and a standard for saying done.
+
+## A prompting template for goals that can be audited
+
+OpenAI's Codex cookbook describes a strong Goal as more than a larger prompt. It should name the outcome, the verification surface, the constraints, the boundaries, the iteration policy, and the blocked stop condition ([Using Goals in Codex](https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex)).
+
+Use this template when the task is too open-ended for a one-shot prompt:
+
+```text
+/goal <desired end state>
+
+Goal:
+- <What should be true when the work is done.>
+
+Completion criteria:
+- <Specific checks, artifacts, or facts that prove completion.>
+- <What must still be true after the work is done.>
+
+Verification:
+- <Commands, tests, benchmarks, screenshots, source links, logs, or review steps to use.>
+
+Scope and boundaries:
+- <Files, tools, repositories, accounts, or data sources allowed.>
+- <Files, tools, or behaviors that are out of scope.>
+
+Iteration policy:
+- <How the agent should choose the next step after each attempt.>
+- <What state it should record between attempts.>
+
+Stop conditions:
+- <When to stop and ask for help.>
+- <What evidence, blockers, and next input to report if the goal cannot be completed.>
+```
+
+For coding, that might be: reduce p95 checkout latency below 120 ms, verify with the checkout benchmark, keep correctness tests green, touch only the checkout service, and stop with benchmark output plus blockers if the benchmark cannot run.
+
+For Hermes, it might be: prepare Friday, verify every meeting has a prep note, every likely reply has a draft, no message is sent without approval, and blockers are listed with the next user decision needed.
+
+## References
+
+- [OpenAI Codex documentation](https://developers.openai.com/codex/cloud)
+- [OpenAI, "Introducing Codex"](https://openai.com/index/introducing-codex/)
+- [OpenAI Cookbook, "Using Goals in Codex"](https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex)
+- [Anthropic Claude Code documentation](https://code.claude.com/docs)
+- [Anthropic Claude Code product page](https://www.anthropic.com/product/claude-code)
+- [snarktank/ralph](https://github.com/snarktank/ralph)
+- [Geoffrey Huntley, "Ralph Wiggum as a software engineer"](https://ghuntley.com/ralph/)
