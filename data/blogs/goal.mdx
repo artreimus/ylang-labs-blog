@@ -3,11 +3,10 @@ title: '/goal Is the Control Layer Autonomous Agents Were Missing'
 date: '2026-05-21'
 tags: ['AI/ML', 'Agents']
 draft: false
-summary: 'A practical look at /goal as the control layer for coding agents, Ralph loops, and Hermes-style assistants.'
+summary: 'A practical look at /goal as the control layer for coding agents and Hermes-style assistants.'
 tldr: |
   - `/goal` turns a loose agent conversation into a durable contract: objective, scope, state, and evidence.
   - Codex and Claude Code already work across files, commands, tests, and PRs; goals make that work easier to steer.
-  - Ralph shows the loop version: pick the next PRD story, start fresh, verify, commit, and repeat.
   - Hermes needs the same goal layer for errands, inbox triage, calendar work, and follow-through.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/goal/cardImage.png'
@@ -19,6 +18,8 @@ layout: 'PostBanner'
 Most agent failures are orientation failures. The agent starts with a useful instruction, finds side quests, fixes one adjacent problem, and reports something that does not match what you wanted.
 
 `/goal` pins the outcome, tracks state, and forces "done" to mean evidence.
+
+This framing was inspired by Ralph Loop, the earlier autonomous coding loop pattern described by Geoffrey Huntley and implemented in `snarktank/ralph` ([Ralph Wiggum as a software engineer](https://ghuntley.com/ralph/), [snarktank/ralph](https://github.com/snarktank/ralph)).
 
 This matters because coding agents have escaped autocomplete. Codex can read, edit, run code, and handle background tasks ([OpenAI Codex docs](https://developers.openai.com/codex/cloud)). Claude Code reads codebases, edits files, runs commands, and works across terminal, IDE, desktop, and browser surfaces ([Claude Code docs](https://code.claude.com/docs)).
 
@@ -46,18 +47,6 @@ Good coding goals are ordinary: bug repair with a reproduction and test, PR comm
 
 Reduce the agent's degrees of freedom before you increase autonomy.
 
-## Ralph is the while loop version of /goal
-
-Ralph is what happens when a goal stops being a chat instruction and becomes an execution loop.
-
-The `snarktank/ralph` README describes Ralph as an autonomous AI agent loop that runs coding tools like Amp or Claude Code until every PRD item is complete. Each iteration starts fresh, while memory persists through git history, `progress.txt`, and `prd.json` ([snarktank/ralph](https://github.com/snarktank/ralph)).
-
-The loop is concrete: create a PRD, convert it into `prd.json`, pick the highest-priority story where `passes: false`, implement one story, run checks, commit, mark it passing, append learnings to `progress.txt`, and repeat.
-
-Ralph exposes the hard rule every agent team learns: story size is destiny. The README says each PRD item should fit inside one context window and gives "build the entire dashboard" as the kind of task that should be split ([snarktank/ralph](https://github.com/snarktank/ralph)). A good goal follows the same rule.
-
-If tests are weak or criteria are vague, the loop will preserve confusion. `/goal` gives you a place to write the stop condition first.
-
 ## Hermes needs goals for personal work too
 
 Hermes, the personal assistant shape of this pattern, has a different surface area: email, calendar, notes, errands, follow-ups, travel, receipts, reminders, and decisions across tools. "Help me with my week" is not a task.
@@ -72,7 +61,7 @@ The best personal assistant knows when a goal needs approval, when it needs more
 
 There are two bad versions of `/goal`: a todo label that changes nothing, and unchecked autonomy that keeps acting until something looks done. The useful middle is strict: reject unrelated work, define the next action and stop condition, keep state outside model context, verify before completion language, and show evidence.
 
-For Codex, that evidence might be files, logs, tests, and a PR. For Claude Code, commits, checks, output, and diff review. For Ralph, `prd.json`, `progress.txt`, git history, and passing stories. For Hermes, drafts, notes, reminders, and an approval queue.
+For Codex, that evidence might be files, logs, tests, and a PR. For Claude Code, commits, checks, output, and diff review. For Hermes, drafts, notes, reminders, and an approval queue.
 
 Different agents, same control problem.
 
@@ -80,7 +69,7 @@ Different agents, same control problem.
 
 Do not start with "build the app", "manage my life", or "make this repo good." Start with a goal that can fail: `/goal Resolve the three actionable PR comments and prove CI still passes.`
 
-That goal has a boundary, a verification path, and a natural final report. It can be delegated to Codex, worked through in Claude Code, executed as one Ralph story, or adapted into Hermes.
+That goal has a boundary, a verification path, and a natural final report. It can be delegated to Codex, worked through in Claude Code, or adapted into Hermes.
 
 The point is not that every agent needs the exact `/goal` command. Every useful agent eventually needs the same primitive: a durable objective, a bounded loop, and a standard for saying done.
 
