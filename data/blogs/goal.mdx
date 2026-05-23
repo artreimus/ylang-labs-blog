@@ -1,0 +1,136 @@
+---
+title: 'What /goal Gives an Agent: A Definition of Done'
+date: '2026-05-23'
+tags: ['AI/ML', 'Agents']
+draft: false
+summary: 'A practical framing of /goal as the objective and evidence layer for coding agents and Hermes-style assistants.'
+tldr: |
+  - `/goal` gives an agent an objective, boundaries, and proof of completion.
+  - In coding, a goal can constrain high-agency work like refactoring a codebase into Rust without letting the agent rewrite the world.
+  - Hermes needs the same goal layer for workflows like clearing inventory, inbox triage, calendar work, and follow-through.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/goal/cardImage.png'
+images: ['/static/images/blogs/goal/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Most people meet AI through chat. You ask a question, get an answer, and ask a follow-up.
+
+Agents are a different interaction. You are no longer asking for the next answer. You are asking software to pursue an outcome across files, tools, approvals, and checks.
+
+That requires a different primitive.
+
+`/goal` is shorthand for giving an agent a definition of done: the outcome, boundaries, evidence, and stop conditions.
+
+The slash command is not the important part. The important part is the contract.
+
+Agents can now act across repositories, inboxes, calendars, and business tools. Once software can act, the hard problem is keeping it pointed at a bounded outcome.
+
+Without a goal, the agent treats the outcome like a chat. It fixes a neighboring problem, changes a file you did not want touched, and comes back with confidence but not completion.
+
+A prompt is an instruction for the next move. A goal is a contract: objective, scope, success criteria, state, and evidence.
+
+Without that structure, agents optimize for the current turn. With a goal, every plan, tool call, edit, check, and final response can be compared with one question: did this move the goal closer to done?
+
+The loop is simple: define the goal, act, verify, update state, and repeat until the evidence satisfies the criteria.
+
+## Coding goals make large changes survivable
+
+The obvious version of a coding agent is autocomplete. The useful version is an operator you can hand a real software goal.
+
+This is the potential of `/goal`: you can ask an agent to refactor a service into Rust and expect more than a code dump.
+
+The agent can inspect the existing service, identify the public contract, map the build and deployment path, create the Rust implementation, wire it into the repo, run tests, compare behavior against fixtures, and report what changed.
+
+The goal is what keeps that work from turning into a repo-wide rewrite.
+
+For a Rust migration, the goal might look like this:
+
+```text
+/goal Migrate the Node worker to Rust while preserving public API and deployment behavior.
+
+Scope:
+- Touch only the worker package, tests, and minimum build configuration.
+- Keep database schema, dashboard UI, billing, and auth unchanged.
+
+Done when:
+- Existing integration tests pass.
+- The Rust worker runs through the current local development command.
+- Before/after fixture output is equivalent, or every behavior difference is listed for review.
+
+Stop if:
+- Compatibility cannot be verified.
+- The migration requires schema or cross-service API changes.
+```
+
+That does not make the migration easy. It makes it auditable.
+
+## Hermes needs goals because personal work crosses tools
+
+Hermes, the personal assistant shape of this pattern, has a different surface area: email, calendar, notes, receipts, vendors, ecommerce listings, spreadsheets, reminders, and approvals.
+
+"Help me clear inventory" is not a task. It is a bundle of decisions hiding behind a sentence. Hermes might need to inspect an inventory spreadsheet, Shopify or Square, sales history, vendor email, customer segments, and your notes.
+
+With a goal, that becomes an operating loop instead of a vague errand. Hermes can rank stale items by stock level, age, margin, and sales velocity. It can draft discount tiers, bundle ideas, customer copy, and vendor emails. It can prepare a one-page approval queue with the inventory rows, discount logic, drafts, and unresolved decisions.
+
+The goal might look like this:
+
+```text
+/goal Prepare a slow-moving inventory clearance plan for approval before Friday.
+
+Allowed access:
+- Inventory spreadsheet, Shopify or Square inventory, sales history, vendor email, approved customer segments, and notes.
+
+Done when:
+- Slow-moving items are ranked by stock level, age, margin, and sales velocity.
+- Discount tiers, bundle ideas, customer copy, and vendor emails are drafted.
+- The approval queue lists each recommendation, source record, draft, and unresolved decision.
+
+Boundaries:
+- Do not send emails.
+- Do not publish storefront changes or change prices.
+- Do not use customer segments outside approved marketing lists.
+```
+
+That approval boundary is the difference between useful assistance and risky automation.
+
+## Autonomy has to earn its loop
+
+Autonomy becomes useful when it has a falsifiable boundary: reject unrelated work, define the next action and stop condition, keep state outside model context, verify before completion language, and show evidence.
+
+For coding, the evidence might be files, logs, tests, screenshots, benchmarks, and a pull request. For Hermes, it might be drafts, notes, reminders, staged changes, source records, and an approval queue.
+
+The point is not that every agent needs the exact `/goal` command. Every useful agent eventually needs the same primitive: a durable objective, a bounded loop, and a standard for saying done.
+
+## A prompting template for goals that can be audited
+
+Use this when the task is too open-ended for a one-shot prompt:
+
+```text
+/goal <desired end state>
+
+Goal:
+- <What should be true when the work is done.>
+
+Done when:
+- <Specific checks, artifacts, or facts that prove completion.>
+
+Boundaries:
+- <Files, tools, accounts, data sources, or behaviors allowed.>
+- <Files, tools, accounts, data sources, or behaviors out of scope.>
+
+Verification:
+- <Commands, tests, screenshots, source records, logs, links, or review steps.>
+
+Iteration policy:
+- <How the agent should choose the next step and record state.>
+
+Stop conditions:
+- <When to stop, ask for help, and report blockers.>
+```
+
+## References
+
+- [snarktank/ralph](https://github.com/snarktank/ralph)
+- [Geoffrey Huntley, "Ralph Wiggum as a software engineer"](https://ghuntley.com/ralph/)
