@@ -279,14 +279,19 @@ Always state which validation ran and any validation that could not be run.
 - Plans must include implementation details: target files, schema changes, component structure, data flow, frontmatter fields, routes, validation, and migration/backfill steps when relevant.
 - Mermaid diagrams are encouraged for complex architecture or content-flow changes.
 - Do not treat old plan files as authoritative without checking the current code.
+- Treat `PLAN_*.md` files as working artifacts by default. Do not commit them unless the user explicitly asks to preserve the plan in the repo or the task is specifically to publish durable planning documentation.
 
 ## Git Hygiene
 
 - Do not commit unless explicitly asked.
 - Do not revert user changes.
-- Check `git status --short` before editing and before finalizing.
+- Check `git status --short --untracked-files=all` before editing, before staging, and before finalizing.
 - When making changes and committing them to a PR, do not leave the local worktree dirty from your task. Before finalizing, confirm `git status --short` is clean or contains only unrelated pre-existing changes that were intentionally left untouched.
 - When making changes and committing them, do not leave the worktree dirty with those same task-related changes after they are already committed. Clean up task-owned generated output, staged leftovers, and duplicate dirty files before finalizing, while preserving unrelated pre-existing work.
-- Keep generated files, plans, local notes, temporary outputs, and `refs/` local research materials out of commits unless explicitly requested.
-- Never commit changes under the `/refs` folder, even when committing other task-related files.
+- Keep generated files, plans, local notes, temporary outputs, and private research materials out of commits unless explicitly requested.
+- Before committing, inspect `git diff --cached --name-status` and reject accidental support artifacts such as `PLAN_*.md`, `posts/*-options.md`, `.DS_Store`, `.tmp`, `.bak`, `.orig`, `.rej`, `.next/`, `coverage/`, `test-results/`, and ignored generated files.
+- Treat `posts/social-media-<slug>.md` as publishable only when social launch copy is explicitly requested or the task is an end-to-end publishing package. Otherwise leave it untracked locally or remove it during cleanup.
+- Treat `refs/<slug>/README.md` as a publication-safe source log only when it lists visible/supporting sources for a sourced post. Do not commit private `refs` scratch files such as `deep-research.md`, transcript-derived notes, raw extracts, prompt transcripts, or image-generation prompts unless the user explicitly approves them for repo visibility.
+- For blog publication or cleanup PRs, compare `data/blogs/<slug>.mdx` with `public/static/images/blogs/<slug>/`, `refs/<slug>/`, and `posts/social-media-<slug>.md` on the target branch. Remove orphaned asset folders, stale social-copy files, and obsolete source packets only after confirming the matching MDX is absent or no longer references them.
+- Keep generated churn such as `next-env.d.ts`, `app/*-tag-data.json`, and `public/search.json` out of commits unless the generated output is an intentional part of the task.
 - If unrelated files are already dirty, mention that they were left untouched.
