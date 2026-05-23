@@ -3,13 +3,11 @@ title: 'Production Agents Need Context Engineering, Not Just Bigger Models'
 date: '2026-05-10'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
-summary: 'A technical readout from Code w/ Claude 2026 on prompt caching, tool search, programmatic tool calling, compaction, and advisor models for production AI agents.'
+summary: 'A technical readout from Code w/ Claude 2026 on managing context, cost, latency, and model routing in production AI agents.'
 tldr: |
-  - Production agents fail differently from demos: every loop adds cost, latency, tool metadata, tool results, and stale conversation state.
-  - Prompt caching should be the default for long-running agents because stable prefixes such as system instructions, tool definitions, examples, and prior turns are resent constantly.
-  - Context engineering has three separate surfaces: which tool definitions enter the prompt, which tool results enter the prompt, and which old turns remain in full detail.
-  - Tool search, programmatic tool calling, and compaction are complementary. One handles tool catalogs, one handles bulky results, and one handles long histories.
-  - The advisor pattern is a cost-control strategy: let a cheaper executor do most mechanical work, then call a stronger model only when judgment changes the outcome.
+  - Production agents fail differently: each loop adds cost, latency, tool metadata, results, and stale state.
+  - Context engineering manages tool definitions, tool results, and old turns.
+  - Caching, tool search, programmatic tool calling, compaction, and advisors are separate pressure valves.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/context-engineering-production-claude-agents/cardImage.png'
 images: ['/static/images/blogs/context-engineering-production-claude-agents/blogHeader.png']
@@ -17,154 +15,73 @@ imageTheme: 'black'
 layout: 'PostBanner'
 ---
 
-Production agents do not fail like demos fail.
+Production agents do not fail like demos fail. A demo fails when the model chooses the wrong tool or gives a bad answer. A production agent fails more quietly: each loop gets more expensive, the first token arrives later, and tool results pile up.
 
-A demo fails when the model chooses the wrong tool or gives a bad answer. A production agent fails more quietly: each loop gets more expensive, the first token arrives later, tool results pile up, and the context window turns into an archive of everything the system was too afraid to throw away.
-
-Brad Abrams' Code w/ Claude 2026 session, ["Getting more out of the Claude Platform"](https://claude.com/code-with-claude/session/sf-getting-more-out-of-the-claude-platform), is useful because it frames agent reliability as an operations problem. The official session summary is blunt: cut cost, manage context, boost intelligence. The talk's examples are Claude-specific, but the architectural lesson is broader.
+Brad Abrams' Code w/ Claude 2026 session, ["Getting more out of the Claude Platform"](https://claude.com/code-with-claude/session/sf-getting-more-out-of-the-claude-platform), frames agent reliability as an operations problem: cut cost, manage context, boost intelligence.
 
 If you are building agents that run long enough to touch real systems, context is now part of your infrastructure.
 
-<Callout type="note" title="Source note">
-  This post is based on a user-supplied, timestamped transcript-derived outline of the session, not
-  a verbatim transcript. YouTube did not expose subtitles or automatic captions through `yt-dlp` at
-  the time of extraction, so the source packet for this post keeps the supplied outline separate
-  from the official Anthropic session page and product docs.
-</Callout>
-
-## Production agents are mostly context machines
-
-An agent loop looks innocent in the first five minutes.
-
-The system prompt is stable. The tool list fits. The first few tool results are manageable. The model can still see what happened, what it should do next, and which external systems matter.
-
-Then production happens.
-
-The agent starts reading Slack, Gong, Salesforce, GitHub, Sentry, internal docs, support tickets, billing data, and user-specific application state. Every tool definition competes with the actual task. Every tool result wants to enter the transcript. Every old turn feels maybe-useful enough to keep.
-
-The result is not just a bigger bill. It is a worse reasoning environment.
-
-That is the core idea behind context engineering: decide what deserves to be in the model's active context, what should be retrieved just in time, what should be summarized, and what should stay outside the prompt entirely.
+The core idea behind context engineering is simple: decide what deserves to be in the model's active context, what should be retrieved just in time, what should be summarized, and what should stay outside the prompt entirely.
 
 ## Prompt caching is the first production tax break
 
-Long-running agents repeat themselves constantly.
+Long-running agents repeat stable context constantly: tool schemas, system instructions, examples, policies, and earlier turns that did not change.
 
-The same system instructions go out on every turn. The same tool definitions are often sent again. The same conversation prefix gets replayed as the agent loops over tool call, tool result, next tool call, next result.
+Prompt caching turns that repeated prefix into a cost lever. Anthropic describes it as resuming from specific prompt prefixes to reduce processing time and cost; as of May 23, 2026, cache reads are priced at 0.1x the base input-token price for supported models ([Anthropic prompt caching docs](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)).
 
-Prompt caching exists for that shape. Anthropic's docs describe it as a way to resume from specific prompt prefixes, reducing processing time and cost for repetitive prompts with consistent elements. Cacheable material includes things like tools, system content, text blocks, images, documents, tool use, and tool results, depending on where the cache breakpoint is placed ([Anthropic prompt caching docs](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)).
+Because cache keys follow prefix order, `tools`, then `system`, then `messages`, stable tool definitions, system instructions, examples, policies, and long-lived context belong before the cache breakpoint. Request-specific user input and retrieved state go after it.
 
-The important implementation detail is that caching is prefix-based. Anthropic documents the ordering as `tools`, then `system`, then `messages`, with cache control applied up to a breakpoint. If you put fast-changing content before the cache point, you get cache misses and a false sense of optimization.
+Dynamic content before the cache point creates misses.
 
-A practical agent prompt usually wants this shape:
-
-```text
-stable tool definitions
-stable system instructions
-stable examples or policy
-stable long-lived context
-cache breakpoint
-request-specific user input
-request-specific retrieved state
-```
-
-The session's point was not "turn on a discount." It was "stop paying to reprocess the same agent skeleton every turn."
-
-Prompt caching is especially boring when it works. That is the compliment. The first request writes the reusable prefix. Later turns read it back, cutting the repeated input-token cost and often improving time to first token.
-
-As of the May 10, 2026 docs, Anthropic prices cache reads at 0.1x the base input-token price for supported models. That matches the session's practical framing: the cheapest input token is the one you do not reprocess.
+GitHub Copilot is the scale case. In the GitHub-scale Code w/ Claude session, the speakers said a 1% caching gain can mean millions in savings; cached input is 10% of normal input cost; Copilot targets 94%-96% hit rates; and a drop toward 70% usually means a bug or bad prompt assembly. Their rules are concrete: keep prefixes stable, keep UUIDs out of system prompts, regression-test tool catalogs because dynamic tool loading can invalidate the conversation cache, and preserve cache affinity when a harness switches models.
 
 ## Tool definitions are not free
 
-Most agent teams underestimate tool definitions because they do not look like user data.
+Most agent teams underestimate tool definitions because they do not look like user data. They are schemas and descriptions, "just metadata."
 
-They are schemas. They are descriptions. They are "just metadata." Then the agent has 80 tools, 200 tools, or a full MCP-powered workspace where every connected service brings its own catalog.
+Then the agent has 80 tools, 200 tools, or a full MCP-powered workspace where every service brings its own catalog. The model has to read that catalog before it works.
 
-The model has to read that catalog before it can do any work.
-
-Anthropic's tool search docs describe the exact scaling problem: multi-server setups can spend large chunks of context on tool definitions before the task begins, and tool selection can degrade once the available tool count gets too high. The documented solution is deferred tool loading: provide a search tool plus a catalog where most tools are marked with `defer_loading: true`; Claude searches names, descriptions, argument names, and argument descriptions, then only the relevant tool references are expanded into full definitions ([Anthropic tool search docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool)).
+Anthropic's tool search docs describe the scaling problem directly: multi-server setups can spend large chunks of context on tool definitions before the task begins, and tool selection degrades once the tool count gets too high. The documented solution is deferred loading: provide a search tool plus a catalog where most tools are marked with `defer_loading: true`; Claude searches tool metadata, then only the relevant references are expanded into full definitions ([Anthropic tool search docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool)).
 
 That gives you a cleaner invariant:
 
 > The model should know how to find tools before it knows every tool.
 
-For small agents, this is unnecessary ceremony. If you have five tools and all five are used on nearly every request, load them.
-
-For enterprise agents, it is different. The problem is not only context size. It is attention. A model choosing among three relevant tools behaves differently from a model choosing among a wall of schemas from every system your company has ever connected.
+For small agents, this is unnecessary ceremony. If you have five tools and all five are used on nearly every request, load them. For enterprise agents, attention is the product surface.
 
 ## Tool results should not become prompt landfill
 
-Tool search handles the front door: which tool definitions enter the prompt.
+Tool search handles the front door: which tool definitions enter the prompt. Programmatic tool calling handles the back door: what happens after tools return too much data.
 
-Programmatic tool calling handles the back door: what happens after tools return too much data.
+The usual failure mode is easy to reproduce. A tool returns a giant JSON payload, an HTML page, a CRM export, a meeting transcript, or all rows that might be relevant. The orchestration layer stuffs the whole result into the next model call.
 
-The usual failure mode is easy to reproduce. A tool returns a giant JSON payload, an HTML page, a CRM export, a meeting transcript, a list of all accounts, or all rows that might be relevant. The orchestration layer dutifully stuffs the whole result into the next model call. The model now has the answer somewhere in the haystack, plus a new opportunity to get distracted by everything else in the haystack.
+Programmatic tool calling changes that contract. Anthropic describes it as letting Claude write code inside a code execution container to call tools, aggregate results, filter data, and return only the relevant output to model context ([Anthropic programmatic tool calling docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling)).
 
-Programmatic tool calling changes that contract. Anthropic's docs describe it as letting Claude write code inside a code execution container to call tools, aggregate results, filter data, and return only the relevant output to the model context ([Anthropic programmatic tool calling docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling)).
+In production, the model should reason over evidence, not raw exhaust. Load only relevant tool definitions, let code filter bulky tool results, and compact stale turns into task state.
 
-That is a subtle but important shift.
+## Compaction preserves state, not nostalgia
 
-The tool can still return the full data. The system does not have to overfit every tool API to every future reasoning path. Instead, the model can inspect the data shape with code, select the handful of fields that matter, and print a compact evidence packet.
+Eventually, even careful agents run long. They plan, call tools, revise the plan, hit errors, recover, test, and continue.
 
-In production, that is often the right boundary:
+Compaction is the blunt tool for that moment. Anthropic describes server-side compaction as summarizing older context when a long-running conversation approaches a configured token threshold. The API creates a `compaction` block, continues from the summary, and later requests can drop message blocks before that point ([Anthropic compaction docs](https://platform.claude.com/docs/en/build-with-claude/compaction)).
 
-| Data surface     | Bad default                                  | Better pattern                                   |
-| ---------------- | -------------------------------------------- | ------------------------------------------------ |
-| Tool definitions | Load every schema into every prompt          | Defer most tools and search by capability        |
-| Tool results     | Paste raw payloads into conversation history | Let code filter, aggregate, and extract evidence |
-| Old turns        | Preserve every message forever               | Compact stale work into task state               |
+As of May 23, 2026, Anthropic lists server-side compaction as beta and requires the `compact-2026-01-12` beta header, so treat it as a gated production feature rather than an invisible default.
 
-The model should reason over evidence, not raw exhaust.
+Good compaction preserves the task goal, decisions, open questions, evidence, changed files or records, active constraints, and next actions. Bad compaction preserves vibes.
 
-## Compaction is not just about fitting in the window
-
-Eventually, even careful agents run long.
-
-They plan, call tools, revise the plan, call more tools, hit errors, recover, test, ask for review, and continue. If the agent is useful, the conversation will grow.
-
-Compaction is the blunt tool for that moment. Anthropic's docs describe server-side compaction as automatically summarizing older context when a long-running conversation approaches a configured token threshold. The API creates a `compaction` block, continues from the summary, and later requests can drop message blocks before that compaction point ([Anthropic compaction docs](https://platform.claude.com/docs/en/build-with-claude/compaction)).
-
-As of May 10, 2026, Anthropic lists server-side compaction as beta and requires the `compact-2026-01-12` beta header, so treat it as a gated production feature rather than an invisible default.
-
-The key is that compaction is not only a token cap workaround. Long histories also degrade focus. The model may be able to technically fit the previous 80 turns, but it may not benefit from carrying every intermediate mistake, every failed tool call, every stale branch of reasoning, and every old partial result.
-
-Good compaction preserves:
-
-- The task goal
-- Current decisions
-- Open questions
-- Important evidence
-- Files or records changed
-- Constraints that still apply
-- The next few actions
-
-Bad compaction preserves vibes.
-
-If the summary cannot tell the next model call what must remain true, it is not compaction. It is amnesia with nicer formatting.
+If the summary cannot tell the next model call what must remain true, it is amnesia with nicer formatting.
 
 ## Advisor models are senior review on demand
 
 After caching and context engineering, the session turns to a different cost problem: using the most expensive model for every step.
 
-This is where the advisor strategy is interesting. Anthropic's advisor docs describe pairing a faster executor model with a higher-intelligence advisor model that can provide strategic guidance mid-generation. The executor continues the task, but it can consult the advisor for a plan, correction, or high-impact decision ([Anthropic advisor tool docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/advisor-tool)).
+Anthropic's advisor docs describe pairing a faster executor model with a higher-intelligence advisor model that can provide strategic guidance mid-generation ([Anthropic advisor tool docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/advisor-tool)). As of May 23, 2026, the advisor tool is documented as beta, so this is not a "flip it on everywhere" recommendation.
 
-As of May 10, 2026, the advisor tool is documented as beta, so this is not a "flip it on everywhere" recommendation. It is a pattern to evaluate on the agent traces where better planning actually changes the result.
+Bad model routing is invisible roulette: send some requests to cheap models, some to expensive models, hope the product feels consistent. The advisor pattern is more explicit: the executor owns the flow, and the advisor is called for high-impact, low-confidence, or expensive-to-miss decisions.
 
-The analogy from the transcript-derived notes is a junior engineer and a senior engineer. The senior engineer should not type every line. They should review the plan, catch the buried requirement, and intervene where judgment changes the outcome.
+In the Hero Corp AI demo, the advisor catches a buried renewal requirement the executor missed. That is the useful version of the pattern.
 
-That is model routing with a clearer interface.
-
-The dangerous version of model routing is invisible roulette: send some requests to cheap models, some to expensive models, hope the product feels consistent. The advisor pattern is more explicit. The executor owns the main flow. The advisor is called when the task crosses a threshold:
-
-- A decision has high business impact.
-- The agent is about to commit to a plan.
-- The cheaper model has low confidence.
-- The evidence is long and contradictory.
-- A missed requirement would be expensive.
-
-In the Hero Corp AI demo described by the notes, the executor initially thinks a renewal is fine. The advisor notices a buried requirement involving Cryo-Thing and the mayor's expectations, turning a vague renewal status into a concrete CEO task. That is exactly the kind of intervention that makes the pattern useful: not "make the answer sound smarter," but "catch the fact that changes the action."
-
-## The production pattern: cache, retrieve, execute, compact, advise
+## The production pattern: cache, search, execute, compact, advise
 
 Put together, the session sketches a practical architecture for production agents:
 
@@ -181,72 +98,23 @@ Put together, the session sketches a practical architecture for production agent
   active model context and what stays in cache, tool memory, code execution, or compacted state.
 </DiagramSubtitle>
 
-This is not one feature. It is a stack of pressure valves.
+This is not one feature. It is a stack of pressure valves: prompt caching for repeated prefixes, tool search for oversized catalogs, programmatic tool calling for oversized results, compaction for long histories, and advisor calls for cases where better reasoning is worth paying for.
 
-Prompt caching handles repeated prefixes. Tool search handles oversized catalogs. Programmatic tool calling handles oversized results. Compaction handles long-running history. Advisor calls handle cases where better reasoning is worth paying for.
+## The short version
 
-The result is an agent that can stay cheaper, faster, and more focused without pretending the model is magically immune to context bloat.
+Production agents do not get reliable just because the model gets bigger. They get reliable when the runtime controls what the model sees.
 
-## What I would ship first
+Cache the stable prefix so repeated instructions and tool schemas stop dominating cost. Search large tool catalogs instead of loading every definition. Use programmatic tool calling to turn bulky results into evidence. Compact old turns into durable task state. Call an advisor model only when better judgment changes the outcome.
 
-If you already have an agent in production, I would not start with the fanciest feature. I would start with measurement.
-
-Track these per agent run:
-
-| Metric                                  | Why it matters                                                      |
-| --------------------------------------- | ------------------------------------------------------------------- |
-| Cache read tokens vs cache write tokens | Shows whether caching is saving work or just adding markers         |
-| Tool-definition tokens                  | Shows whether the catalog is eating the context budget              |
-| Tool-result tokens                      | Shows whether raw payloads are dominating the prompt                |
-| Number of tools visible to the model    | Predicts selection difficulty and schema noise                      |
-| Compaction count and trigger threshold  | Shows whether long tasks are managed intentionally                  |
-| Advisor calls per successful task       | Shows whether expensive reasoning is targeted or sprayed everywhere |
-| End-to-end task cost                    | Keeps token optimizations tied to user-visible work                 |
-| Time to first token and total latency   | Catches "cheap but slow" regressions                                |
-
-Then apply the techniques in order:
-
-1. Add prompt caching around stable prefixes.
-2. Move rarely used tools behind tool search once the tool catalog gets large.
-3. Stop dumping raw tool results into the prompt. Extract structured evidence first.
-4. Add gated compaction before long histories force emergency truncation.
-5. Add advisor calls only for decisions where a better plan changes the task outcome.
-
-That order matters. If your cache hit rate is terrible, an advisor model will not fix your economics. If your tool results are huge, a bigger context window will delay the pain rather than remove it.
-
-## Where this can go wrong
-
-Context engineering is not free. Every technique adds a new failure mode.
-
-Prompt caching can silently underperform if the cached prefix changes too often. Tool search can miss a tool if descriptions are vague. Programmatic tool calling can hide evidence if the extraction code is wrong. Compaction can remove a detail the agent later needs. Advisor calls can become expensive theater if they fire on every turn.
-
-The answer is not to avoid these techniques. It is to make them observable.
-
-Keep the transcript inspectable. Log which tools were searched, loaded, and called. Save the extraction code that selected evidence from raw results. Store compaction summaries as first-class artifacts. Record when the advisor was called and what changed because of the advice.
-
-The session notes include a warning against abstractions that hide the full transcript from the developer. That warning is worth keeping. Production agent systems need dashboards, but they also need the plain ugly record of what the model saw, what it ignored, and what it decided to keep.
-
-There is one more operational detail from the wrap-up that belongs in this category: credentials. Anthropic's Workload Identity Federation docs describe exchanging a signed JWT from an identity provider for a short-lived Anthropic access token, avoiding static API keys in CI and other workloads ([Anthropic Workload Identity Federation docs](https://platform.claude.com/docs/en/manage-claude/workload-identity-federation)). That does not make an agent cheaper or smarter, but it reduces the blast radius of putting agents into production.
-
-## The real lesson from the Claude Platform session
-
-"Getting more out of the Claude Platform" sounds like a vendor feature tour. The better reading is an agent architecture lesson.
-
-The future production agent is not a single giant prompt wrapped around a giant model. It is a runtime that manages context with the same seriousness backend engineers already apply to memory, indexes, queues, and caches.
-
-That is the bar now.
-
-Not "can the model answer with enough context?"
-
-"Can the system make sure the right context is there, the wrong context is absent, and the expensive reasoning only happens where it changes the outcome?"
+That is the thread through the Claude Platform session: context is not background material. It is the operating surface for cost, latency, reliability, and reasoning quality.
 
 ## References
 
 1. Anthropic, ["Getting more out of the Claude Platform"](https://claude.com/code-with-claude/session/sf-getting-more-out-of-the-claude-platform), Code w/ Claude 2026 San Francisco, May 6, 2026.
-2. Anthropic, ["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching), accessed May 10, 2026.
-3. Anthropic, ["Tool search tool"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool), accessed May 10, 2026.
-4. Anthropic, ["Programmatic tool calling"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling), accessed May 10, 2026.
-5. Anthropic, ["Compaction"](https://platform.claude.com/docs/en/build-with-claude/compaction), accessed May 10, 2026.
-6. Anthropic, ["Advisor tool"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/advisor-tool), accessed May 10, 2026.
-7. Anthropic, ["Workload Identity Federation"](https://platform.claude.com/docs/en/manage-claude/workload-identity-federation), accessed May 10, 2026.
-8. Anthropic, ["Claude Code overview"](https://code.claude.com/docs/en/overview), accessed May 10, 2026.
+2. Anthropic, ["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching), accessed May 23, 2026.
+3. Anthropic, ["Tool search tool"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool), accessed May 23, 2026.
+4. Anthropic, ["Programmatic tool calling"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling), accessed May 23, 2026.
+5. Anthropic, ["Compaction"](https://platform.claude.com/docs/en/build-with-claude/compaction), accessed May 23, 2026.
+6. Anthropic, ["Advisor tool"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/advisor-tool), accessed May 23, 2026.
+7. GitHub Docs, ["Hosting of models for GitHub Copilot"](https://docs.github.com/en/enterprise-cloud@latest/copilot/reference/ai-models/model-hosting), accessed May 23, 2026.
+8. GitHub Docs, ["Models and pricing for GitHub Copilot"](https://docs.github.com/en/enterprise-cloud@latest/copilot/reference/copilot-billing/models-and-pricing), accessed May 23, 2026.
