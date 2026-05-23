@@ -4,12 +4,6 @@ This reference packet supports the blog post `data/blogs/gemma-4-open-models-edg
 
 Access date for web sources: 2026-05-03.
 
-## Local Research
-
-1. `refs/gemma-4-open-models-edge-agent-workflows/deep-research.md`
-   - Local fact-check and editorial notes for the Gemma 4 article.
-   - Supports claim boundaries around architecture details, runtime support, audio parameters, and source provenance.
-
 ## Primary And Near-Primary Sources
 
 1. Google, [Gemma 4: Byte for byte, the most capable open models](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/), 2026-04-02.
