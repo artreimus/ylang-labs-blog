@@ -23,6 +23,23 @@ Brad Abrams' Code w/ Claude 2026 session, ["Getting more out of the Claude Platf
 
 Context engineering is the discipline behind that pattern. It decides what deserves to be in the model's active context, what should be retrieved just in time, what should be summarized, and what should stay outside the prompt entirely.
 
+**The production pattern: cache, search, execute, compact, advise.** Cache the stable prefix, search the tool catalog, execute against bulky data outside the prompt, compact old turns into durable task state, and call an advisor model when the decision deserves stronger reasoning.
+
+<Image
+  alt="Production AI agent context engineering pipeline showing prompt caching, tool search, execution, compaction, and advisor review"
+  src="/static/images/blogs/context-engineering-production-claude-agents/production-pattern.png"
+  width={1600}
+  height={900}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A production agent should treat context as a managed resource. Each step decides what enters the
+  active model context and what stays in cache, tool memory, code execution, or compacted state.
+</DiagramSubtitle>
+
+It is not one feature. It is a stack of pressure valves: prompt caching for repeated prefixes, tool search for oversized catalogs, programmatic tool calling for oversized results, compaction for long histories, and advisor calls for cases where better reasoning is worth paying for.
+
 ## Prompt caching is the first production tax break
 
 Long-running agents repeat stable context constantly: tool schemas, system instructions, examples, policies, and earlier turns that did not change.
@@ -80,25 +97,6 @@ Anthropic's advisor docs describe pairing a faster executor model with a higher-
 Bad model routing is invisible roulette: send some requests to cheap models, some to expensive models, hope the product feels consistent. The advisor pattern is more explicit: the executor owns the flow, and the advisor is called for high-impact, low-confidence, or expensive-to-miss decisions.
 
 In the Hero Corp AI demo, the advisor catches a buried renewal requirement the executor missed. That is the useful version of the pattern.
-
-## The production pattern: cache, search, execute, compact, advise
-
-Put these pieces together and you get a practical architecture for production agents:
-
-<Image
-  alt="Production AI agent context engineering pipeline showing prompt caching, tool search, execution, compaction, and advisor review"
-  src="/static/images/blogs/context-engineering-production-claude-agents/production-pattern.png"
-  width={1600}
-  height={900}
-  className="mx-auto rounded-md bg-white"
-/>
-
-<DiagramSubtitle>
-  A production agent should treat context as a managed resource. Each step decides what enters the
-  active model context and what stays in cache, tool memory, code execution, or compacted state.
-</DiagramSubtitle>
-
-This is not one feature. It is a stack of pressure valves: prompt caching for repeated prefixes, tool search for oversized catalogs, programmatic tool calling for oversized results, compaction for long histories, and advisor calls for cases where better reasoning is worth paying for.
 
 ## Conclusion
 
