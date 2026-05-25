@@ -1,0 +1,115 @@
+---
+title: 'HTML vs. Markdown for Agent Output'
+date: '2026-05-24'
+tags: ['AI/ML', 'Agents', 'Generative AI']
+draft: false
+summary: 'Markdown is still the best source format, but agents should use HTML when the output needs layout, interaction, or visual review.'
+tldr: |
+  - Markdown wins as a durable source format because it is readable, diffable, and easy to edit.
+  - HTML wins as an agent artifact format when the reader needs layout, diagrams, navigation, or interaction.
+  - The strongest workflow is not HTML instead of Markdown. It is HTML for review surfaces, then Markdown or structured data for the durable record.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/html-vs-markdown-agent-output/cardImage.png'
+images: ['/static/images/blogs/html-vs-markdown-agent-output/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Markdown became the default output format for coding agents because it is cheap, readable, and easy to commit.
+
+That default breaks down when the output is not really a document. A code review map, design comparison, incident timeline, report, prototype, or custom editor is a small interface pretending to be prose.
+
+For that class of work, HTML is not prettier Markdown. It is a better surface.
+
+Thariq Shihipar's "unreasonable effectiveness of HTML" examples make the argument concrete: twenty self-contained `.html` files that replace walls of Markdown with planning boards, annotated pull requests, component sheets, slide decks, explainers, reports, and small editors. Simon Willison's write-up framed the same shift as a reconsideration of Markdown defaults, especially for model output that can use SVG, widgets, navigation, and richer layouts.
+
+The useful question is not "should agents always use HTML?"
+
+The useful question is: when should the output be source, and when should it be a surface?
+
+<HtmlMarkdownArtifactExperience />
+
+## Markdown is still the best source format
+
+Markdown works because the source is readable. CommonMark describes Markdown as a plain text format for structured documents, and its design goal is readability before rendering.
+
+That matters in a repository.
+
+If the artifact is meant to be reviewed in a diff, edited by hand, quoted in an issue, copied into a README, or kept as long-term project memory, Markdown is still hard to beat. It has low ceremony. A reviewer can patch one sentence without asking the agent to regenerate a page. A future agent can ingest it without needing to separate content from layout code.
+
+This is why project plans, specs, source logs, runbooks, decision records, and blog drafts should usually start as Markdown or MDX.
+
+Markdown is also honest. It does not let a weak argument hide behind gradients, animation, or a dashboard shell. If the reasoning is bad, the file looks bad in a useful way.
+
+## HTML wins when the output is a review surface
+
+HTML is the browser's native document substrate. MDN describes it as the basic building block of the web, with CSS handling presentation and JavaScript handling behavior.
+
+That gives an agent a bigger vocabulary than headings, bullets, tables, and fenced code blocks.
+
+HTML can show PR risk as an annotated map, design states as a contact sheet, research as a navigable evidence board, reports as timelines, and approval queues as small editors.
+
+This is where the HTML examples are most persuasive. The artifact is not trying to become the source of truth. It is trying to help a human inspect a decision.
+
+That distinction matters. A Markdown PR summary is fine when the reviewer already understands the code. An HTML review artifact is better when the reviewer needs to see the hot path, jump between files, compare before and after behavior, and inspect risk by severity.
+
+The extra pixels are not decoration. They are a way to externalize working memory.
+
+## The tradeoff is editability versus inspectability
+
+Markdown's advantage is that it invites co-authoring. You can change a phrase, move a section, fix a bullet, and commit the diff.
+
+HTML's advantage is that it can become an interface. You can click through states, drag tickets between columns, compare design variants, open details only when needed, and export the final decision back into the agent loop.
+
+Those are different jobs.
+
+The risk is obvious: generated HTML is code. It can contain JavaScript. It can fetch external resources. It can bury assumptions in CSS, copy, or client-side state.
+
+So the default rule should be strict:
+
+1. Ask for a self-contained file with no external network dependencies.
+2. Treat generated HTML like code before sharing it.
+3. Keep secrets, credentials, private API responses, and customer data out of ad hoc artifacts.
+4. Require an export path back to Markdown, JSON, a patch, or a checklist when the artifact affects durable work.
+
+HTML should make the decision easier to inspect. It should not become an unreviewable place where decisions disappear.
+
+## Use HTML when the reader has to do something
+
+The clearest prompt pattern is task-specific:
+
+```text
+Create a single self-contained HTML artifact for <task>.
+
+Requirements:
+- Use no external network resources.
+- Make the artifact readable in a browser with no build step.
+- Show the information spatially where that helps: diagrams, tabs, cards, tables, timelines, or side-by-side comparisons.
+- Include controls only when interaction changes the decision.
+- Include an export section that turns the final state into Markdown, JSON, or a checklist I can paste back into the agent or commit.
+- Keep the source data and assumptions visible.
+```
+
+That last line is the difference between a helpful artifact and a magic trick. If the artifact hides the evidence, it is worse than Markdown.
+
+Ask for HTML when the reader has to compare, tune, navigate, triage, rehearse, or choose. Ask for Markdown when the reader has to edit, cite, commit, preserve, or maintain.
+
+## The format should match the feedback loop
+
+Markdown is a good authoring format because it keeps the content close to the source. HTML is a good agent artifact format because it can turn output into an inspectable surface.
+
+For agents, that split is becoming important.
+
+When the output is a durable record, keep it in Markdown. When the output is a decision surface, ask for HTML. When the decision is made, export the result back into the durable format.
+
+That is not a Markdown replacement story. It is a division of labor.
+
+Markdown is where the record lives. HTML is where the human can finally see what the agent means.
+
+## References
+
+1. Thariq Shihipar, ["The unreasonable effectiveness of HTML" examples](https://thariqs.github.io/html-effectiveness/).
+2. Simon Willison, ["Using Claude Code: The Unreasonable Effectiveness of HTML"](https://simonwillison.net/2026/May/8/unreasonable-effectiveness-of-html/), May 8, 2026.
+3. Thariq Shihipar, ["Using Claude Code: The Unreasonable Effectiveness of HTML"](https://x.com/trq212/status/2052809885763747935), X post, May 2026.
+4. CommonMark, ["CommonMark Spec 0.31.2"](https://spec.commonmark.org/0.31.2/), January 28, 2024.
+5. MDN Web Docs, ["HTML: HyperText Markup Language"](https://developer.mozilla.org/en-US/docs/Web/HTML).
