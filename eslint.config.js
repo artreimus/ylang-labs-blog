@@ -3,7 +3,7 @@ const prettierPlugin = require('eslint-plugin-prettier')
 
 module.exports = [
   {
-    ignores: ['node_modules/**', '.next/**', '.contentlayer/**'],
+    ignores: ['node_modules/**', '.next/**', '.contentlayer/**', 'next-env.d.ts'],
   },
   ...nextConfig,
   {
