@@ -27,7 +27,7 @@ function usage() {
 Options:
   --input <path>       Image to watermark.
   --output <path>      Output image. May equal --input for in-place replacement.
-  --corner <corner>    lower-left, lower-right, upper-left, or upper-right. Default: lower-left.
+  --corner <corner>    lower-left, lower-right, upper-left, or upper-right. Default: lower-right.
   --logo <choice>      auto, black, or white. Default: auto.
   --logo-dir <path>    Directory containing logo-black.png and logo-white.png.
   --scale <number>     Logo width as a fraction of image width. Default: 0.065.
@@ -40,7 +40,7 @@ Options:
 
 function parseArgs(argv) {
   const options = {
-    corner: 'lower-left',
+    corner: 'lower-right',
     logo: 'auto',
     logoDir: defaultLogoDir,
     scale: 0.065,
