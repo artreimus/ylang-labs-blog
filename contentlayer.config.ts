@@ -22,7 +22,7 @@ import rehypeCitation from 'rehype-citation'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+import { sortPosts } from 'pliny/utils/contentlayer.js'
 
 const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
@@ -103,12 +103,36 @@ function createProjectTagCount(allProjects) {
   writeGeneratedJson('./app/project-tag-data.json', tagCount)
 }
 
+type SearchDocumentSource = {
+  draft?: boolean
+  title: string
+  date: string
+  path: string
+  summary?: string
+  description?: string
+}
+
+function isSearchableDocument(file: SearchDocumentSource) {
+  return file.draft !== true
+}
+
+function toSearchDocument(file: SearchDocumentSource) {
+  return {
+    title: file.title,
+    date: file.date,
+    path: file.path,
+    summary: file.summary || file.description || '',
+  }
+}
+
 function createSearchIndex(allBlogs, allProjects) {
   if (
     siteMetadata?.search?.provider === 'kbar' &&
     siteMetadata.search.kbarConfig.searchDocumentsPath
   ) {
-    const searchableContent = allCoreContent(sortPosts([...allBlogs, ...allProjects]))
+    const searchableContent = sortPosts([...allBlogs, ...allProjects])
+      .filter(isSearchableDocument)
+      .map(toSearchDocument)
 
     writeFileSync(
       `public/${path.basename(siteMetadata.search.kbarConfig.searchDocumentsPath)}`,
