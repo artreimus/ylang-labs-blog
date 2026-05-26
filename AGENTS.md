@@ -85,6 +85,8 @@ These files may change after a build. Treat unrelated pre-existing generated cha
 
 Blog posts live in `data/blogs/<slug>.mdx`. Use kebab-case slugs and match the asset folder name exactly.
 
+When asked to create a new blog post, create or switch to a dedicated branch in the existing checkout instead of starting from a sibling worktree. Use a clear branch name such as `blog/<slug>` or `codex/blog-<slug>`, preserve unrelated dirty files, and only use a separate worktree when the user explicitly asks for one or when branch work in the current checkout would risk overwriting user changes.
+
 Required or strongly expected blog frontmatter:
 
 ```mdx

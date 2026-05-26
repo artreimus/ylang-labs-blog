@@ -1,23 +1,26 @@
 ---
-title: 'HTML vs. Markdown for Agent Output'
+title: 'The Unreasonable Effectiveness of HTML for Agent Output'
 date: '2026-05-27'
 tags: ['AI/ML', 'Agents', 'Generative AI']
 draft: false
-summary: 'Markdown is still the best source format, but agents should use HTML when the output needs layout, interaction, or visual review.'
+summary: 'HTML is unusually effective as an agent review surface when the output needs layout, interaction, or visual inspection, while Markdown remains the durable source format.'
 tldr: |
   - Markdown wins as a durable source format because it is readable, diffable, and easy to edit.
   - HTML wins as an agent artifact format when the reader needs layout, diagrams, navigation, or interaction.
   - The strongest workflow is not HTML instead of Markdown. It is HTML for review surfaces, then Markdown or structured data for the durable record.
 authors: ['arthur-reimus']
-cardImage: '/static/images/blogs/html-vs-markdown-agent-output/cardImage.png'
-images: ['/static/images/blogs/html-vs-markdown-agent-output/blogHeader.png']
+cardImage: '/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/cardImage.png'
+images:
+  ['/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/blogHeader.png']
 imageTheme: 'white'
 layout: 'PostBanner'
 ---
 
-Markdown became the default output format for coding agents because it is cheap, readable, and easy to commit.
+HTML is unusually effective for agent output for a boring reason: a lot of agent output is not really a document.
 
-That default breaks down when the output is not really a document. A code review map, design comparison, incident timeline, report, prototype, or custom editor is a small interface pretending to be prose.
+Markdown became the default because it is cheap, readable, and easy to commit. That default breaks down when the output is a code review map, design comparison, incident timeline, report, prototype, or custom editor.
+
+Those artifacts are small interfaces pretending to be prose.
 
 For that class of work, HTML is not prettier Markdown. It is a better surface.
 
@@ -41,7 +44,7 @@ This is why project plans, specs, source logs, runbooks, decision records, and b
 
 Markdown is also honest. It does not let a weak argument hide behind gradients, animation, or a dashboard shell. If the reasoning is bad, the file looks bad in a useful way.
 
-## HTML wins when the output is a review surface
+## HTML is unreasonable when the output is a review surface
 
 HTML is the browser's native document substrate. MDN describes it as the basic building block of the web, with CSS handling presentation and JavaScript handling behavior.
 

@@ -1,6 +1,6 @@
-# HTML vs. Markdown for Agent Output
+# The Unreasonable Effectiveness of HTML for Agent Output
 
-Source packet for `data/blogs/html-vs-markdown-agent-output.mdx`.
+Source packet for `data/blogs/the-unreasonable-effectiveness-of-html-for-agent-output.mdx`.
 
 Access date: 2026-05-24
 
@@ -57,11 +57,11 @@ Access date: 2026-05-24
 
 The blog artwork uses the provided square raster source image, renamed to `source-image.png`, and cropped into the standard Ylang Labs blog dimensions.
 
-| Asset                                                                       | Source                          | Use                              |
-| --------------------------------------------------------------------------- | ------------------------------- | -------------------------------- |
-| `public/static/images/blogs/html-vs-markdown-agent-output/source-image.png` | User-provided source image      | Crop source                      |
-| `public/static/images/blogs/html-vs-markdown-agent-output/cardImage.png`    | Cropped from `source-image.png` | Blog listing card at `1080x1920` |
-| `public/static/images/blogs/html-vs-markdown-agent-output/blogHeader.png`   | Cropped from `source-image.png` | Post banner at `1260x700`        |
+| Asset                                                                                                 | Source                          | Use                              |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------- | -------------------------------- |
+| `public/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/source-image.png` | User-provided source image      | Crop source                      |
+| `public/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/cardImage.png`    | Cropped from `source-image.png` | Blog listing card at `1080x1920` |
+| `public/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/blogHeader.png`   | Cropped from `source-image.png` | Post banner at `1260x700`        |
 
 ## Claim Boundaries
 
