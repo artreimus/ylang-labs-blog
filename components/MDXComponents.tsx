@@ -51,7 +51,7 @@ import AgentMemory from './blogs/key-elements-of-multi-agent-systems/AgentMemory
 // Context Engineering Blog Components
 import MemoryArchitecture from './blogs/context-engineering-for-ai-agents/MemoryArchitecture'
 import ProcessFlow from './blogs/context-engineering-for-ai-agents/ProcessFlow'
-import HtmlMarkdownArtifactExperience from './blogs/html-vs-markdown-agent-output/HtmlMarkdownArtifactExperience'
+import HtmlMarkdownArtifactExperience from './blogs/the-unreasonable-effectiveness-of-html-for-agent-output/HtmlMarkdownArtifactExperience'
 
 // Core MDX Components
 const coreMDXComponents = {
