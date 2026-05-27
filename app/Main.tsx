@@ -55,7 +55,7 @@ export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
           <div className="flex flex-col items-center justify-center gap-4 pt-8 sm:flex-row">
             <NextLink
               href="/blogs"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-primary-500 px-8 py-3 font-medium text-gray-950 transition-all duration-300 hover:scale-105 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2"
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-primary-500 px-8 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2"
             >
               <span className="mr-2">Start Reading</span>
               <svg
