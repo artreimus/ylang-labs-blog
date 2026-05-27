@@ -39,7 +39,14 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
             <div className="w-full">
               <Bleed>
                 <div className="relative aspect-[2/1] w-full">
-                  <Image src={displayImage} alt={title} fill className="object-cover" />
+                  <Image
+                    src={displayImage}
+                    alt={title}
+                    fill
+                    sizes="100vw"
+                    preload
+                    className="object-cover"
+                  />
                 </div>
               </Bleed>
             </div>

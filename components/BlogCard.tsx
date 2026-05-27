@@ -4,7 +4,7 @@ import Image from 'next/image'
 import React from 'react'
 
 export default function BlogCard({ post, variant = 'default' }) {
-  const { slug, title, tags, cardImage, summary, readingTime, images, imageTheme = 'white' } = post
+  const { slug, title, tags, cardImage, summary, readingTime, images } = post
   const displayImage = (Array.isArray(images) && images.length > 0 && images[0]) || cardImage
 
   if (variant === 'grid') {
@@ -17,6 +17,7 @@ export default function BlogCard({ post, variant = 'default' }) {
               src={displayImage}
               alt={title}
               fill
+              sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
               className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             />
           </div>
@@ -58,14 +59,17 @@ export default function BlogCard({ post, variant = 'default' }) {
   // Original horizontal scroll variant
   return (
     <Link href={`/blogs/${slug}`} className="group block h-[320px] w-[240px]">
-      <article className="relative h-full w-full overflow-hidden rounded-lg">
+      <article className="relative h-full w-full overflow-hidden rounded-lg bg-gray-900">
         {/* Image */}
         <Image
-          src={cardImage}
+          src={displayImage}
           alt={title}
           fill
+          sizes="240px"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
 
         {/* Upper Content: Tags and Date */}
         <div className="absolute left-0 top-0 p-4">
@@ -79,10 +83,7 @@ export default function BlogCard({ post, variant = 'default' }) {
 
         {/* Bottom Content: Title */}
         <div className="absolute bottom-0 left-0 p-4">
-          <h2
-            className="line-clamp-2 text-lg font-bold leading-tight"
-            style={{ color: imageTheme }}
-          >
+          <h2 className="line-clamp-2 text-lg font-bold leading-tight text-white drop-shadow-sm">
             {title}
           </h2>
         </div>

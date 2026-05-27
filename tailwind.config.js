@@ -2,6 +2,8 @@
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const colors = require('tailwindcss/colors')
 
+const rgbVar = (variable) => `rgb(var(${variable}) / <alpha-value>)`
+
 /** @type {import("tailwindcss/types").Config } */
 module.exports = {
   content: [
@@ -26,6 +28,7 @@ module.exports = {
       },
       colors: {
         primary: {
+          DEFAULT: rgbVar('--color-primary'),
           50: '#fefde8',
           100: '#fffdc2',
           200: '#fff787',
@@ -37,8 +40,10 @@ module.exports = {
           800: '#88520b',
           900: '#734310',
           950: '#432305',
+          foreground: rgbVar('--color-primary-foreground'),
         },
         secondary: {
+          DEFAULT: rgbVar('--color-secondary'),
           50: '#f3f8ed',
           100: '#e3f0d7',
           200: '#c9e3b3',
@@ -50,7 +55,33 @@ module.exports = {
           800: '#354f25',
           900: '#2f4423',
           950: '#16240f',
+          foreground: rgbVar('--color-secondary-foreground'),
         },
+        destructive: {
+          DEFAULT: rgbVar('--color-destructive'),
+          foreground: rgbVar('--color-destructive-foreground'),
+        },
+        background: rgbVar('--color-background'),
+        foreground: rgbVar('--color-foreground'),
+        card: {
+          DEFAULT: rgbVar('--color-card'),
+          foreground: rgbVar('--color-card-foreground'),
+        },
+        popover: {
+          DEFAULT: rgbVar('--color-popover'),
+          foreground: rgbVar('--color-popover-foreground'),
+        },
+        muted: {
+          DEFAULT: rgbVar('--color-muted'),
+          foreground: rgbVar('--color-muted-foreground'),
+        },
+        accent: {
+          DEFAULT: rgbVar('--color-accent'),
+          foreground: rgbVar('--color-accent-foreground'),
+        },
+        border: rgbVar('--color-border'),
+        input: rgbVar('--color-input'),
+        ring: rgbVar('--color-ring'),
         gray: colors.gray,
       },
       zIndex: {

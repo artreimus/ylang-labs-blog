@@ -2,7 +2,6 @@
 
 import siteMetadata from '@/data/siteMetadata'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import ContactUsFormSchema from 'app/validators/formschema'
 import { useForm } from 'react-hook-form'
@@ -144,12 +143,13 @@ export default function ContactPage() {
                   return (
                     <div
                       key={`flower-${row}-${col}`}
+                      aria-hidden="true"
                       className={`absolute opacity-[0.4] ${isCenter ? 'block' : ''}`}
                       style={{ left: `${left}%`, top: `${top}%` }}
                     >
                       <Image
                         src="/static/images/logo-yellow.svg"
-                        alt="Flower"
+                        alt=""
                         width={250}
                         height={250}
                         className="h-8 w-8 object-contain md:h-16 md:w-16"
@@ -266,31 +266,37 @@ export default function ContactPage() {
                   name="inquiries"
                   render={({ field }) => (
                     <FormItem className="space-y-4">
-                      <FormLabel className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        Type of Inquiry
-                      </FormLabel>
-                      <FormControl>
+                      <fieldset className="space-y-4">
+                        <legend className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          Type of Inquiry
+                        </legend>
                         <div className="grid grid-cols-2 gap-4">
-                          {INQUIRY_TYPES.map((type) => (
-                            <FormItem key={type} className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
+                          {INQUIRY_TYPES.map((type) => {
+                            const inputId = `inquiry-${type}`
+
+                            return (
+                              <label
+                                key={type}
+                                htmlFor={inputId}
+                                className="flex items-center space-x-3 text-sm font-medium text-gray-700 dark:text-gray-300"
+                              >
+                                <input
+                                  id={inputId}
+                                  type="radio"
+                                  name={field.name}
+                                  value={type}
                                   checked={field.value === type}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange(type)
-                                      : field.onChange(undefined)
-                                  }}
-                                  className="h-5 w-5 rounded-md border-2 border-gray-300 data-[state=checked]:border-primary-500 data-[state=checked]:bg-primary-500 dark:border-gray-600 dark:data-[state=checked]:border-primary-400 dark:data-[state=checked]:bg-primary-400"
+                                  onBlur={field.onBlur}
+                                  onChange={() => field.onChange(type)}
+                                  ref={field.ref}
+                                  className="h-5 w-5 border-gray-300 text-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:checked:bg-primary-400 dark:focus:ring-primary-400"
                                 />
-                              </FormControl>
-                              <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                              </FormLabel>
-                            </FormItem>
-                          ))}
+                                <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                              </label>
+                            )
+                          })}
                         </div>
-                      </FormControl>
+                      </fieldset>
                       <FormMessage className="text-sm" />
                     </FormItem>
                   )}

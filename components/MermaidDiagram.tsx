@@ -29,10 +29,19 @@ export interface MermaidDiagramProps {
   code?: string
   children?: string
   className?: string
+  description?: string
+  label?: string
 }
 
-export default function MermaidDiagram({ code, children, className = '' }: MermaidDiagramProps) {
+export default function MermaidDiagram({
+  code,
+  children,
+  className = '',
+  description,
+  label = 'Mermaid diagram',
+}: MermaidDiagramProps) {
   const renderId = useId().replace(/[:]/g, '')
+  const descriptionId = useId().replace(/[:]/g, '')
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [isDark, setIsDark] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -103,14 +112,16 @@ export default function MermaidDiagram({ code, children, className = '' }: Merma
     <div className={`my-6 ${className}`}>
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950">
         {isLoading && (
-          <InlineLoader
-            text="Rendering diagram…"
-            color="text-gray-700"
-            className="justify-start text-sm dark:text-gray-200"
-          />
+          <div role="status" aria-live="polite">
+            <InlineLoader
+              text="Rendering diagram…"
+              color="text-gray-700"
+              className="justify-start text-sm dark:text-gray-200"
+            />
+          </div>
         )}
         {error && (
-          <div className="space-y-3">
+          <div className="space-y-3" role="alert">
             <p className="text-sm font-medium text-red-600 dark:text-red-400">
               Mermaid render error: {error}
             </p>
@@ -122,8 +133,15 @@ export default function MermaidDiagram({ code, children, className = '' }: Merma
         <div
           ref={containerRef}
           className={isLoading || error ? 'hidden' : 'mermaid-diagram'}
-          aria-label="Mermaid diagram"
+          role="img"
+          aria-label={label}
+          aria-describedby={description ? descriptionId : undefined}
         />
+        {description && (
+          <p id={descriptionId} className="sr-only">
+            {description}
+          </p>
+        )}
       </div>
     </div>
   )

@@ -13,23 +13,28 @@ const tagData = JSON.parse(
 
 const outputFolder = process.env.EXPORT ? 'out' : 'public'
 
-const generateRssItem = (config, post) => `
+const getPostUrl = (config, post) => `${config.siteUrl}/${post.path || `blogs/${post.slug}`}`
+
+const generateRssItem = (config, post) => {
+  const postUrl = getPostUrl(config, post)
+  return `
   <item>
-    <guid>${config.siteUrl}/blog/${post.slug}</guid>
+    <guid>${postUrl}</guid>
     <title>${escape(post.title)}</title>
-    <link>${config.siteUrl}/blog/${post.slug}</link>
+    <link>${postUrl}</link>
     ${post.summary && `<description>${escape(post.summary)}</description>`}
     <pubDate>${new Date(post.date).toUTCString()}</pubDate>
     <author>${config.email} (${config.author})</author>
     ${post.tags && post.tags.map((t) => `<category>${t}</category>`).join('')}
   </item>
 `
+}
 
 const generateRss = (config, posts, page = 'feed.xml') => `
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
       <title>${escape(config.title)}</title>
-      <link>${config.siteUrl}/blog</link>
+      <link>${config.siteUrl}/blogs</link>
       <description>${escape(config.description)}</description>
       <language>${config.language}</language>
       <managingEditor>${config.email} (${config.author})</managingEditor>
@@ -51,7 +56,11 @@ async function generateRSS(config, allBlogs, page = 'feed.xml') {
 
   if (publishPosts.length > 0) {
     for (const tag of Object.keys(tagData)) {
-      const filteredPosts = allBlogs.filter((post) => post.tags.map((t) => slug(t)).includes(tag))
+      const filteredPosts = publishPosts.filter((post) =>
+        post.tags.map((t) => slug(t)).includes(tag)
+      )
+      if (filteredPosts.length === 0) continue
+
       const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`)
       const rssPath = path.join(outputFolder, 'tags', tag)
       mkdirSync(rssPath, { recursive: true })
