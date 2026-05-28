@@ -53,6 +53,7 @@ import MemoryArchitecture from './blogs/context-engineering-for-ai-agents/Memory
 import ProcessFlow from './blogs/context-engineering-for-ai-agents/ProcessFlow'
 import HtmlMarkdownArtifactExperience from './blogs/the-unreasonable-effectiveness-of-html-for-agent-output/HtmlMarkdownArtifactExperience'
 import DeepSWELeaderboard from './blogs/deepswe-coding-agent-benchmark/DeepSWELeaderboard'
+import XTweetEmbed from './blogs/deepswe-coding-agent-benchmark/XTweetEmbed'
 
 // Core MDX Components
 const coreMDXComponents = {
@@ -123,6 +124,7 @@ const htmlVsMarkdownBlogComponents = {
 
 const deepSWEBlogComponents = {
   DeepSWELeaderboard,
+  XTweetEmbed,
 }
 
 export const components: MDXComponents = {
