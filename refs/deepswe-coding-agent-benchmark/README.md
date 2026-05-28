@@ -1,13 +1,17 @@
 # DeepSWE coding-agent benchmark sources
 
-Accessed: 2026-05-27
+Accessed: 2026-05-28
 
 - Datacurve, "DeepSWE", https://deepswe.datacurve.ai/
   - Used for the benchmark framing, leaderboard values, task count, repository/language coverage, and top-level methodology claims.
 - Datacurve, "Measuring frontier coding agents on original, long-horizon engineering tasks", https://deepswe.datacurve.ai/blog
-  - Used for methodology details, verifier design, harness discussion, limitations, and qualitative interpretation.
+  - Used for methodology details, prompt and solution-size comparisons, verifier design, verifier audit results, harness discussion, limitations, and qualitative interpretation.
+- Datacurve, `corpus-stats.json`, https://deepswe.datacurve.ai/artifacts/corpus-stats.json
+  - Used for the DeepSWE, SWE-Bench Pro, and SWE-Bench Verified task counts, prompt lengths, solution sizes, and files changed.
+- Datacurve, `verification-behavior.json`, https://deepswe.datacurve.ai/artifacts/verification-behavior.json
+  - Used for trajectory counts and model self-testing behavior across DeepSWE and SWE-Bench Pro.
 - Datacurve AI, `datacurve-ai/deep-swe`, https://github.com/datacurve-ai/deep-swe
-  - Used for the task format, quickstart context, Pier/Harbor framing, and benchmark repository metadata.
+  - Used for the task format, Harbor framing, and benchmark repository metadata.
 - SWE-agent, `mini-swe-agent`, https://github.com/SWE-agent/mini-swe-agent
   - Used for the fixed harness context referenced by the DeepSWE leaderboard.
 - Kol Tregaskes, X post, https://x.com/koltregaskes/status/2059552963094511618
