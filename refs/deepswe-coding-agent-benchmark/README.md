@@ -10,3 +10,9 @@ Accessed: 2026-05-27
   - Used for the task format, quickstart context, Pier/Harbor framing, and benchmark repository metadata.
 - SWE-agent, `mini-swe-agent`, https://github.com/SWE-agent/mini-swe-agent
   - Used for the fixed harness context referenced by the DeepSWE leaderboard.
+- Kol Tregaskes, X post, https://x.com/koltregaskes/status/2059552963094511618
+  - Used as public reaction context: DeepSWE aligns with developer experience that SWE-Bench near-parity did not explain.
+- Garry Tan, X post, https://x.com/garrytan/status/2059326763579392130
+  - Used as public reaction context for the "new standard for engineering evals" framing.
+- Matthew Berman, X post, https://x.com/MatthewBerman/status/2059682104733278569
+  - Used as optional supporting inspiration for the claim that DeepSWE reflects what engineers are reporting in practice.

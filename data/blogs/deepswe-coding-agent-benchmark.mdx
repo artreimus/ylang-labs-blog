@@ -18,13 +18,15 @@ layout: 'PostBanner'
 
 DeepSWE matters because it makes frontier coding agents look less solved.
 
-The top model on Datacurve's leaderboard scores 70% +/-4 on original, long-horizon software engineering tasks. The next tier is in the mid-50s, and many formidable model names fall below 30%.
+The top model on Datacurve's leaderboard scores 70% +/-4 on original, long-horizon engineering tasks. The next tier is in the mid-50s, and many models fall below 30%.
 
 That is a healthier signal than another saturated benchmark where every frontier model lands inside the same error band.
 
 <DeepSWELeaderboard />
 
-DeepSWE is not measuring autocomplete or recall. It is asking whether an agent can enter an unfamiliar repository, find the right surface area, make a correct change, and leave nearby behavior intact.
+That is why the benchmark spread through engineering AI Twitter. Kol Tregaskes pointed out that DeepSWE matches the developer intuition that GPT-5.5 has been stronger for coding than SWE-Bench near-parity suggested. Garry Tan called it "the new standard for engineering evals." Matthew Berman made the same practical point: DeepSWE reflects what he hears from engineers better than other benchmarks.
+
+DeepSWE is not measuring autocomplete or recall. It asks whether an agent can enter an unfamiliar repository, find the right surface area, make a correct change, and leave nearby behavior intact.
 
 ## DeepSWE tests the part of coding that benchmarks usually sand down
 
@@ -36,19 +38,15 @@ DeepSWE also makes the prompts shorter than SWE-Bench Pro while making the solut
 
 ## The leaderboard is interesting because the gaps are ugly
 
-The current leaderboard has GPT-5.5 at 70% +/-4, GPT-5.4 at 56% +/-5, and Claude Opus 4.7 at 54% +/-5. After that, the drop is steep: Claude Sonnet 4.6 reaches 32% +/-4, Gemini 3.5 Flash reaches 28% +/-4, and several recognizable models sit in the teens or single digits.
+The current leaderboard has GPT-5.5 at 70% +/-4, GPT-5.4 at 56% +/-5, and Claude Opus 4.7 at 54% +/-5. After that, the drop is steep: Claude Sonnet 4.6 reaches 32% +/-4, Gemini 3.5 Flash reaches 28% +/-4, and several recognizable models sit much lower.
 
-The optimistic read is that coding agents are genuinely capable. A 70% pass rate on original long-horizon repository tasks is a real achievement.
-
-The sober read is that 70% still means the best public configuration fails about three out of ten tasks. For production workflows, that is not "replace the maintainer." It is "give the maintainer a powerful junior engineer who needs review, tests, and rollback paths."
+The optimistic read is that a 70% pass rate on original long-horizon repository tasks is a real achievement. The sober read is that 70% still means the best public configuration fails about three out of ten tasks. For production, that is not "replace the maintainer." It is "give the maintainer a powerful junior engineer who needs review, tests, and rollback paths."
 
 The shape matters more than the winner. A benchmark that separates models by 10, 20, or 40 points is telling us something. A benchmark where everyone clusters together may have stopped matching the frontier.
 
 ## The verifier is the real product
 
-The most useful part of DeepSWE is not the public rank order. It is the verifier philosophy.
-
-The GitHub repository describes each task as a package: metadata, the instruction the agent sees, a reproducible environment, grading tests, and a held-out reference solution. The reference solution is not used at grading time. The verifier checks observable behavior, not whether the agent rediscovered the author's exact patch shape.
+The GitHub repository describes each task as a package: metadata, the instruction the agent sees, a reproducible environment, grading tests, and a held-out reference solution. The reference solution is not used at grading time. The verifier checks observable behavior, not whether the agent rediscovered the author's patch shape.
 
 That matters because real engineering tasks admit many valid implementations. If a benchmark only accepts one helper name, file split, or control-flow shape, it is measuring whether the model guessed the author's implementation. DeepSWE tries to avoid that trap by grading behavior.
 
@@ -56,9 +54,9 @@ That matters because real engineering tasks admit many valid implementations. If
 
 All leaderboard runs use mini-swe-agent. That holds the scaffolding constant: every model gets the same broad tool surface and agent loop instead of each vendor's native editor, patch primitive, and system prompt.
 
-It also means the score is not a direct answer to "which coding product should my team buy?" Developers use Codex, Claude Code, Cursor, Gemini CLI, internal frameworks, or custom systems with retrieval, code navigation, test selection, and review loops. Those systems can matter as much as the model.
+It also means the score is not a direct answer to "which coding product should my team buy?" Developers use Codex, Claude Code, Cursor, Gemini CLI, or internal frameworks with retrieval, code navigation, test selection, and review loops.
 
-DeepSWE's fixed harness isolates model capability better than a product benchmark would. It also leaves room for model-native tooling to change the production result.
+DeepSWE's fixed harness isolates model capability, while leaving room for model-native tooling to change the production result.
 
 ## Use DeepSWE as an eval design pattern
 
@@ -68,17 +66,15 @@ The lesson for builders is not "copy DeepSWE's leaderboard into a procurement do
 2. Keep prompts behavior-focused instead of over-specifying the implementation.
 3. Grade observable behavior through public APIs, CLI output, persisted state, or end-to-end tests.
 4. Run regression checks so the agent cannot satisfy the new behavior by breaking nearby behavior.
-5. Hold the harness fixed when you want model signal, then run product-native harnesses when you want deployment signal.
+5. Hold the harness fixed for model signal, then use product-native harnesses for deployment signal.
 
-Model evals and product evals answer different questions. The first tells you which base model is stronger under controlled conditions. The second tells you which full agent system your team can trust.
+Model evals and product evals answer different questions: which base model is stronger, and which full agent system your team can trust.
 
 ## Where DeepSWE can still mislead
 
-The corpus focuses on active open-source repositories with at least 500 GitHub stars, mostly in TypeScript, Go, and Python. That keeps tasks realistic, but it does not guarantee transfer to private monorepos, unusual build systems, C++, Java, mobile, data infrastructure, or frontend integration work.
+The corpus focuses on active open-source repositories with at least 500 GitHub stars, mostly in TypeScript, Go, and Python. That keeps tasks realistic, but it does not guarantee transfer to private monorepos, unusual build systems, C++, Java, mobile, or data infrastructure work.
 
 DeepSWE's tasks are original today, not forever. Public benchmarks have finite shelf lives once future training and fine-tuning pipelines can absorb their surface area.
-
-That does not make DeepSWE less useful. It makes the methodology more important than the static leaderboard.
 
 ## The practical takeaway
 
@@ -96,3 +92,6 @@ That is the useful thing DeepSWE gives us: not just a ranking, but a better shap
 2. Wenqi Huang, Charley Lee, Leonard Tng, and Serena Ge, [Measuring frontier coding agents on original, long-horizon engineering tasks](https://deepswe.datacurve.ai/blog), Datacurve, 2026.
 3. Datacurve AI, [datacurve-ai/deep-swe](https://github.com/datacurve-ai/deep-swe), GitHub.
 4. SWE-agent, [mini-swe-agent](https://github.com/SWE-agent/mini-swe-agent), GitHub.
+5. Kol Tregaskes, [DeepSWE reaction post](https://x.com/koltregaskes/status/2059552963094511618), X post, May 27, 2026.
+6. Garry Tan, [DeepSWE engineering evals post](https://x.com/garrytan/status/2059326763579392130), X post, May 26, 2026.
+7. Matthew Berman, [DeepSWE engineering benchmark post](https://x.com/MatthewBerman/status/2059682104733278569), X post, May 27, 2026.
