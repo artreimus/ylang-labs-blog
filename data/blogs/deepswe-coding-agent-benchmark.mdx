@@ -42,6 +42,8 @@ The size comparison makes the design choice obvious:
 | SWE-Bench Pro      | 731   | 4,614 chars        | 120 lines          | 5.07 files         |
 | SWE-Bench Verified | 500   | 1,700 chars        | 10 lines           | 1.25 files         |
 
+<DeepSWECorpusStats />
+
 DeepSWE is not just "bigger SWE-Bench." It flips the ratio: less prompt, more required code, more room for the agent to choose the wrong path.
 
 ## The task package is the benchmark
@@ -98,6 +100,8 @@ The reported difference is large:
 | SWE-Bench Pro | 8.5%            | 24.0%           | 789               |
 | DeepSWE       | 0.3%            | 1.1%            | 735               |
 
+<DeepSWEVerifierAudit />
+
 The analyzer disagreed with SWE-Bench Pro's pass/fail result on 32% of reviewed trials. It disagreed with DeepSWE on 1.4%.
 
 You should not treat an AI analyzer as ground truth. But as a comparative audit, that result explains why DeepSWE produces a sharper leaderboard: the scoring function is less noisy.
@@ -108,11 +112,23 @@ One of Datacurve's more useful measurements is not pass rate. It is how agents c
 
 Across 5,685 classified trajectories, models were much more likely to author new tests on DeepSWE than on SWE-Bench Pro. GPT-5.4 wrote new tests in 462 of 542 DeepSWE trials, versus 16 of 90 SWE-Bench Pro trials. Claude Opus 4.7 wrote new tests in 449 of 540 DeepSWE trials, versus 25 of 90 SWE-Bench Pro trials.
 
+<DeepSWESelfTestingChart />
+
 That is partly a prompt artifact. Datacurve points out that SWE-Bench Pro's prompt tells agents the test files are already handled and that they should not modify the testing logic or tests. DeepSWE does not include that instruction, so the test-writing behavior comes back.
 
 This is exactly why benchmark prompts matter. If the prompt template suppresses the behavior you want in production, the benchmark is no longer measuring the system you think it is measuring.
 
-## The leaderboard matters because the gaps are visible
+## Why the tweets landed
+
+The tweet angle matters because the social reaction was not just "new benchmark dropped."
+
+The reaction was that DeepSWE explains a mismatch many developers have felt for months. Public SWE-Bench-style scores often made frontier agents look clustered. Day-to-day coding-agent use did not feel clustered. Some agents plan, inspect, test, and recover. Others burn tokens, edit the wrong surface, or pass one narrow test while missing the actual behavior.
+
+DeepSWE gives that intuition a measurement surface.
+
+<DeepSWECrossBenchmarkSpread />
+
+On the subset Datacurve compares, SWE-Bench Pro scores span 30 points from worst to best. DeepSWE spans 70 points. That wider spread is why the leaderboard became shareable: it turns a vague "this feels more real" reaction into a testable claim about model separation.
 
 <DeepSWELeaderboard />
 
@@ -124,7 +140,7 @@ The optimistic reading is that a 70% pass rate on original, long-horizon reposit
 
 The sober reading is that 70% still fails about three out of ten tasks. For production engineering, that is not "replace the maintainer." It is "give the maintainer a faster junior engineer with tests, code review, and rollback paths."
 
-That is why the benchmark resonated with developers who felt older leaderboards were not matching their day-to-day experience:
+That is also why the Kol and Garry Tan tweets belong in the piece. They are not decoration. They are the distribution channel for the benchmark's real claim: engineering evals are starting to catch up to how practitioners judge coding agents in the wild.
 
 <TweetEmbed id="2059552963094511618" />
 

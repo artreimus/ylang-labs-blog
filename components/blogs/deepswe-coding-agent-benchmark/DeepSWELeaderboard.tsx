@@ -224,7 +224,7 @@ export default function DeepSWELeaderboard() {
       </div>
 
       <figcaption className="border-t border-gray-200 px-4 py-3 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400 sm:px-6">
-        Values are from Datacurve's DeepSWE leaderboard, accessed May 27, 2026. Every listed model
+        Values are from Datacurve's DeepSWE leaderboard, accessed May 28, 2026. Every listed model
         was run through mini-swe-agent; bars show pass rate and reported uncertainty.
       </figcaption>
     </figure>

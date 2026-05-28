@@ -5,7 +5,7 @@ Accessed: 2026-05-28
 - Datacurve, "DeepSWE", https://deepswe.datacurve.ai/
   - Used for the benchmark framing, leaderboard values, task count, repository/language coverage, and top-level methodology claims.
 - Datacurve, "Measuring frontier coding agents on original, long-horizon engineering tasks", https://deepswe.datacurve.ai/blog
-  - Used for methodology details, prompt and solution-size comparisons, verifier design, verifier audit results, harness discussion, limitations, and qualitative interpretation.
+  - Used for methodology details, prompt and solution-size comparisons, verifier design, verifier audit results, harness discussion, chart inspiration, limitations, and qualitative interpretation.
 - Datacurve, `corpus-stats.json`, https://deepswe.datacurve.ai/artifacts/corpus-stats.json
   - Used for the DeepSWE, SWE-Bench Pro, and SWE-Bench Verified task counts, prompt lengths, solution sizes, and files changed.
 - Datacurve, `verification-behavior.json`, https://deepswe.datacurve.ai/artifacts/verification-behavior.json

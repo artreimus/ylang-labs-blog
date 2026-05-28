@@ -52,6 +52,12 @@ import AgentMemory from './blogs/key-elements-of-multi-agent-systems/AgentMemory
 import MemoryArchitecture from './blogs/context-engineering-for-ai-agents/MemoryArchitecture'
 import ProcessFlow from './blogs/context-engineering-for-ai-agents/ProcessFlow'
 import HtmlMarkdownArtifactExperience from './blogs/the-unreasonable-effectiveness-of-html-for-agent-output/HtmlMarkdownArtifactExperience'
+import {
+  DeepSWECorpusStats,
+  DeepSWEVerifierAudit,
+  DeepSWESelfTestingChart,
+  DeepSWECrossBenchmarkSpread,
+} from './blogs/deepswe-coding-agent-benchmark/DeepSWECharts'
 import DeepSWELeaderboard from './blogs/deepswe-coding-agent-benchmark/DeepSWELeaderboard'
 import TweetEmbed from './blogs/deepswe-coding-agent-benchmark/TweetEmbed'
 
@@ -123,6 +129,10 @@ const htmlVsMarkdownBlogComponents = {
 }
 
 const deepSWEBlogComponents = {
+  DeepSWECorpusStats,
+  DeepSWEVerifierAudit,
+  DeepSWESelfTestingChart,
+  DeepSWECrossBenchmarkSpread,
   DeepSWELeaderboard,
   TweetEmbed,
 }
