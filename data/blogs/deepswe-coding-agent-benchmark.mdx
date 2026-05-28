@@ -1,0 +1,98 @@
+---
+title: 'DeepSWE Is the Coding-Agent Benchmark That Finally Hurts'
+date: '2026-05-27'
+tags: ['AI/ML', 'Agents', 'Generative AI']
+draft: false
+summary: 'DeepSWE separates frontier coding agents with original long-horizon tasks, behavioral verifiers, and a fixed harness. The useful signal is not that agents are solved, but that the benchmark finally measures the hard part.'
+tldr: |
+  - DeepSWE uses 113 original long-horizon tasks across 91 repositories and 5 languages, with hand-written behavioral verifiers.
+  - The leaderboard separates frontier agents: GPT-5.5 leads at 70% +/-4, while the next tier sits in the mid-50s and most models fall much lower.
+  - The practical lesson is to evaluate agents on novel, repository-specific work with behavioral checks, not only on public issue and PR benchmarks.
+  - The score still depends on one standardized harness, so treat it as a strong benchmark signal, not a full production procurement answer.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/deepswe-coding-agent-benchmark/cardImage.png'
+images: ['/static/images/blogs/deepswe-coding-agent-benchmark/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+DeepSWE matters because it makes frontier coding agents look less solved.
+
+The top model on Datacurve's leaderboard scores 70% +/-4 on original, long-horizon software engineering tasks. The next tier is in the mid-50s, and many formidable model names fall below 30%.
+
+That is a healthier signal than another saturated benchmark where every frontier model lands inside the same error band.
+
+<DeepSWELeaderboard />
+
+DeepSWE is not measuring autocomplete or recall. It is asking whether an agent can enter an unfamiliar repository, find the right surface area, make a correct change, and leave nearby behavior intact.
+
+## DeepSWE tests the part of coding that benchmarks usually sand down
+
+Datacurve describes DeepSWE as 113 original tasks drawn from 91 active open-source repositories across TypeScript, Go, Python, JavaScript, and Rust. The tasks are intentionally new, not adapted from merged commits or public pull requests, which reduces the chance that the model is being rewarded for memorizing a public solution.
+
+The construction choice is the whole story. Most software work is not "implement the function below." It is "make this behavior true in a codebase you did not write, without breaking everything nearby."
+
+DeepSWE also makes the prompts shorter than SWE-Bench Pro while making the solutions larger. Datacurve reports that DeepSWE prompts are roughly half the length of SWE-Bench Pro's, while solutions require 5.5x more code and about 2x more output tokens.
+
+## The leaderboard is interesting because the gaps are ugly
+
+The current leaderboard has GPT-5.5 at 70% +/-4, GPT-5.4 at 56% +/-5, and Claude Opus 4.7 at 54% +/-5. After that, the drop is steep: Claude Sonnet 4.6 reaches 32% +/-4, Gemini 3.5 Flash reaches 28% +/-4, and several recognizable models sit in the teens or single digits.
+
+The optimistic read is that coding agents are genuinely capable. A 70% pass rate on original long-horizon repository tasks is a real achievement.
+
+The sober read is that 70% still means the best public configuration fails about three out of ten tasks. For production workflows, that is not "replace the maintainer." It is "give the maintainer a powerful junior engineer who needs review, tests, and rollback paths."
+
+The shape matters more than the winner. A benchmark that separates models by 10, 20, or 40 points is telling us something. A benchmark where everyone clusters together may have stopped matching the frontier.
+
+## The verifier is the real product
+
+The most useful part of DeepSWE is not the public rank order. It is the verifier philosophy.
+
+The GitHub repository describes each task as a package: metadata, the instruction the agent sees, a reproducible environment, grading tests, and a held-out reference solution. The reference solution is not used at grading time. The verifier checks observable behavior, not whether the agent rediscovered the author's exact patch shape.
+
+That matters because real engineering tasks admit many valid implementations. If a benchmark only accepts one helper name, file split, or control-flow shape, it is measuring whether the model guessed the author's implementation. DeepSWE tries to avoid that trap by grading behavior.
+
+## The fixed harness is both a strength and a warning label
+
+All leaderboard runs use mini-swe-agent. That holds the scaffolding constant: every model gets the same broad tool surface and agent loop instead of each vendor's native editor, patch primitive, and system prompt.
+
+It also means the score is not a direct answer to "which coding product should my team buy?" Developers use Codex, Claude Code, Cursor, Gemini CLI, internal frameworks, or custom systems with retrieval, code navigation, test selection, and review loops. Those systems can matter as much as the model.
+
+DeepSWE's fixed harness isolates model capability better than a product benchmark would. It also leaves room for model-native tooling to change the production result.
+
+## Use DeepSWE as an eval design pattern
+
+The lesson for builders is not "copy DeepSWE's leaderboard into a procurement doc." The lesson is to copy the evaluation shape:
+
+1. Write original tasks against your own codebase, not public issues with known fixes.
+2. Keep prompts behavior-focused instead of over-specifying the implementation.
+3. Grade observable behavior through public APIs, CLI output, persisted state, or end-to-end tests.
+4. Run regression checks so the agent cannot satisfy the new behavior by breaking nearby behavior.
+5. Hold the harness fixed when you want model signal, then run product-native harnesses when you want deployment signal.
+
+Model evals and product evals answer different questions. The first tells you which base model is stronger under controlled conditions. The second tells you which full agent system your team can trust.
+
+## Where DeepSWE can still mislead
+
+The corpus focuses on active open-source repositories with at least 500 GitHub stars, mostly in TypeScript, Go, and Python. That keeps tasks realistic, but it does not guarantee transfer to private monorepos, unusual build systems, C++, Java, mobile, data infrastructure, or frontend integration work.
+
+DeepSWE's tasks are original today, not forever. Public benchmarks have finite shelf lives once future training and fine-tuning pipelines can absorb their surface area.
+
+That does not make DeepSWE less useful. It makes the methodology more important than the static leaderboard.
+
+## The practical takeaway
+
+The best benchmark is the one that makes capable models look uneven in ways developers recognize. DeepSWE does that.
+
+It shows that frontier coding agents can solve real repository tasks at rates that matter, and that the field is still far from boring reliability.
+
+If your internal coding-agent eval has every model tied near the top, raise the bar. Shorter prompts, original tasks, broader repositories, behavior-first verifiers, and regression checks will tell you more than another leaderboard clone.
+
+That is the useful thing DeepSWE gives us: not just a ranking, but a better shape for asking whether an agent can actually do engineering work.
+
+## References
+
+1. Datacurve, [DeepSWE](https://deepswe.datacurve.ai/), accessed May 27, 2026.
+2. Wenqi Huang, Charley Lee, Leonard Tng, and Serena Ge, [Measuring frontier coding agents on original, long-horizon engineering tasks](https://deepswe.datacurve.ai/blog), Datacurve, 2026.
+3. Datacurve AI, [datacurve-ai/deep-swe](https://github.com/datacurve-ai/deep-swe), GitHub.
+4. SWE-agent, [mini-swe-agent](https://github.com/SWE-agent/mini-swe-agent), GitHub.
