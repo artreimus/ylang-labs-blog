@@ -22,6 +22,8 @@ The benchmark does not ask a model to complete a toy function or reproduce a pub
 
 That is the part of coding-agent work most benchmarks still sand down.
 
+The technical claim is simple: for coding agents, benchmark packaging and verifier quality matter as much as task selection. If the repo state is loose, the environment is noisy, or the grader rewards one implementation shape instead of behavior, the leaderboard becomes a measurement of benchmark artifacts.
+
 ## What DeepSWE is
 
 DeepSWE is Datacurve's benchmark for measuring frontier coding agents on original, long-horizon engineering tasks. It contains 113 tasks drawn from 91 active open-source repositories across TypeScript, Go, Python, JavaScript, and Rust.
@@ -42,7 +44,7 @@ The size comparison makes the design choice obvious:
 | SWE-Bench Pro      | 731   | 4,614 chars        | 120 lines          | 5.07 files         |
 | SWE-Bench Verified | 500   | 1,700 chars        | 10 lines           | 1.25 files         |
 
-DeepSWE is not just "bigger SWE-Bench." It flips the ratio: less prompt, more required code, more room for the agent to choose the wrong path.
+DeepSWE is not just "bigger SWE-Bench." It flips the ratio: less prompt, more required code, more room for the agent to choose the wrong path. That is the useful pressure test. The agent has to recover structure from the repository instead of being handed a map.
 
 ## The task package is the benchmark
 
@@ -56,7 +58,7 @@ The public repository describes the task format as:
 4. `tests/` for the verifier entry point and test patch applied at grading time.
 5. `solution/` for a held-out reference solution used during review, not shown to the agent.
 
-That structure makes the benchmark inspectable, rerunnable, and hard to hand-wave.
+That structure makes the benchmark inspectable, rerunnable, and hard to hand-wave. A result can be traced back to the exact repo commit, the instruction the agent saw, the verifier that graded it, and the held-out solution reviewers used as a sanity check.
 
 If an eval does not pin the repository state, isolate the environment, and ship the verifier alongside the prompt, it is not really measuring coding-agent capability. It is measuring whatever happened on that machine, with that dependency cache, against tests no one can audit.
 
@@ -124,7 +126,11 @@ The optimistic reading is that a 70% pass rate on original, long-horizon reposit
 
 The sober reading is that 70% still fails about three out of ten tasks. For production engineering, that is not "replace the maintainer." It is "give the maintainer a faster junior engineer with tests, code review, and rollback paths."
 
-That is why the benchmark resonated with developers who felt older leaderboards were not matching their day-to-day experience:
+That is the tweet angle worth keeping.
+
+The social reaction is not just hype around a new leaderboard. It is a signal that the benchmark matches an experience developers already had: older SWE-Bench-style scores often made strong coding agents look closer together than they felt in actual repo work. DeepSWE gives that mismatch a measurement surface.
+
+The embedded posts belong here because they show how the benchmark landed with practitioners and founders: not as another isolated score, but as a sharper standard for engineering evals.
 
 <TweetEmbed id="2059552963094511618" />
 
@@ -153,9 +159,11 @@ For internal coding-agent evals, a good task should have:
 5. Regression tests that catch collateral damage.
 6. A held-out reference solution for human review, not exact-match grading.
 
-Then run the same task set against a fixed harness for model signal, and against product-native harnesses for deployment signal.
+Then run the same task set twice: once against a fixed harness for model signal, and once against product-native harnesses for deployment signal. Those are different questions. A fixed harness asks which model can solve the task under equal scaffolding. A product-native harness asks which system your team can actually ship into a workflow.
 
-If every model ties near the top, the eval is probably too easy or the verifier is too weak. DeepSWE's value is that it gives us a better shape for making coding agents fail in ways that look like real engineering work.
+If every model ties near the top, the eval is probably too easy or the verifier is too weak. If the same model wins every task with no failure analysis, the eval probably is not telling you where your system breaks.
+
+DeepSWE's value is that it gives us a better shape for making coding agents fail in ways that look like real engineering work. That is the bar internal evals should copy.
 
 ## References
 
