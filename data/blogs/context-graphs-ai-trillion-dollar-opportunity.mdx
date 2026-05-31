@@ -31,6 +31,18 @@ That differs from ordinary enterprise data modeling. A customer graph says custo
 
 Edge labels such as `USED`, `APPROVED`, `OVERRIDES`, and `LATER_RESULTED_IN` turn scattered traces into queryable memory. You can traverse from a decision to evidence, or from a bad outcome to similar approvals.
 
+<Image
+  alt="Context graph decision trace diagram"
+  src="/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/context-graph-decision-trace.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A context graph connects entities, approvals, evidence, tools, and outcomes into a traceable path.
+</DiagramSubtitle>
+
 ## What context graphs record that CRMs cannot
 
 A CRM knows the account. Tickets know the escalation. Billing knows the invoice.
@@ -51,21 +63,6 @@ Those are path questions. The answer lives in relationships.
 Humans are bad at writing down context. We summarize after the fact and forget which evidence changed the decision.
 
 Agents are different because much of the trace is already in the runtime: retrieved documents, tool calls, policy checks, approvals, and final writes. Later outcomes can be linked back as feedback. Capturing that is engineering work, not clerical work for the operator.
-
-<MermaidDiagram>
-  {`
-    flowchart LR
-      A["Business systems<br/>CRM, billing, tickets, docs"] --> B["Agent runtime<br/>tools, retrieval, policy checks"]
-      B --> C["Decision trace<br/>inputs, approvals, exceptions, writes"]
-      C --> D["Context graph<br/>entities, relationships, time, provenance"]
-      D --> E["Future agent call<br/>retrieve precedent, explain action, audit outcome"]
-      E --> B
-  `}
-</MermaidDiagram>
-
-<DiagramSubtitle>
-  A context graph turns agent execution into reusable institutional memory.
-</DiagramSubtitle>
 
 This is why glue functions are the wedge. RevOps, SecOps, legal ops, deal desk, compliance review, and customer escalation teams exist because no single application owns the real workflow. They bridge systems and carry exceptions.
 
@@ -102,6 +99,18 @@ That is just expensive logging with edges.
 A useful context graph needs sharper contracts: identity resolution, temporal modeling, retrieval-time permissions, trace hygiene that stores user-visible rationale instead of raw hidden model chain-of-thought, and lifecycle rules so bad precedent can expire.
 
 This is where most "memory for agents" demos get too cute. The demo remembers facts. The production system remembers ownership, provenance, and lifecycle too.
+
+<Image
+  alt="Trace hygiene and memory lifecycle diagram"
+  src="/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/trace-memory-lifecycle.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Useful memory is filtered from traces, retrieved deliberately, and corrected by later outcomes.
+</DiagramSubtitle>
 
 ## The trillion-dollar question is distribution
 
