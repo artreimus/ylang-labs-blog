@@ -1,0 +1,116 @@
+---
+title: 'Context Graphs Are the Trillion-Dollar AI Opportunity'
+date: '2026-05-31'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'Context graphs turn agent activity into a durable record of decisions, exceptions, approvals, and precedent. That may be the next enterprise system of record.'
+tldr: |
+  - The valuable AI data layer is not only customer, employee, or transaction data. It is the trace of why decisions happened.
+  - Context graphs make agent memory queryable by connecting entities, policies, approvals, exceptions, tools, and outcomes over time.
+  - The hard part is not drawing a graph. It is deciding which traces deserve to become durable precedent.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/cardImage.png'
+images: ['/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Enterprise AI will not create its biggest companies by putting a chat box on every database. The larger opportunity is a system of record that remembers why work happened, not just which row changed.
+
+That is the context graph thesis. Agents sit in the execution path across sales, finance, support, legal, security, and operations. If they persist the decisions and outcomes they touch, they start building a record most companies do not have today.
+
+Foundation Capital frames this as AI's trillion-dollar opportunity: new platforms can capture the traces that make existing records actionable ([Foundation Capital](https://foundationcapital.com/ideas/context-graphs-ais-trillion-dollar-opportunity)).
+
+## What context graphs record that CRMs cannot
+
+A CRM knows the account. Tickets know the escalation. Billing knows the invoice. Slack knows the messy conversation where the exception was negotiated.
+
+It should answer questions like:
+
+- Which policy version applied when we approved this discount?
+- Who granted the exception, and what precedent did they cite?
+- Which source document or tool result changed the agent's recommendation?
+- Did the same decision pattern later produce churn, fraud, or delay?
+
+Those are relationship questions. Neo4j's docs describe the basic model as nodes, relationships, and properties, then querying by traversing paths through connected data ([Neo4j graph database concepts](https://neo4j.com/docs/getting-started/appendix/graphdb-concepts/)).
+
+`Account -> HAS_CONTRACT -> Contract` is useful. `AgentRun -> RECOMMENDED_EXCEPTION -> Approval -> OVERRIDES_POLICY -> PolicyVersion` is where autonomy starts to become auditable.
+
+## Why agents create the graph better than humans do
+
+Humans are bad at writing down operational context. We summarize after the fact, skip the boring links, and forget which evidence changed the decision.
+
+Agents are different because much of the trace is already in the runtime. The agent runtime can capture retrieved documents, tool calls, policy checks, approvals, and final writes. Later outcomes can be linked back as feedback. Capturing that is engineering work, but it is not clerical work for the operator.
+
+<MermaidDiagram>
+  {`
+    flowchart LR
+      A["Business systems<br/>CRM, billing, tickets, docs"] --> B["Agent runtime<br/>tools, retrieval, policy checks"]
+      B --> C["Decision trace<br/>inputs, approvals, exceptions, writes"]
+      C --> D["Context graph<br/>entities, relationships, time, provenance"]
+      D --> E["Future agent call<br/>retrieve precedent, explain action, audit outcome"]
+      E --> B
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  A context graph turns agent execution into reusable institutional memory.
+</DiagramSubtitle>
+
+This is why glue functions are the wedge. RevOps, SecOps, legal ops, deal desk, compliance review, and customer escalation teams exist because no single application owns the real workflow. They bridge systems, carry exceptions, and know which rule matters in which case.
+
+An agent that helps with that workflow should leave behind a structured trace the next agent can query.
+
+## The implementation shape is becoming concrete
+
+This is no longer only a venture thesis.
+
+Neo4j's Create Context Graph project scaffolds a FastAPI backend, Neo4j, a Next.js frontend, streaming chat, graph visualization, domain ontology, Cypher-powered tools, and demo data from one `uvx create-context-graph` command ([Neo4j Create Context Graph](https://neo4j.com/blog/genai/introducing-create-context-graph/)). Its pattern is practical: import systems, synthesize traces from histories and state transitions, then let agents query the graph.
+
+Cognee takes a similar memory-layer view. Its docs describe `.remember`, `.recall`, `.improve`, and `.forget`: ingest data, extract relationships, query memory, enrich it, and delete it when needed ([Cognee introduction](https://docs.cognee.ai/getting-started/introduction)).
+
+Neo4j's AI systems page gives the enterprise version: use knowledge graphs to ground agents, manage context, explain actions, and support long-term agent memory ([Neo4j AI Systems](https://neo4j.com/use-cases/ai-systems/)).
+
+The architecture is straightforward: ingest objects, extract entities and events, store relationships with time and provenance, retrieve subgraphs for future agent calls, and feed outcomes back into the graph.
+
+The product opportunity is not the database. It is the workflow that decides what becomes memory.
+
+## Context graphs are not just better RAG
+
+It is tempting to call this GraphRAG and move on. That misses the economic point.
+
+RAG answers a question using external context. A context graph changes what the company knows after the question is answered.
+
+If a support agent looks up a policy and replies to a customer, ordinary RAG might cite the policy. A context graph should also record the plan, contract version, policy version, denial reason, approver, and outcome.
+
+That record becomes useful in three ways.
+
+First, retrieval gets sharper. The next agent can traverse from a customer to similar cases, from an exception to the approving manager, or from a policy version to outcomes.
+
+Second, audits get less theatrical. When someone asks why the agent acted, the answer is a path through evidence, policy, authority, and state changes.
+
+Third, memory compounds. Every workflow leaves precedent. Over time, the context graph becomes a map of how the company actually operates.
+
+## The hard part is deciding what deserves to persist
+
+The failure mode is obvious: teams dump every prompt, tool result, chat message, and output into a graph and call it memory.
+
+That is just expensive logging with edges.
+
+A useful context graph needs sharper contracts: identity resolution, temporal modeling, permission boundaries at retrieval time, trace hygiene that stores user-visible rationale, tool observations, approvals, and provenance instead of raw hidden model chain-of-thought, and lifecycle rules so bad precedent can expire.
+
+This is where most "memory for agents" demos get too cute. The demo remembers facts. The production system remembers facts with ownership, provenance, and lifecycle.
+
+## The trillion-dollar question is distribution
+
+The primitive is clear enough: graph-shaped memory for agentic workflows. The market question is who gets to own it.
+
+Incumbent systems of record already own the nouns: accounts, employees, tickets, contracts, invoices. Agent startups may own the verbs: investigate, approve, reconcile, remediate, negotiate, renew, escalate.
+
+The context graph forms where the verbs cross the nouns.
+
+That makes the best wedge less likely to be "a general memory layer for all agents" and more likely to be a high-value workflow where decisions are frequent, cross-system, regulated, and expensive to get wrong: deal desk, claims, KYC, incident response, procurement exceptions, customer escalations, release approvals.
+
+Start narrow. Capture the trace. Make precedent queryable. Prove that future decisions get faster or more defensible.
+
+If that works, the graph becomes more than context for the model. It becomes context for the company.

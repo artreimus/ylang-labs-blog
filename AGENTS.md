@@ -258,6 +258,7 @@ For content-only changes:
 - Confirm frontmatter matches `contentlayer.config.ts`.
 - Confirm referenced images exist under `public/static/images/...`.
 - Confirm blog drafts stay at 5 minutes or less by default, or explicitly note that the user approved a longer post.
+- Before finalizing any new or materially changed blog post, use an available sub-agent to run an independent `blog-factuality-review` pass, then address or explicitly report the review findings.
 - Run `pnpm build` when feasible, especially for new MDX, citations, components, or route-visible content.
 
 For code/layout changes:
