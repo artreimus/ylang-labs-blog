@@ -21,6 +21,8 @@ Create both files unless the user explicitly asks for only one:
 
 Use PNG. Keep filenames exact because blog frontmatter expects these names.
 
+When this workflow creates or normalizes the reusable source artwork, keep `source-artwork.png` square (`1:1`) unless the user explicitly requests another source format. The source image is the master artwork for future crops, so it should not be saved as a header-shaped or card-shaped derivative.
+
 ## Core Rule
 
 Do not blindly resize or center-crop.
@@ -47,6 +49,8 @@ Before editing, inspect the source image with `view_image` or another visual ins
 For Ylang Labs blog art, the preferred house style remains a beautiful painting-like background with a central conceptual illustration or diagram. When the provided image already has that structure, preserve it. When it does not, still crop it cleanly; do not invent new artwork unless the user asks for generation.
 
 If no source artwork has been provided yet, generate or prompt the source artwork through `.agents/skills/oil-painting-image-generator/SKILL.md` before creating `cardImage.png` and `blogHeader.png`. The card and header should come from that oil-painting source artwork unless the user explicitly asks for a different style or supplies an image that must be used.
+
+For generated source artwork, prefer a square `1:1` composition with the main subject near the center and enough breathing room on all sides. If the available source artwork is not square and the task includes preparing the source image itself, first create a visually intentional square `source-artwork.png`, then derive the required card and header crops from it.
 
 ## Crop Strategy
 
@@ -115,6 +119,7 @@ Use judgment instead of forcing a bad crop:
 
 5. Verify.
    - Confirm exact dimensions with `sips -g pixelWidth -g pixelHeight` or equivalent.
+   - Confirm generated or normalized `source-artwork.png` is square (`1:1`) unless the user requested another source format.
    - Visually inspect both final images.
    - Re-crop if the subject is awkwardly cut off, text is unreadable, or the composition feels accidental.
 
@@ -160,6 +165,7 @@ Pick `left`, `top`, `width`, and `height` from the source image dimensions after
 
 Before finalizing, confirm:
 
+- `source-artwork.png` is square (`1:1`) when the task includes creating or normalizing source artwork.
 - `cardImage.png` is exactly `1080x1920`.
 - `blogHeader.png` is exactly `1260x700`.
 - Both outputs come from the provided image.

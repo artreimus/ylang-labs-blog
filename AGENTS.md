@@ -120,10 +120,11 @@ Blog asset standards:
 - Store assets in `public/static/images/blogs/<slug>/`.
 - Use `cardImage.png` for listing/card thumbnails.
 - Use `blogHeader.png` for the post banner.
+- Use `source-artwork.png` as the reusable master artwork for generated/cropped blog art. Keep it square (`1:1`), ideally `1536x1536` or larger when the generation tool allows it, unless the user explicitly requests another source format.
 - Use descriptive names for inline images, diagrams, and figures.
 - Reference images with absolute public paths such as `/static/images/blogs/<slug>/diagram.png`.
 - For generated cover/card/header art, create the source artwork with `oil-painting-image-generator` first unless the user explicitly asks for another cover style.
-- For generated/cropped blog art, `cardImage.png` should be `1080x1920` and `blogHeader.png` should be `1260x700` unless the user explicitly asks otherwise.
+- For generated/cropped blog art, derive `cardImage.png` and `blogHeader.png` from the square `source-artwork.png`; `cardImage.png` should be `1080x1920` and `blogHeader.png` should be `1260x700` unless the user explicitly asks otherwise.
 - For section-level diagrams, architecture plates, process maps, and inline technical figures, use `technical-blog-image-generator`.
 - Do not create SVG/vector/code-native image sources unless the user explicitly asks for manual vector work.
 
