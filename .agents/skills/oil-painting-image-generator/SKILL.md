@@ -31,10 +31,12 @@ When creating Ylang Labs blog artwork, use this skill to generate the source pai
 Required flow:
 
 1. Create a refined oil-painting prompt for the article's central technical metaphor.
-2. Generate or save the source artwork as `public/static/images/blogs/[slug]/source-artwork.png`.
+2. Generate or save the source artwork as `public/static/images/blogs/[slug]/source-artwork.png` using a square `1:1` aspect ratio.
 3. Use `blog-image-cropper` to crop the source artwork into:
    - `cardImage.png` at exactly `1080x1920`
    - `blogHeader.png` at exactly `1260x700`
+
+The source painting should be a square master image, ideally `1536x1536` or larger when the generation tool allows it. A square source gives the cropper enough vertical and horizontal room to create both the portrait card and wide header without privileging one target format too early.
 
 The source painting should work in both portrait and wide crops: place the main subject near the center, preserve readable negative space around the subject, avoid important details near the edges, and avoid any text or logo-like marks because the crop targets are reused across listings, social cards, and the PostBanner hero.
 
