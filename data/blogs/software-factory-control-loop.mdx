@@ -1,0 +1,160 @@
+---
+title: 'The Software Factory Is a Control Loop, Not an Assembly Line'
+date: '2026-06-06'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'A useful software factory is not a swarm of agents writing code. It is a controlled delivery system with explicit inputs, bounded build cells, verification gates, review, and feedback loops.'
+tldr: |
+  - A software factory only works when every stage has a contract: what enters, what leaves, and what can reject the work.
+  - Agents should operate inside bounded cells with selected context, scoped plans, and evidence-producing verification.
+  - The factory improves when failures become tests, docs, skills, prompts, and fixtures that harden the next run.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/software-factory-control-loop/cardImage.png'
+images: ['/static/images/blogs/software-factory-control-loop/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+The software factory idea is right, but the dangerous version is just a faster mess. If an agent turns vague tickets into unchecked patches, you did not build a factory. You built a code generator with a conveyor belt attached.
+
+A real software factory is a control loop: clear intake, selected context, bounded build cells, verification, review, and a way for every failure to improve the next run.
+
+Inspired by Alex Op's ["The Software Factory"](https://alexop.dev/posts/the-software-factory/), this post keeps the staged visual rhythm and argues for a stricter operating model.
+
+Use one rule for every station: name the input, output, rejection condition, and evidence. If any piece is missing, the work is not ready for the next station.
+
+## Stage 1: Intake turns ambiguity into a build contract
+
+<Image
+  alt="Software factory intake dock turning rough requests into build contracts"
+  src="/static/images/blogs/software-factory-control-loop/stage-01-intake.png"
+  width={1586}
+  height={992}
+  className="mx-auto rounded-md bg-white"
+/>
+
+Many agent failures start before the agent touches code. The request is too broad. The expected behavior is implied. The non-goals live in someone's head.
+
+The intake station removes that ambiguity. Its output is a build contract: problem, desired behavior, constraints, non-goals, acceptance checks, owner, risk tier, and rollback notes.
+
+If nobody can state what "done" means, sending the task to an agent only makes the confusion cheaper to produce.
+
+## Stage 2: Context selection beats context hoarding
+
+<Image
+  alt="Software factory context bench selecting relevant repository knowledge"
+  src="/static/images/blogs/software-factory-control-loop/stage-02-context.png"
+  width={1586}
+  height={992}
+  className="mx-auto rounded-md bg-white"
+/>
+
+Agents do better with the right context, not the most context.
+
+The context station gathers the files, tests, architecture notes, product rules, prior decisions, and known failure modes that matter for this task. It should also record what it did not find.
+
+That last part matters. Silent missing context is where confident nonsense sneaks in.
+
+The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions. A good packet is small enough to reason over and specific enough to constrain the build.
+
+## Stage 3: Planning routes work before code exists
+
+<Image
+  alt="Software factory planning station routing work into bounded cells"
+  src="/static/images/blogs/software-factory-control-loop/stage-03-plan.png"
+  width={1586}
+  height={992}
+  className="mx-auto rounded-md bg-white"
+/>
+
+The plan should be more than "implement the feature."
+
+It chooses the route through the factory: files in scope, contracts at risk, tests to move first, whether the work needs a branch or isolated worktree, and where a human must decide.
+
+This is where big tasks get split into cells. Schema change here. UI adjustment there. Evaluation fixture somewhere else.
+
+The plan should also name the riskiest assumption.
+
+## Stage 4: Build cells give agents room without giving them the factory
+
+<Image
+  alt="Software factory build cells producing scoped patch modules"
+  src="/static/images/blogs/software-factory-control-loop/stage-04-build.png"
+  width={1586}
+  height={992}
+  className="mx-auto rounded-md bg-white"
+/>
+
+Agents are useful here because they can read, patch, run commands, recover from errors, and keep moving. They are especially useful when the task has boundaries and fast feedback.
+
+The build cell still has limits: selected context, allowed files, tool permissions, validation commands, and a stop condition. It emits a patch, rationale, assumptions, and evidence.
+
+The point is not to make the agent timid. The point is to make the work inspectable.
+
+## Stage 5: Verification creates backpressure
+
+<Image
+  alt="Software factory verification gate with tests and a return loop"
+  src="/static/images/blogs/software-factory-control-loop/stage-05-verify.png"
+  width={1586}
+  height={992}
+  className="mx-auto rounded-md bg-white"
+/>
+
+A factory without backpressure is just a pipeline for defects.
+
+Verification should run the boring checks first: format, lint, unit tests, type checks, build, migration checks, and smoke tests. For agent systems, it should also run evals or golden traces when behavior can drift without breaking a compiler.
+
+The output is an evidence packet: what ran, what passed, what failed, what was skipped, and why. When verification fails, the work goes backward with the evidence attached.
+
+## Stage 6: Review protects judgment, not indentation
+
+<Image
+  alt="Software factory human review bridge before the merge gate"
+  src="/static/images/blogs/software-factory-control-loop/stage-06-review.png"
+  width={1586}
+  height={992}
+  className="mx-auto rounded-md bg-white"
+/>
+
+Human review should not spend most of its time asking whether the tests ran. The factory should have answered that already.
+
+Review is for judgment: did this solve the right problem, change the wrong contract, worsen the UX, or increase cost, latency, security risk, or operational burden?
+
+The best review prompts are blunt: what did the agent assume, what was not verified, and what is the smallest rollback?
+
+The merge gate opens only when the evidence and the judgment agree.
+
+## Stage 7: Improvement is how the factory compounds
+
+<Image
+  alt="Software factory improvement workshop feeding learnings back into the loop"
+  src="/static/images/blogs/software-factory-control-loop/stage-07-improve.png"
+  width={1586}
+  height={992}
+  className="mx-auto rounded-md bg-white"
+/>
+
+The factory gets better when failures become reusable machinery.
+
+A missed edge case becomes a test. A bad retrieval becomes a context rule. A confusing review thread becomes a checklist. A repeated manual fix becomes a skill, script, fixture, or generator.
+
+Teams often underinvest here. They celebrate the fix, then let the same bug class return next week.
+
+Measure the factory by compounding effects: lower rework rate, shorter time to first useful patch, fewer escaped defects, faster review, better context hit rate, and more reusable artifacts.
+
+The best factory does not make humans less responsible. It makes responsibility easier to exercise.
+
+## The control loop is the product
+
+A software factory is not a place where agents replace engineering judgment. It is a place where judgment is encoded into the line: intake contracts, context packets, scoped plans, bounded build cells, verification gates, review prompts, and improvement loops.
+
+That is the part worth copying from the factory metaphor. Not the assembly line. The control system.
+
+Start with one route for one kind of work: a bug fix, content update, or test-only regression patch. Make the contracts explicit. Measure where work bounces backward. Then improve that station.
+
+That is how the software factory becomes real: not by asking an agent to build everything, but by building a system where each run leaves the next run less fragile.
+
+## Reference
+
+1. Alex Op, ["The Software Factory: Why Your Team Will Never Work the Same Again"](https://alexop.dev/posts/the-software-factory/), March 22, 2026.
