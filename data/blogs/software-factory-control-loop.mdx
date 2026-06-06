@@ -19,7 +19,7 @@ The software factory idea is right, but the dangerous version is just a faster m
 
 A real software factory is a control loop: clear intake, selected context, bounded build cells, verification, review, and a way for every failure to improve the next run.
 
-Inspired by Alex Op's ["The Software Factory"](https://alexop.dev/posts/the-software-factory/), this post keeps the staged visual rhythm and argues for a stricter operating model.
+This borrows the staged visual rhythm from Alex Op's ["The Software Factory"](https://alexop.dev/posts/the-software-factory/) and argues for a stricter operating model.
 
 Use one rule for every station: name the input, output, rejection condition, and evidence. If any piece is missing, the work is not ready for the next station.
 
@@ -33,9 +33,11 @@ Use one rule for every station: name the input, output, rejection condition, and
   className="mx-auto rounded-md bg-white"
 />
 
-Many agent failures start before the agent touches code. The request is too broad. The expected behavior is implied. The non-goals live in someone's head.
+Many agent failures start before code. The request is too broad. The expected behavior is implied. The non-goals live in someone's head.
 
-The intake station removes that ambiguity. Its output is a build contract: problem, desired behavior, constraints, non-goals, acceptance checks, owner, risk tier, and rollback notes.
+A human defines the acceptance criteria here, before the agent starts guessing. Name the observable behavior, important edge cases, and the checks that prove the work is done.
+
+The output is a build contract: problem, desired behavior, constraints, non-goals, checks, owner, risk tier, and rollback notes.
 
 If nobody can state what "done" means, sending the task to an agent only makes the confusion cheaper to produce.
 
@@ -51,11 +53,9 @@ If nobody can state what "done" means, sending the task to an agent only makes t
 
 Agents do better with the right context, not the most context.
 
-The context station gathers the files, tests, architecture notes, product rules, prior decisions, and known failure modes that matter for this task. It should also record what it did not find.
+The context station gives the agent docs and other relevant context on purpose: product briefs, API docs, architecture notes, runbooks, files, tests, prior decisions, and known failure modes. It should also record what it did not find.
 
-That last part matters. Silent missing context is where confident nonsense sneaks in.
-
-The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions. A good packet is small enough to reason over and specific enough to constrain the build.
+The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions.
 
 ## Stage 3: Planning routes work before code exists
 
@@ -69,11 +69,11 @@ The output is a context packet: referenced files, invariants, hazards, examples 
 
 The plan should be more than "implement the feature."
 
-It chooses the route through the factory: files in scope, contracts at risk, tests to move first, whether the work needs a branch or isolated worktree, and where a human must decide.
+Spec-driven development belongs here: write the behavior contract before the patch. Name files in scope, contracts at risk, acceptance checks, tests to move first, branch or worktree needs, and human decisions.
 
-This is where big tasks get split into cells. Schema change here. UI adjustment there. Evaluation fixture somewhere else.
+The spec does not need ceremony. It needs enough structure that an agent can be wrong in a way the system can catch.
 
-The plan should also name the riskiest assumption.
+This is where big tasks split into cells: schema change here, UI adjustment there, evaluation fixture somewhere else.
 
 ## Stage 4: Build cells give agents room without giving them the factory
 
@@ -85,11 +85,11 @@ The plan should also name the riskiest assumption.
   className="mx-auto rounded-md bg-white"
 />
 
-Agents are useful here because they can read, patch, run commands, recover from errors, and keep moving. They are especially useful when the task has boundaries and fast feedback.
+Agents are useful here because they can read, patch, run commands, recover from errors, and keep moving inside fast feedback loops.
 
-The build cell still has limits: selected context, allowed files, tool permissions, validation commands, and a stop condition. It emits a patch, rationale, assumptions, and evidence.
+The build cell needs a sandbox: a disposable worktree, container, or test environment where the agent can build, run code, inspect failures, and verify the patch without touching shared state.
 
-The point is not to make the agent timid. The point is to make the work inspectable.
+That sandbox still has limits: selected context, allowed files, tool permissions, validation commands, and a stop condition. Autonomy works better when the room has walls.
 
 ## Stage 5: Verification creates backpressure
 
@@ -103,7 +103,9 @@ The point is not to make the agent timid. The point is to make the work inspecta
 
 A factory without backpressure is just a pipeline for defects.
 
-Verification should run the boring checks first: format, lint, unit tests, type checks, build, migration checks, and smoke tests. For agent systems, it should also run evals or golden traces when behavior can drift without breaking a compiler.
+Verification should run the boring checks first: format, lint, unit tests, type checks, build, migration checks, and smoke tests. TDD belongs here too: write the failing regression before the fix when behavior is testable, then keep the loop red, green, refactor.
+
+AI code reviewers add another pass. Greptile, CodeRabbit, Codex, Claude, and similar tools are useful for asking, "what did this diff miss?" They are pressure, not proof, and they work best when their findings feed back into tests and review prompts.
 
 The output is an evidence packet: what ran, what passed, what failed, what was skipped, and why. When verification fails, the work goes backward with the evidence attached.
 
@@ -118,6 +120,8 @@ The output is an evidence packet: what ran, what passed, what failed, what was s
 />
 
 Human review should not spend most of its time asking whether the tests ran. The factory should have answered that already.
+
+This is the human-in-the-loop station. Always review AI outputs. A plausible patch, passing tests, and tidy explanation can still solve the wrong problem, especially when the task depended on product judgment.
 
 Review is for judgment: did this solve the right problem, change the wrong contract, worsen the UX, or increase cost, latency, security risk, or operational burden?
 
@@ -137,9 +141,11 @@ The merge gate opens only when the evidence and the judgment agree.
 
 The factory gets better when failures become reusable machinery.
 
-A missed edge case becomes a test. A bad retrieval becomes a context rule. A confusing review thread becomes a checklist. A repeated manual fix becomes a skill, script, fixture, or generator.
+A missed edge case becomes a test. A bad retrieval becomes memory. A confusing review thread becomes an `AGENTS.md` rule. A repeated manual fix becomes a `SKILL.md`, script, fixture, or generator.
 
-Teams often underinvest here. They celebrate the fix, then let the same bug class return next week.
+This is how the system stops relearning the same lesson. The next run should inherit more judgment than the last one.
+
+Teams underinvest here. They celebrate the fix, then let the same bug class return next week.
 
 Measure the factory by compounding effects: lower rework rate, shorter time to first useful patch, fewer escaped defects, faster review, better context hit rate, and more reusable artifacts.
 
