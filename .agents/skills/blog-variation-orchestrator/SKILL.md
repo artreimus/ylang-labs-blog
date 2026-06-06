@@ -1,11 +1,11 @@
 ---
 name: blog-variation-orchestrator
-description: 'Default Ylang Labs blog creation and drafting skill. Use this skill first when the user asks to create, write, draft, ideate, or turn an idea into a new Ylang Labs blog post, especially when no final direction has been selected yet. Orchestrates a five-subagent blog variation workflow by producing five distinct article variants with cover and inline image specs, then selecting or synthesizing a final MDX-ready draft using the repo blog writing, MDX, image, cropper, factuality review, and publishing skills. Also use when the user explicitly asks for multiple blog variations, five or more subagents/agents, parallel writing agents, or a main agent to coordinate different writing styles and image directions. If the user only asks to package, prepare, or publish an already selected final draft, use blog-publishing-workflow instead.'
+description: 'Default Ylang Labs blog creation and drafting skill. Use this skill first when the user asks to create, write, draft, ideate, or turn an idea into a new Ylang Labs blog post, especially when no final direction has been selected yet. Orchestrates a five-subagent blog variation workflow by having subagents produce five distinct article variants with cover and inline image specs, then coordinates selection or synthesis into a final MDX-ready draft. The main agent assigns repo blog writing, MDX, image, cropper, factuality review, cleanup, and publishing skills to subagents rather than doing that specialist work itself. Also use when the user explicitly asks for multiple blog variations, five or more subagents/agents, parallel writing agents, or a main agent to coordinate different writing styles and image directions. If the user only asks to package, prepare, or publish an already selected final draft, use blog-publishing-workflow instead.'
 ---
 
 # Blog Variation Orchestrator
 
-Use this skill to coordinate five independent writer subagents and turn their outputs into a stronger Ylang Labs blog direction. The main agent owns the shared brief, subagent prompts, repo writes, final synthesis, image generation, validation, and user-facing recommendation.
+Use this skill to coordinate five independent writer subagents and turn their outputs into a stronger Ylang Labs blog direction. The main agent orchestrates: it builds the shared brief, spawns subagents, assigns skills and responsibilities, compares outputs, integrates the selected direction, and reports validation. The subagents use the specialist blog, image, cleanup, and review skills to do the work.
 
 The goal is not five shallow rewrites. Each subagent should explore a genuinely different editorial strategy, structure, opening, technical emphasis, and visual direction.
 
@@ -24,19 +24,53 @@ This is the default create-blog workflow for this repo. When the user says "crea
 - Preserve unrelated work. Run `git status --short --untracked-files=all` before repo writes and do not touch unrelated dirty files.
 - Do not commit unless the user explicitly asks.
 
-## Skills To Use
+## Orchestrator Role
 
-Load these skills as needed:
+The main agent should stay out of specialist execution when subagents can do it. Its job is to:
+
+- Inspect the repo enough to create an accurate shared brief.
+- Decide which subagent role owns each specialist skill.
+- Spawn the writer, asset, cleanup, and review subagents with clear prompts.
+- Compare outputs and choose or synthesize the final direction.
+- Apply only the final integration edits that cannot be cleanly delegated.
+- Verify that subagent outputs satisfy the repo contract.
+
+The main agent may read specialist skills to write accurate prompts, but the subagents should be told to load and apply those skills themselves.
+
+## Subagent Skill Responsibilities
+
+Assign specialist skills to subagents explicitly:
+
+### Writer Subagents
+
+Every writer subagent must load:
 
 - `.agents/skills/blog-writing-guide/SKILL.md` for Ylang Labs voice, structure, title quality, banned language, and the 5-minute default.
-- `.agents/skills/blog-mdx-authoring/SKILL.md` when creating or updating MDX, frontmatter, references, and asset directories.
-- `.agents/skills/blog-publishing-workflow/SKILL.md` when the user wants the full post package, social copy, validation, or PR publication.
-- `.agents/skills/blog-variation-cleanup/SKILL.md` after the user chooses a winning variant and the unselected blog drafts, images, refs, or social-copy artifacts need to be pruned, archived, or reconciled.
-- `.agents/skills/oil-painting-image-generator/SKILL.md` for normal cover, card, header, and `source-artwork.png` concepts.
-- `.agents/skills/blog-image-cropper/SKILL.md` to derive `cardImage.png` and `blogHeader.png` from source artwork.
-- `.agents/skills/technical-blog-image-generator/SKILL.md` for inline technical diagrams, architecture plates, process maps, and technical cover variants when explicitly requested.
-- `.agents/skills/blog-factuality-review/SKILL.md` before finalizing a new or materially changed repo-backed post.
-- `.agents/skills/technical-blog-image-review/SKILL.md` when generated technical visuals need independent QA.
+
+Use role-specific additions:
+
+- **Engineering deep dive writer**: also load `.agents/skills/technical-blog-image-generator/SKILL.md` for architecture plates, system maps, and technical figure specs.
+- **Practical implementation guide writer**: also load `.agents/skills/blog-mdx-authoring/SKILL.md` for MDX structure, code-friendly post shape, frontmatter expectations, and component conventions.
+- **Opinion or strategy essay writer**: also load `.agents/skills/oil-painting-image-generator/SKILL.md` for metaphor-led cover concepts.
+- **Research or explainer writer**: also load `.agents/skills/blog-factuality-review/SKILL.md` for claim discipline and source-backed framing, and `.agents/skills/technical-blog-image-generator/SKILL.md` for taxonomy or evaluation visuals.
+- **Build story or product narrative writer**: also load `.agents/skills/blog-mdx-authoring/SKILL.md` and `.agents/skills/oil-painting-image-generator/SKILL.md` for production post shape and cover direction.
+
+### Asset Subagents
+
+When the workflow needs actual image assets rather than image specs:
+
+- Assign an image subagent to load `.agents/skills/oil-painting-image-generator/SKILL.md` for source artwork.
+- Assign a crop subagent to load `.agents/skills/blog-image-cropper/SKILL.md` for `cardImage.png` and `blogHeader.png`.
+- Assign a technical image subagent to load `.agents/skills/technical-blog-image-generator/SKILL.md` for inline technical figures.
+- Assign an image QA subagent to load `.agents/skills/technical-blog-image-review/SKILL.md` when generated technical visuals carry factual meaning.
+
+### Finalization Subagents
+
+After the user chooses a winning variant:
+
+- Assign an MDX/package subagent to load `.agents/skills/blog-mdx-authoring/SKILL.md` and `.agents/skills/blog-publishing-workflow/SKILL.md` for final repo packaging.
+- Assign a cleanup subagent to load `.agents/skills/blog-variation-cleanup/SKILL.md` to audit unselected variant artifacts. It should default to report-only unless the user explicitly approves prune or archive.
+- Assign a factuality-review subagent to load `.agents/skills/blog-factuality-review/SKILL.md` before finalizing a new or materially changed repo-backed post.
 
 ## Inputs To Establish
 
@@ -59,7 +93,7 @@ Before spawning writer subagents:
 
 1. Run `git status --short --untracked-files=all`.
 2. Read `AGENTS.md`.
-3. Read `blog-writing-guide`; read `blog-mdx-authoring` or `blog-publishing-workflow` if files may be created.
+3. Read only enough of the specialist skills to brief subagents accurately; do not perform specialist drafting, image, cleanup, or review work locally when it can be delegated.
 4. Inspect the target MDX file, nearby posts, `contentlayer.config.ts`, and matching asset folder when the work is repo-backed.
 5. Research current or external factual claims when needed. Prefer primary sources and record source URLs and dates.
 6. Create a compact brief for subagents:
@@ -108,8 +142,12 @@ Assigned variant: [engineering-deep-dive | implementation-guide | opinion-strate
 Use the shared brief below and follow the Ylang Labs blog standards in:
 - AGENTS.md
 - .agents/skills/blog-writing-guide/SKILL.md
+- [role-specific skills assigned by the orchestrator]
 
 Do not edit files unless this prompt gives you a unique output path. Do not create shared assets. Do not invent sources, metrics, release dates, product capabilities, or citations.
+
+Required skills for this subagent:
+- [list exact `.agents/skills/.../SKILL.md` files assigned for this role]
 
 Shared brief:
 [brief]
@@ -175,26 +213,26 @@ Return a short comparison matrix when useful, then recommend one of:
 - run another round for a specific weakness
 - stop at variant options because source gaps or user choices are blocking
 
-If the user chooses one variant after this comparison, use `blog-variation-cleanup` to audit selected and unselected artifacts. Prune or archive only when the user explicitly asks for that cleanup mode or confirms the cleanup manifest.
+If the user chooses one variant after this comparison, assign a cleanup subagent to use `blog-variation-cleanup` to audit selected and unselected artifacts. Prune or archive only when the user explicitly asks for that cleanup mode or confirms the cleanup manifest.
 
 ### 5. Create The Final Blog Package
 
 Only write repo files when the user requested files, a final draft, a complete post, or publication prep.
 
-For the selected or synthesized post:
+For the selected or synthesized post, assign subagents rather than doing the specialist work locally:
 
-1. Use `blog-mdx-authoring` for `data/blogs/<slug>.mdx`, frontmatter, references, and asset paths.
-2. Use `blog-writing-guide` for a final prose pass.
-3. Use `oil-painting-image-generator` for normal cover artwork, then `blog-image-cropper` for:
+1. Assign an MDX/package subagent to use `blog-mdx-authoring` for `data/blogs/<slug>.mdx`, frontmatter, references, and asset paths.
+2. Assign a writer/editor subagent to use `blog-writing-guide` for the final prose pass.
+3. Assign image and crop subagents to use `oil-painting-image-generator` for normal cover artwork, then `blog-image-cropper` for:
    - `public/static/images/blogs/<slug>/cardImage.png` at `1080x1920`
    - `public/static/images/blogs/<slug>/blogHeader.png` at `1260x700`
-4. Use `technical-blog-image-generator` for inline section visuals or technical cover variants.
-5. If only image prompts can be produced, label them as prompts/specs and do not claim files exist.
+4. Assign a technical image subagent to use `technical-blog-image-generator` for inline section visuals or technical cover variants.
+5. If subagents only produce image prompts, label them as prompts/specs and do not claim files exist.
 6. Keep exact labels, numbers, and citations in MDX captions or body text instead of inside generated images unless the user explicitly wants image text.
 
 When the user asks for full image files for all five variants, keep each variant's image files in a separate variant asset folder. Do not point production MDX frontmatter at variant folders unless that variant is selected.
 
-After a selected final package exists, use `blog-variation-cleanup` to report on remaining unselected variant MDX files, image folders, reference packets, social-copy drafts, or variant notes. Remove or archive them only with explicit user approval.
+After a selected final package exists, assign a cleanup subagent to use `blog-variation-cleanup` to report on remaining unselected variant MDX files, image folders, reference packets, social-copy drafts, or variant notes. Remove or archive them only with explicit user approval.
 
 ### 6. Validate
 
@@ -204,8 +242,8 @@ For any final repo-backed post:
 - Confirm referenced image files exist.
 - Confirm `cardImage.png` and `blogHeader.png` dimensions when generated or cropped.
 - Confirm references or citations support the claims.
-- Run an independent `blog-factuality-review` subagent before finalizing a new or materially changed post.
-- Run `technical-blog-image-review` when technical visuals carry factual meaning.
+- Assign an independent `blog-factuality-review` subagent before finalizing a new or materially changed post.
+- Assign a `technical-blog-image-review` subagent when technical visuals carry factual meaning.
 - Run `pnpm build` when feasible for MDX, citations, images, or component-visible changes.
 
 State validation results and any skipped validation clearly.
