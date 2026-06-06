@@ -3,11 +3,11 @@ title: 'How to Build an AI-Native Software Factory'
 date: '2026-06-06'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
-summary: 'Autonomous software development only works when AI agents run inside an AI-native factory: clear intent, selected context, sandboxes, verification, review, and memory.'
+summary: 'Autonomous software development needs more than prompts. It needs clear tasks, selected context, sandboxed work, verification, review, and memory.'
 tldr: |
-  - A software factory only works when every stage has a contract: what enters, what leaves, and what can reject the work.
-  - Agents should operate inside bounded cells with selected context, scoped plans, and evidence-producing verification.
-  - The factory improves when failures become tests, docs, skills, prompts, and fixtures that harden the next run.
+  - Agentic development works when every handoff says what changed, how it was checked, and when to stop.
+  - Agents need selected context and bounded sandboxes, not unlimited repo access and vague goals.
+  - Failed runs should turn into tests, docs, prompts, rules, or reusable tools.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/how-to-build-an-ai-native-software-factory/cardImage.png'
 images: ['/static/images/blogs/how-to-build-an-ai-native-software-factory/blogHeader.png']
@@ -15,33 +15,31 @@ imageTheme: 'white'
 layout: 'PostBanner'
 ---
 
-Autonomous software development is not an agent opening a pull request after one prompt. That is a demo. The real prize is an AI-native software factory where agents can take intent, plan the route, write code, run it, test it, get reviewed, and learn from the result.
+Autonomous software development is not an agent opening a pull request after one prompt. That is a demo.
 
-That changes the unit of software delivery. Instead of one engineer manually translating every request into code, the team designs the system that lets AI agents do real development work repeatedly.
+The real step forward is the system around the agent: clear intake, useful context, sandboxed work, verification, review, and memory.
 
-But autonomy without control is just a faster mess. If an agent turns vague tickets into unchecked patches, you did not build a factory. You built code generation with permissions.
+Autonomy without control is just a faster mess. If an agent turns vague tickets into unchecked patches, you did not build a factory. You built code generation with permissions.
 
-A real software factory is a control loop: clear intake, selected context, bounded build cells, verification, review, and a way for every failure to improve the next run.
+The rule is simple: each handoff should say what changed, how it was checked, and what would send it backward.
 
-Use one rule for every station: name the input, output, rejection condition, and evidence. If any piece is missing, the work is not ready for the next station.
-
-## Stage 1: Intake turns ambiguity into a build contract
+## Stage 1: Intake makes the task testable
 
 <Image
-  alt="Software factory intake dock turning rough requests into build contracts"
+  alt="Software factory intake dock turning rough requests into testable tasks"
   src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-01-intake.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
 />
 
-Many agent failures start before code. The request is too broad. The expected behavior is implied. The non-goals live in someone's head.
+Many agent failures start before code. The request is too broad, the expected behavior is implied, and the non-goals live in someone's head.
 
-A human defines the acceptance criteria here, before the agent starts guessing. Name the observable behavior, important edge cases, and the checks that prove the work is done.
+A human defines the acceptance criteria before the agent starts guessing. Name the behavior, the edge cases that matter, and the checks that prove the work is done.
 
-The output is a build contract: problem, desired behavior, constraints, non-goals, checks, owner, risk tier, and rollback notes.
+Write this down before the agent starts: what should change, what must not change, and which checks must pass.
 
-If nobody can state what "done" means, sending the task to an agent only makes the confusion cheaper to produce.
+If nobody can state what "done" means, the agent should not start.
 
 ## Stage 2: Context selection beats context hoarding
 
@@ -53,33 +51,33 @@ If nobody can state what "done" means, sending the task to an agent only makes t
   className="mx-auto rounded-md bg-white"
 />
 
-Agents do better with the right context, not the most context.
+Agents do better with the right context, not more context.
 
-The context station gives the agent docs and other relevant context on purpose: product briefs, API docs, architecture notes, runbooks, files, tests, prior decisions, an LLM wiki, and known failure modes. The LLM can reference that wiki the same way it references code: as a durable map of concepts, decisions, examples, and failure modes.
+Give the agent only what the task needs: relevant files, tests, docs, prior decisions, and known failure modes.
 
-It should also record what it did not find.
+The agent should also say what it could not find. Missing context is useful, especially when the task depends on hidden product or architecture knowledge.
 
-The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions.
+Do not reward context hoarding. Reward a short explanation of what mattered and why.
 
 ## Stage 3: Planning routes work before code exists
 
 <Image
-  alt="Software factory planning station routing work into bounded cells"
+  alt="Software factory planning station routing work into scoped changes"
   src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-03-plan.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
 />
 
-The plan should be more than "implement the feature."
+The plan should say more than "implement the feature."
 
-Spec-driven development belongs here: write the behavior contract before the patch. Name files in scope, contracts at risk, acceptance checks, tests to move first, branch or worktree needs, and human decisions.
+Spec-driven development belongs here. Before the patch, name the files in scope, the risky interfaces, the tests to move first, and the decisions that still need a person.
 
 The spec does not need ceremony. It needs enough structure that an agent can be wrong in a way the system can catch.
 
-This is where big tasks split into cells: schema change here, UI adjustment there, evaluation fixture somewhere else.
+This is also where big tasks split. One bounded change is easier to verify than one sprawling agent run.
 
-## Stage 4: Build cells give agents room without giving them the factory
+## Stage 4: Sandboxes give agents room without giving them the repo
 
 <Image
   alt="Software factory build cells producing scoped patch modules"
@@ -89,13 +87,13 @@ This is where big tasks split into cells: schema change here, UI adjustment ther
   className="mx-auto rounded-md bg-white"
 />
 
-Agents are useful here because they can read, patch, run commands, recover from errors, and keep moving inside fast feedback loops.
+Agents are useful here because they can read, patch, run commands, inspect failures, and keep moving.
 
-The build cell needs a sandbox: a disposable worktree, container, or test environment where the agent can build, run code, inspect failures, and verify the patch without touching shared state.
+Run the work in a sandbox: a disposable worktree, container, or test environment where the agent cannot damage shared state.
 
-That sandbox still has limits: selected context, allowed files, tool permissions, validation commands, and a stop condition. Autonomy works better when the room has walls.
+That sandbox still needs limits: selected context, allowed files, tool permissions, validation commands, and a stop condition. Autonomy works better when the room has walls.
 
-## Stage 5: Verification creates backpressure
+## Stage 5: Verification stops bad patches
 
 <Image
   alt="Software factory verification gate with tests and a return loop"
@@ -105,13 +103,15 @@ That sandbox still has limits: selected context, allowed files, tool permissions
   className="mx-auto rounded-md bg-white"
 />
 
-A factory without backpressure is just a pipeline for defects.
+A factory without a stop gate is a pipeline for defects.
 
-Verification should run the boring checks first: format, lint, unit tests, type checks, build, migration checks, and smoke tests. TDD belongs here too: write the failing regression before the fix when behavior is testable, then keep the loop red, green, refactor.
+Verification should run the boring checks first: format, lint, unit tests, type checks, build, migration checks, and smoke tests.
 
-AI code reviewers add another pass. Greptile, CodeRabbit, Codex, Claude, and similar tools are useful for asking, "what did this diff miss?" They are pressure, not proof, and they work best when their findings feed back into tests and review prompts.
+When behavior is testable, write the failing regression before the fix. Then keep the loop small: red, green, refactor.
 
-The output is an evidence packet: what ran, what passed, what failed, what was skipped, and why. When verification fails, the work goes backward with the evidence attached.
+AI reviewers are useful for a second look at what the diff missed. They are not proof. Their best findings should turn into tests, prompts, or review rules.
+
+Before review, the agent should report the exact checks it ran, what passed, what failed, and what it skipped. When verification fails, send the work back with that output attached.
 
 ## Stage 6: Review protects judgment, not indentation
 
@@ -125,7 +125,7 @@ The output is an evidence packet: what ran, what passed, what failed, what was s
 
 Human review should not spend most of its time asking whether the tests ran. The factory should have answered that already.
 
-This is the human-in-the-loop station. Always review AI outputs. A plausible patch, passing tests, and tidy explanation can still solve the wrong problem, especially when the task depended on product judgment.
+Always review AI outputs. A plausible patch, passing tests, and tidy explanation can still solve the wrong problem, especially when the task depends on product judgment.
 
 Review is for judgment: did this solve the right problem, change the wrong contract, worsen the UX, or increase cost, latency, security risk, or operational burden?
 
@@ -133,7 +133,7 @@ The best review prompts are blunt: what did the agent assume, what was not verif
 
 The merge gate opens only when the evidence and the judgment agree.
 
-## Stage 7: Improvement is how the factory compounds
+## Stage 7: Failed runs should change the system
 
 <Image
   alt="Software factory improvement workshop feeding learnings back into the loop"
@@ -143,25 +143,23 @@ The merge gate opens only when the evidence and the judgment agree.
   className="mx-auto rounded-md bg-white"
 />
 
-The factory gets better when failures become reusable machinery.
+The factory gets better when failures become reusable work.
 
-A missed edge case becomes a test. A bad retrieval becomes memory. A confusing review thread becomes an `AGENTS.md` rule. A repeated manual fix becomes a `SKILL.md`, script, fixture, or generator. An LLM can also update the LLM wiki with the decision, example, and failure mode so future agents inherit the lesson.
+A missed edge case becomes a test. A confusing review thread becomes an `AGENTS.md` rule. A repeated manual fix becomes a `SKILL.md`, script, fixture, or generator.
 
-This is how the system stops relearning the same lesson. The next run should inherit more judgment than the last one.
+This is how the system stops relearning the same lesson. The next run should start with more judgment than the last one.
 
-Teams underinvest here. They celebrate the fix, then let the same bug class return next week.
-
-Measure the factory by compounding effects: lower rework rate, shorter time to first useful patch, fewer escaped defects, faster review, better context hit rate, and more reusable artifacts.
+Measure whether the system is improving: less rework, faster first useful patch, fewer escaped defects, faster review, and fewer repeated mistakes.
 
 The best factory does not make humans less responsible. It makes responsibility easier to exercise.
 
-## The control loop is the product
+## Build the loop first
 
-A software factory is not a place where agents replace engineering judgment. It is a place where judgment is encoded into the line: intake contracts, context packets, scoped plans, bounded build cells, verification gates, review prompts, and improvement loops.
+A software factory is not a place where agents replace engineering judgment. It is a system that makes judgment explicit: clear tasks, selected context, scoped plans, sandboxed work, verification gates, review prompts, and improvement loops.
 
 That is the part worth building first: the control system.
 
-Start with one route for one kind of work: a bug fix, content update, or test-only regression patch. Make the contracts explicit. Measure where work bounces backward. Then improve that station.
+Start with one repeatable route. A testable bug fix is enough. Make the handoffs explicit. Measure where work gets sent back. Then improve that step.
 
 That is how the software factory becomes real: not by asking an agent to build everything, but by building a system where each run leaves the next run less fragile.
 
