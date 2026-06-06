@@ -102,7 +102,7 @@ Use or adapt this prompt for each subagent:
 ```text
 You are one of five independent writer subagents for a Ylang Labs blog variation workflow.
 
-Repo: /Users/artreimus/Repositories/ylang-labs/ylang-labs-blog
+Repo: [current repository root from the main agent, preferably the output of `git rev-parse --show-toplevel`]
 Assigned variant: [engineering-deep-dive | implementation-guide | opinion-strategy | research-explainer | build-story]
 
 Use the shared brief below and follow the Ylang Labs blog standards in:
