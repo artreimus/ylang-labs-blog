@@ -1,4 +1,4 @@
-# Source Log: The Software Factory Is a Control Loop
+# Source Log: How to Build an AI-Native Software Factory
 
 Accessed: 2026-06-06
 
@@ -11,7 +11,7 @@ Accessed: 2026-06-06
 
 ## Generated Visual Assets
 
-All visuals were generated with the built-in OpenAI image generation path, copied into `public/static/images/blogs/software-factory-control-loop/`, and inspected before use.
+All visuals were generated with the built-in OpenAI image generation path, copied into `public/static/images/blogs/how-to-build-an-ai-native-software-factory/`, and inspected before use.
 
 - `source-artwork.png`: oil-painted software factory control-loop cover source.
 - `cardImage.png`: cropped from `source-artwork.png` at `1080x1920`.

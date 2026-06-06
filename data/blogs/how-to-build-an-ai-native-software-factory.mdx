@@ -1,21 +1,25 @@
 ---
-title: 'The Software Factory Is a Control Loop, Not an Assembly Line'
+title: 'How to Build an AI-Native Software Factory'
 date: '2026-06-06'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
-summary: 'A useful software factory is not a swarm of agents writing code. It is a controlled delivery system with explicit inputs, bounded build cells, verification gates, review, and feedback loops.'
+summary: 'Autonomous software development only works when AI agents run inside an AI-native factory: clear intent, selected context, sandboxes, verification, review, and memory.'
 tldr: |
   - A software factory only works when every stage has a contract: what enters, what leaves, and what can reject the work.
   - Agents should operate inside bounded cells with selected context, scoped plans, and evidence-producing verification.
   - The factory improves when failures become tests, docs, skills, prompts, and fixtures that harden the next run.
 authors: ['arthur-reimus']
-cardImage: '/static/images/blogs/software-factory-control-loop/cardImage.png'
-images: ['/static/images/blogs/software-factory-control-loop/blogHeader.png']
+cardImage: '/static/images/blogs/how-to-build-an-ai-native-software-factory/cardImage.png'
+images: ['/static/images/blogs/how-to-build-an-ai-native-software-factory/blogHeader.png']
 imageTheme: 'white'
 layout: 'PostBanner'
 ---
 
-The software factory idea is right, but the dangerous version is just a faster mess. If an agent turns vague tickets into unchecked patches, you did not build a factory. You built a code generator with a conveyor belt attached.
+Autonomous software development is not an agent opening a pull request after one prompt. That is a demo. The real prize is an AI-native software factory where agents can take intent, plan the route, write code, run it, test it, get reviewed, and learn from the result.
+
+That changes the unit of software delivery. Instead of one engineer manually translating every request into code, the team designs the system that lets AI agents do real development work repeatedly.
+
+But autonomy without control is just a faster mess. If an agent turns vague tickets into unchecked patches, you did not build a factory. You built code generation with permissions.
 
 A real software factory is a control loop: clear intake, selected context, bounded build cells, verification, review, and a way for every failure to improve the next run.
 
@@ -25,7 +29,7 @@ Use one rule for every station: name the input, output, rejection condition, and
 
 <Image
   alt="Software factory intake dock turning rough requests into build contracts"
-  src="/static/images/blogs/software-factory-control-loop/stage-01-intake.png"
+  src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-01-intake.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
@@ -43,7 +47,7 @@ If nobody can state what "done" means, sending the task to an agent only makes t
 
 <Image
   alt="Software factory context bench selecting relevant repository knowledge"
-  src="/static/images/blogs/software-factory-control-loop/stage-02-context.png"
+  src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-02-context.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
@@ -59,7 +63,7 @@ The output is a context packet: referenced files, invariants, hazards, examples 
 
 <Image
   alt="Software factory planning station routing work into bounded cells"
-  src="/static/images/blogs/software-factory-control-loop/stage-03-plan.png"
+  src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-03-plan.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
@@ -77,7 +81,7 @@ This is where big tasks split into cells: schema change here, UI adjustment ther
 
 <Image
   alt="Software factory build cells producing scoped patch modules"
-  src="/static/images/blogs/software-factory-control-loop/stage-04-build.png"
+  src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-04-build.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
@@ -93,7 +97,7 @@ That sandbox still has limits: selected context, allowed files, tool permissions
 
 <Image
   alt="Software factory verification gate with tests and a return loop"
-  src="/static/images/blogs/software-factory-control-loop/stage-05-verify.png"
+  src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-05-verify.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
@@ -111,7 +115,7 @@ The output is an evidence packet: what ran, what passed, what failed, what was s
 
 <Image
   alt="Software factory human review bridge before the merge gate"
-  src="/static/images/blogs/software-factory-control-loop/stage-06-review.png"
+  src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-06-review.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
@@ -131,7 +135,7 @@ The merge gate opens only when the evidence and the judgment agree.
 
 <Image
   alt="Software factory improvement workshop feeding learnings back into the loop"
-  src="/static/images/blogs/software-factory-control-loop/stage-07-improve.png"
+  src="/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-07-improve.png"
   width={1586}
   height={992}
   className="mx-auto rounded-md bg-white"
@@ -153,7 +157,7 @@ The best factory does not make humans less responsible. It makes responsibility 
 
 A software factory is not a place where agents replace engineering judgment. It is a place where judgment is encoded into the line: intake contracts, context packets, scoped plans, bounded build cells, verification gates, review prompts, and improvement loops.
 
-That is the part worth copying from the factory metaphor. Not the assembly line. The control system.
+That is the part worth building first: the control system.
 
 Start with one route for one kind of work: a bug fix, content update, or test-only regression patch. Make the contracts explicit. Measure where work bounces backward. Then improve that station.
 
