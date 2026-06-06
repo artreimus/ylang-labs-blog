@@ -1,6 +1,6 @@
 ---
 name: blog-factuality-review
-description: 'Review, critique, fact-check, and validate Ylang Labs blog drafts or published posts with a factuality-first standard. Use this skill when the user asks to review a blog, check factual accuracy, assess MDX/frontmatter/assets/citations, find unsupported claims, flag overlong drafts, or provide editorial feedback before publishing. Use `blog-writing-guide` as the primary editorial rubric for Ylang Labs blog prose.'
+description: 'Review, critique, fact-check, and validate Ylang Labs blog drafts or published posts with a factuality-first standard. Use this skill when the user asks to review a blog, check factual accuracy, assess MDX/frontmatter/assets/citations, find unsupported claims, flag overlong or overcomplicated drafts, review simplicity, clarity, and concision, or provide editorial feedback before publishing. Use `blog-writing-guide` as the primary editorial rubric for Ylang Labs blog prose.'
 ---
 
 # Blog Factuality Review
@@ -101,10 +101,29 @@ Assess whether the post works for Ylang Labs' audience: practical AI engineering
 
 Apply `.agents/skills/blog-writing-guide/SKILL.md` as the primary editorial rubric.
 
-Check for:
+Run a simplicity pass before judging voice or polish. A post can be accurate and still fail because the reader has to carry too much abstract structure.
+
+Check for simplicity failures:
+
+- A thesis that is clear in the first few paragraphs.
+- Sections with one job each.
+- Examples that teach the mechanism, not examples added just because they are available.
+- Repeated examples that make the same point.
+- Abstract label-plus-noun-pile sentences, such as "The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions."
+- Sentences that name more than three abstract nouns when a direct verb would be clearer.
+- Terms like "contract", "packet", "surface", "artifact", "machinery", or "framework" used before the post has earned them.
+
+When this appears, quote the weak sentence and give a simpler rewrite. Prefer operational wording:
+
+- "Write down what should change, what must not change, and which checks must pass."
+- "Give the agent only what the task needs. Then say what mattered, what was missing, and what still needs a person."
+
+Then check the broader editorial bar:
 
 - A clear thesis or technical question.
 - Specific mechanisms, architecture, examples, or implementation detail.
+- Simple explanations before dense terminology.
+- Useful, limited examples instead of catalogs.
 - Evidence before impact claims.
 - Accurate caveats and limitations.
 - Concrete takeaways in `summary` and `tldr`.
@@ -128,8 +147,8 @@ For sourced posts:
 
 - `P0`: False or unsupported claim that creates major legal, safety, security, reputational, or publishing risk.
 - `P1`: Material factual error, broken build, missing primary asset, invalid frontmatter, or citation failure that should block publishing.
-- `P2`: Unsupported or overstated claim, missing caveat, unclear technical explanation, non-blocking asset/reference issue, draft longer than 5 minutes without user approval, or meaningful editorial weakness.
-- `P3`: Polish issue, minor wording improvement, weak transition, small metadata refinement, or optional enhancement.
+- `P2`: Unsupported or overstated claim, missing caveat, unclear technical explanation, overcomplicated prose that obscures the thesis, repeated example catalogs, non-blocking asset/reference issue, draft longer than 5 minutes without user approval, or meaningful editorial weakness.
+- `P3`: Polish issue, minor wording improvement, minor simplification, weak transition, small metadata refinement, or optional enhancement.
 
 Lead with findings ordered by severity. Do not bury important factual problems under compliments.
 
@@ -151,6 +170,12 @@ Use this structure for read-only reviews:
 - Verified: <high-value claims checked and how>
 - Needs source: <claims that remain plausible but unsupported>
 - Could not verify: <claims blocked by missing source/tool access>
+
+## Simplicity Notes
+
+- Hard to follow: <sections or sentences where the point is buried>
+- Over-explained: <repeated examples, noun piles, or unnecessary categories>
+- Recommended cuts: <specific deletions or simpler rewrites>
 
 ## Repo/MDX Checks
 
@@ -187,6 +212,7 @@ Before finalizing a review, confirm:
 - Relevant repo instructions and local skills were checked.
 - Factual claims were separated from editorial judgments.
 - `blog-writing-guide` was used as the primary editorial rubric.
+- A simplicity pass checked for over-explaining, repeated examples, noun piles, and unnecessary abstract terminology.
 - The draft is 5 minutes or less by default, or the review explicitly notes that the user approved a longer post.
 - High-risk claims were verified against primary or current sources.
 - Unsupported claims were explicitly marked instead of silently accepted.
