@@ -9,9 +9,11 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 ## Required First Steps
 
 - Check relevant local skills before starting. For this repo, prefer:
+  - `blog-variation-orchestrator` as the default when asked to create, write, draft, ideate, or turn an idea into a new Ylang Labs blog post. It should coordinate five writer subagents, image directions, selection/synthesis, and downstream blog packaging unless the user explicitly requests a different workflow.
+  - `blog-variation-cleanup` after a blog variation has been chosen and the unselected subagent-created drafts, images, refs, social-copy files, or variant notes should be audited, pruned, archived, or reconciled. Default to report-only unless the user explicitly asks to remove or archive artifacts.
   - `blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
   - `content-calendar-management` when asked to use GitHub Issues/Projects as the editorial calendar, create content briefs, schedule posts/projects/social content, or audit planned work.
-  - `blog-publishing-workflow` when asked to turn a blog idea or draft into a complete post with optional artwork, blog assets, social copy, and PR publication.
+  - `blog-publishing-workflow` when continuing from a selected final blog direction, when explicitly requested, or when the task is only the downstream packaging, preparation, or publishing step without five-variant orchestration.
   - `blog-writing-guide` as the primary Ylang Labs writing, rewriting, editing, and editorial review standard for blog posts.
   - `blog-factuality-review` when asked to review, critique, fact-check, validate, or assess publication readiness for Ylang Labs blog drafts.
   - `blog-mdx-authoring` for creating or structuring new blog posts.
