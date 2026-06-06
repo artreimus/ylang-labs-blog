@@ -23,7 +23,7 @@ Infer these from the conversation, repo files, and orchestrator output where pos
 - Whether selected images should live in `public/static/images/blogs/<slug>/`.
 - Whether selected source notes should live in `refs/<slug>/README.md`.
 
-Ask one concise question only if the selected variant cannot be determined. If cleanup mode is not specified, default to `report-only`. Use `prune` or `archive` only when the user explicitly asks to remove, clean up, prune, delete, archive, or confirms the cleanup manifest.
+Ask one concise question only if the selected variant cannot be determined. If cleanup mode is not specified, default to `report-only`. Use `prune` or `archive` only when the user explicitly asks to remove, prune, delete, or archive artifacts, or confirms the cleanup manifest.
 
 ## Skills To Use
 
