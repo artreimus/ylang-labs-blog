@@ -56,6 +56,8 @@ Agents do better with the right context, not more context.
 
 Give the agent only what the task needs: relevant files, tests, docs, prior decisions, and known failure modes.
 
+This is where MCPs earn their keep. Context7 can pin current library docs. GitHub MCP can bring in the issue, PR, and review thread. A logs or observability MCP can show the failing trace. The point is not to give the agent every tool. The point is to give it the few context sources that make the task less ambiguous.
+
 The agent should also say what it could not find. Missing context is useful, especially when the task depends on hidden product or architecture knowledge.
 
 Do not reward context hoarding. Reward a short explanation of what mattered and why.
@@ -109,6 +111,14 @@ Change one observable behavior:
 - Docs:
 - Prior decisions:
 
+## Tools in scope
+
+- MCPs:
+- CLIs:
+- Read-only tools:
+- Mutating tools:
+- Tools explicitly denied:
+
 ## Execution boundaries
 
 - Allowed files:
@@ -152,6 +162,8 @@ Run the work in an isolated workspace. A disposable worktree protects file chang
 
 If the agent can reach shared databases, credentials, cloud accounts, global config, or production-like services, add a container, test environment, mocked services, and explicit tool permissions.
 
+The same rule applies to CLIs. `gh`, `aws`, package managers, and migration runners are not generic conveniences. They are capabilities. Put each one in the contract with the access level, environment, and stop condition.
+
 The sandbox still needs limits: selected context, allowed files, allowed commands, network rules when needed, validation commands, and a stop condition. Autonomy works better when the room has walls.
 
 ## Stage 5: Verification stops bad patches
@@ -167,6 +179,8 @@ The sandbox still needs limits: selected context, allowed files, allowed command
 A factory without a stop gate is a pipeline for defects.
 
 Verification should run the boring checks first: format, lint, unit tests, type checks, build, migration checks, and smoke tests.
+
+Tool output becomes evidence here. `gh pr checks` tells review what CI saw. `aws logs tail` or the team's log MCP can show whether the same failure still appears after a fix. The agent should attach the output that matters, not a transcript of every command it touched.
 
 When behavior is testable, write the failing regression before the fix. Then keep the loop small: red, green, refactor.
 
