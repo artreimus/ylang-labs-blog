@@ -55,7 +55,9 @@ If nobody can state what "done" means, sending the task to an agent only makes t
 
 Agents do better with the right context, not the most context.
 
-The context station gives the agent docs and other relevant context on purpose: product briefs, API docs, architecture notes, runbooks, files, tests, prior decisions, and known failure modes. It should also record what it did not find.
+The context station gives the agent docs and other relevant context on purpose: product briefs, API docs, architecture notes, runbooks, files, tests, prior decisions, an LLM wiki, and known failure modes. The LLM can reference that wiki the same way it references code: as a durable map of concepts, decisions, examples, and failure modes.
+
+It should also record what it did not find.
 
 The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions.
 
@@ -143,7 +145,7 @@ The merge gate opens only when the evidence and the judgment agree.
 
 The factory gets better when failures become reusable machinery.
 
-A missed edge case becomes a test. A bad retrieval becomes memory. A confusing review thread becomes an `AGENTS.md` rule. A repeated manual fix becomes a `SKILL.md`, script, fixture, or generator.
+A missed edge case becomes a test. A bad retrieval becomes memory. A confusing review thread becomes an `AGENTS.md` rule. A repeated manual fix becomes a `SKILL.md`, script, fixture, or generator. An LLM can also update the LLM wiki with the decision, example, and failure mode so future agents inherit the lesson.
 
 This is how the system stops relearning the same lesson. The next run should inherit more judgment than the last one.
 
