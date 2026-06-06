@@ -3,9 +3,9 @@ title: 'How to Build an AI-Native Software Factory'
 date: '2026-06-07'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
-summary: 'Autonomous software development needs more than prompts. It needs clear tasks, selected context, sandboxed work, verification, review, and memory.'
+summary: 'Autonomous software development works when agents write software in a loop: scoped tasks, selected context, sandboxed work, verification, review, and memory.'
 tldr: |
-  - Agentic development works when every handoff says what changed, how it was checked, and when to stop.
+  - Autonomous software development works when agents write software in a loop, not when they produce one-off diffs.
   - The core artifact is a handoff contract: desired behavior, non-goals, selected context, allowed tools, checks, stop condition, and rollback path.
   - Agents need selected context and real execution boundaries, not unlimited repo access and vague goals.
   - Failed runs should turn into tests, docs, prompts, rules, or reusable tools.
@@ -16,7 +16,7 @@ imageTheme: 'white'
 layout: 'PostBanner'
 ---
 
-AI agents make the most interesting version of the software factory possible: software that can write software. The destination is not autocomplete with a chat box bolted on. It is a development system that can take a scoped goal, read the repo, change the code, run the checks, and carry the evidence to review.
+AI agents make the most interesting version of the software factory possible: software that can write software. The useful version is a system where agents write software in a loop: take a scoped goal, read the repo, change the code, run the checks, and carry the evidence to review.
 
 That is the ambitious version of autonomous development. A human sets direction and judgment gates. The factory handles the work that should be repeatable: gather context, patch the repo, run checks, return evidence, and learn from failed runs.
 
