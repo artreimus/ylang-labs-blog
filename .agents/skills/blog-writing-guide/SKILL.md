@@ -35,6 +35,30 @@ Never use these. They are automatic red flags:
 - Filler transitions: "That being said," "It's worth noting that," "At the end of the day," "Without further ado," "As you might know"
 - "In this blog post, we will explore..." — be direct, just start
 
+## Verbosity And Example Discipline
+
+Write direct operating sentences. Do not hide the point inside an abstract label followed by a pile of nouns.
+
+**Avoid abstract label + colon + noun pile.**
+
+- Bad: "The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions."
+- Good: "Give the agent only what the task needs. Then say what mattered, what was missing, and what still needs a person."
+
+More rewrites:
+
+- Bad: "The output is a build contract: problem, desired behavior, constraints, non-goals, checks, owner, risk tier, and rollback notes."
+- Good: "Write down what should change, what must not change, and which checks must pass."
+- Bad: "The system improves through reusable machinery: tests, docs, skills, prompts, fixtures, and generators."
+- Good: "Turn a missed edge case into a test. Turn a repeated manual fix into a script or skill."
+
+Use this rule while drafting and editing:
+
+- If a sentence names more than three abstract nouns, rewrite it.
+- Prefer verbs a person can perform: write, check, run, compare, send back, measure, remove, split, review.
+- Use terms like "contract", "packet", "surface", "artifact", "machinery", or "framework" only when the post has defined them and the term makes the sentence clearer.
+- Use one useful example, not a catalog of possible examples.
+- Do not explain a system by naming seven buckets. Explain the next handoff and why it matters.
+
 ## The Opening (First 2-3 Sentences)
 
 The opening must do one of two things: **state the problem** or **state the conclusion**. Never start with background, company history, or hype.
@@ -227,6 +251,8 @@ Run through both checklists:
 - Opening hooks reader within 2 sentences
 - Passes the "would I share this?" test
 - No corporate language, filler, or fluff
+- No abstract label-plus-noun-pile sentences
+- Examples are useful and limited, not a catalog of everything that could happen
 - Headings convey information
 - Right length: 5 minutes or less by default, unless the user explicitly allowed a longer post
 - Title is specific and compelling
