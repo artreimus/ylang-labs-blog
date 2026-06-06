@@ -6,7 +6,8 @@ draft: false
 summary: 'Autonomous software development needs more than prompts. It needs clear tasks, selected context, sandboxed work, verification, review, and memory.'
 tldr: |
   - Agentic development works when every handoff says what changed, how it was checked, and when to stop.
-  - Agents need selected context and bounded sandboxes, not unlimited repo access and vague goals.
+  - The core artifact is a handoff contract: desired behavior, non-goals, selected context, allowed tools, checks, stop condition, and rollback path.
+  - Agents need selected context and real execution boundaries, not unlimited repo access and vague goals.
   - Failed runs should turn into tests, docs, prompts, rules, or reusable tools.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/how-to-build-an-ai-native-software-factory/cardImage.png'
@@ -77,6 +78,64 @@ The spec does not need ceremony. It needs enough structure that an agent can be 
 
 This is also where big tasks split. One bounded change is easier to verify than one sprawling agent run.
 
+## Use a handoff contract
+
+The useful artifact is small enough to paste into an issue and strict enough to stop a vague request from becoming a wandering patch.
+
+Use this before an agent starts:
+
+```md
+# Agent handoff contract
+
+## Goal
+
+Change one observable behavior:
+
+## Acceptance criteria
+
+- Given ...
+- When ...
+- Then ...
+
+## Non-goals
+
+- Do not change ...
+- Do not refactor ...
+
+## Context in scope
+
+- Files:
+- Tests:
+- Docs:
+- Prior decisions:
+
+## Execution boundaries
+
+- Allowed files:
+- Allowed commands:
+- Network or service access:
+- Secrets and credentials:
+
+## Checks before review
+
+- Format:
+- Lint:
+- Unit tests:
+- Type checks:
+- Build:
+- Smoke test:
+
+## Stop condition
+
+Stop and ask for review if ...
+
+## Review note
+
+Report what changed, what passed, what failed, what was skipped, and the smallest rollback.
+```
+
+You can make this stricter for migrations, security work, or production data. The important part is not the exact headings. The important part is that the agent gets a bounded job, a bounded workspace, and a bounded definition of done.
+
 ## Stage 4: Sandboxes give agents room without giving them the repo
 
 <Image
@@ -89,9 +148,11 @@ This is also where big tasks split. One bounded change is easier to verify than 
 
 Agents are useful here because they can read, patch, run commands, inspect failures, and keep moving.
 
-Run the work in a sandbox: a disposable worktree, container, or test environment where the agent cannot damage shared state.
+Run the work in an isolated workspace. A disposable worktree protects file changes, but it is not a security boundary.
 
-That sandbox still needs limits: selected context, allowed files, tool permissions, validation commands, and a stop condition. Autonomy works better when the room has walls.
+If the agent can reach shared databases, credentials, cloud accounts, global config, or production-like services, add a container, test environment, mocked services, and explicit tool permissions.
+
+The sandbox still needs limits: selected context, allowed files, allowed commands, network rules when needed, validation commands, and a stop condition. Autonomy works better when the room has walls.
 
 ## Stage 5: Verification stops bad patches
 
