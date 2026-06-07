@@ -20,14 +20,14 @@ This skill guides you through creating a new blog post for the `ylang-labs-blog`
 
 Before creating the post, ensure you have the following information:
 
-- **Title**: The title of the blog post.
+- **Title**: The title of the blog post. Prefer an ambitious, specific title that sells the thesis, tension, or payoff instead of a neutral topic label.
 - **Date**: Defaults to today's date (YYYY-MM-DD).
 - **Authors**: A list of author slugs (e.g., `arthur-reimus`, `christopher-caysido`, `ezekiel-mariano`, `van-panugan`, `default`).
 - **Tags**: A list of tags. Common tags in this project: `AI/ML`, `Agents`, `Generative AI`, `DeepSeek`, `Pydantic`, `Multi-Agent Systems`, `Context Engineering`, `RAG`.
 - **Calendar Metadata** (Optional): GitHub issue URL/number, content type, canonical tag keys from `app/blog-tag-data.json`, target date, end date, slug, priority, and description.
-- **Summary**: A short description for the blog list view.
-- **TLDR**: Multi-bullet key takeaways for `PostBanner`. Do not duplicate these as a manual "Key Takeaways" section in the body.
-- **Style Direction**: Read `.agents/skills/blog-writing-guide/SKILL.md` before drafting or revising Ylang Labs blog prose.
+- **Summary**: A short description for the blog list view. It should give a concrete reason to click by saying what the reader will understand, build, fix, or decide after reading.
+- **TLDR**: Multi-bullet key takeaways for `PostBanner`. Write bullets as useful conclusions, not neutral recaps. Do not duplicate these as a manual "Key Takeaways" section in the body.
+- **Style Direction**: Read `.agents/skills/blog-writing-guide/SKILL.md` before drafting or revising blog prose. Use The Pragmatic Engineer-inspired standard by default.
 - **Reading Time**: Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - **Reference Topic**: A kebab-case folder name under `refs/`. Default to the final blog slug; use a working topic slug while researching if the title is not final.
 - **Bibliography** (Optional): Path to a `.bib` file if references are used.
@@ -99,7 +99,9 @@ Optional generated-art sequence:
 
 ### Step 5: Create the MDX File
 
-Use `.agents/skills/blog-writing-guide/SKILL.md` before drafting the `summary`, `tldr`, and article body. Keep this skill responsible for file structure, frontmatter, asset paths, and MDX conventions; let `blog-writing-guide` shape the opening, reader-question structure, technical depth, section headings, banned-language cleanup, and editorial review pass.
+Use `.agents/skills/blog-writing-guide/SKILL.md` before drafting the `title`, `summary`, `tldr`, and article body. Keep this skill responsible for file structure, frontmatter, asset paths, and MDX conventions; let `blog-writing-guide` shape the Pragmatic Engineer-inspired voice, ambition level, opening, reader-question structure, technical depth, section headings, banned-language cleanup, and editorial review pass.
+
+After the body has a clear thesis, revisit the `title`, `summary`, and `tldr`. These are part of the blog's packaging, not clerical metadata. They should sell the strongest defensible claim in the post.
 
 Create the file `data/blogs/[slug].mdx` with the following frontmatter:
 
@@ -251,6 +253,7 @@ The project uses `refs/[slug]/` as the source-of-truth workspace for research pr
 - Confirm `refs/[slug]/README.md` exists when the post relies on external sources or research.
 - Confirm the file `data/blogs/[slug].mdx` exists with the correct frontmatter.
 - Confirm rendered citations in `data/references-data.bib` or the MDX `## References` section line up with the source log in `refs/[slug]/README.md`.
-- Confirm the draft passes `blog-writing-guide`: it opens with the problem or conclusion, stays at 5 minutes or less by default, uses the correct post-type scaffold, has specific headings, includes concrete technical detail, explains tradeoffs or limitations where relevant, avoids banned language, and ends with a useful next step.
+- Confirm the draft passes `blog-writing-guide`: it uses the Pragmatic Engineer-inspired voice, opens with the problem or conclusion, stays at 5 minutes or less by default, uses the correct post-type scaffold, has specific headings, includes concrete technical detail, explains tradeoffs or limitations where relevant, avoids banned language, and ends with a useful next step.
+- Confirm the `title`, `summary`, and `tldr` are ambitious enough to sell the post while remaining defensible from the article body.
 - Confirm `PostBanner` posts do not duplicate the rendered "Key Takeaways" callout with a manual body section.
 - Confirm `cardImage.png` and `blogHeader.png` exist when frontmatter references them, or clearly report that the image assets still need to be created.
