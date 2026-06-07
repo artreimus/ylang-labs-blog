@@ -19,7 +19,7 @@ Read and apply these skills in this order:
    - Purpose: create or update the content-calendar issue and Project item with content type, tags, target date, end date, slug, stage, and description.
 3. `blog-writing-guide`
    - Path: `.agents/skills/blog-writing-guide/SKILL.md`
-   - Purpose: apply the primary Ylang Labs blog voice, structure, technical quality bar, banned-language rules, title guidance, and review checklist before the MDX draft is finalized.
+   - Purpose: apply the primary Pragmatic Engineer-inspired voice, ambition-without-hype standard, structure, technical quality bar, banned-language rules, title guidance, and review checklist before the MDX draft is finalized.
 4. `blog-mdx-authoring`
    - Path: `.agents/skills/blog-mdx-authoring/SKILL.md`
    - Purpose: create the MDX file, frontmatter, slug, asset directory, and content structure.
@@ -52,7 +52,7 @@ Derive missing details from the provided blog whenever possible instead of block
 - Target date and end date when the user wants scheduling metadata.
 - Publication date. Default to today's date in `YYYY-MM-DD`.
 - Draft status. Default to `draft: false` unless the user asks for a draft article.
-- Style direction. Default to `blog-writing-guide` for all Ylang Labs blog prose.
+- Style direction. Default to `blog-writing-guide` for all blog prose. The Pragmatic Engineer-inspired standard is the default.
 - Reading time. Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - Any external references or canonical URL.
 - Reference topic slug for `refs/<topic>/`. Default to the final blog slug when the user does not provide one.
@@ -111,8 +111,8 @@ Use `blog-mdx-authoring` to:
 - Set:
   - `cardImage: '/static/images/blogs/<slug>/cardImage.png'`
   - `images: ['/static/images/blogs/<slug>/blogHeader.png']`
-- Use `summary` for the listing/SEO summary.
-- Use `tldr` for concise Key Takeaways.
+- Use `summary` for the listing/SEO summary, and make it concrete enough to sell why the post is worth reading.
+- Use `tldr` for concise Key Takeaways, written as useful conclusions rather than neutral recaps.
 - Use existing MDX components such as `Callout`, `Image`, `DiagramSubtitle`, and `MermaidDiagram` when they make the article clearer.
 - Choose the body scaffold by post type:
   - Engineering deep dive: problem, mechanism, architecture, tradeoffs, failure modes, practical application, references.
@@ -124,6 +124,8 @@ Keep the article concrete and technical. Prefer implementation details, architec
 
 Apply `blog-writing-guide` before finalizing the MDX draft:
 
+- Use the Pragmatic Engineer-inspired voice: direct, concrete, technically sharp, inside-view, source-backed, and grounded in shipped-work judgment.
+- Sell the strongest defensible thesis through the title, opening, summary, and TLDR.
 - Keep the draft at 5 minutes or less by default unless the user explicitly asked for or approved a longer post.
 - Open by stating the problem or conclusion in the first 2-3 sentences.
 - Structure the article around the reader's questions: problem, mechanics, tradeoffs, implementation, failed attempts, and known limitations where relevant.
@@ -191,7 +193,7 @@ posts/social-media-<slug>.md
 
 Create 2-3 variations. For LinkedIn, prefer a professional, insight-led narrative variation in the 500-900 character range with short paragraphs, concrete technical stakes, and a natural CTA. Include one short X/Twitter-ready variation only when useful, and include a `[URL]` placeholder unless the final URL is known.
 
-Use `blog-writing-guide` as the baseline voice for social copy: specific, direct, technically useful, and free of generic hype.
+Use `blog-writing-guide` as the baseline voice for social copy: Pragmatic Engineer-inspired, specific, direct, technically useful, ambitious without generic hype, and anchored in the post's strongest defensible claim.
 
 ### 7. Update The Content Calendar
 

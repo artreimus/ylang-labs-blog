@@ -131,6 +131,10 @@ Blog asset standards:
 Blog writing standards:
 
 - The publication focuses on AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, and practical implementation lessons.
+- The default blog writing standard is The Pragmatic Engineer by Gergely Orosz. Use it as the editorial reference for inside-view engineering writing: practical, source-backed, numbers-forward, specific about how teams and systems work, and useful to engineers and engineering leaders. Do not imitate Gergely Orosz's exact prose, recurring phrasing, or author persona.
+- Default to a Pragmatic Engineer-inspired voice: direct, concrete, technically sharp, and written by someone who has shipped the work and understands the failure modes. Prefer useful judgment, named systems, operational tradeoffs, and industry context over banter, hype, or detached research prose.
+- Be ambitious in the blog body and packaging. Titles, summaries, TLDR bullets, openings, and social posts should sell the strongest defensible thesis, tension, payoff, or shift in the article instead of merely naming the topic.
+- Ambition must remain evidence-backed. Every bold title, hook, or claim needs support from a mechanism, example, number, tradeoff, caveat, source, or implementation detail in the article.
 - Default blog posts to 5 minutes or less unless the user explicitly asks for or approves a longer post. If a topic needs more depth, narrow the scope, split follow-up posts, or confirm the longer format before drafting past the default.
 - Prefer concrete technical explanations, architecture diagrams, examples, and citations over generic marketing prose.
 - Use post-type structures rather than one universal article template:

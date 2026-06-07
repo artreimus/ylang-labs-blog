@@ -7,9 +7,13 @@ description: Generate exciting, thesis-driven social launch copy for Ylang Labs 
 
 Use this skill to create exciting, specific social media variations for blogs or project updates.
 
-The default output should feel like a strong founder or technical-builder post: clear thesis, concrete stakes, practical implication, and a direct pointer to the article. It should make a reader feel that something in the technical landscape is shifting, then quickly show what the post explains.
+The default social-copy standard is The Pragmatic Engineer by Gergely Orosz as an editorial reference. Do not imitate his exact prose, recurring phrasing, or author persona.
+
+The default output should feel like a Pragmatic Engineer-inspired post with founder-level ambition: clear thesis, concrete stakes, practical implication, and a direct pointer to the article. It should make a reader feel that something in the technical landscape is shifting, then quickly show what the post explains and why it is worth their time.
 
 Do not make the copy sound like a generic announcement, SEO snippet, newsletter blurb, or press release.
+
+Sell the blog by selling the problem, mechanism, or shift. Do not merely announce that Ylang Labs wrote something.
 
 ## Core Mandates
 
@@ -18,6 +22,10 @@ Do not make the copy sound like a generic announcement, SEO snippet, newsletter 
   2. A concrete explanation of what changed, why it matters, or what the reader can now build.
   3. At least one practical implication, such as latency, privacy, cost, deployment, reliability, evaluation, or developer workflow.
   4. A clear CTA with `[URL]` unless the final URL is known.
+- **Ambition:** The hook should make a bold, defensible claim about an engineering shift, failure mode, or payoff. Avoid neutral topic summaries.
+- **Proof Anchor:** Every ambitious claim needs at least one concrete anchor from the article: a named model, paper, product, framework, architecture, workflow, number, tradeoff, or failure mode.
+- **Reader Payoff:** Make clear what the reader will understand, build, fix, avoid, or decide after clicking.
+- **Inside-View Signal:** When the article supports it, include a specific operating detail: scale, architecture, migration path, incident pattern, team workflow, evaluation result, or cost/reliability implication.
 - **Default LinkedIn Shape:** Prefer the pattern:
   1. One-line thesis.
   2. A short paragraph grounding the thesis in a model, architecture, workflow, or problem.
@@ -28,13 +36,14 @@ Do not make the copy sound like a generic announcement, SEO snippet, newsletter 
   - LinkedIn: 500-900 characters by default, with short paragraphs and no filler.
   - X/Twitter: 240-280 characters when a short variant is requested.
   - Generic social launch copy: 400-700 characters.
-- **Tone:** Engaging, conversational, technically credible, and platform-appropriate. Aim for "this is worth reading" energy, not corporate enthusiasm.
+- **Tone:** Engaging, conversational, technically credible, and platform-appropriate. Aim for "this changes how I think about the problem" energy, not corporate enthusiasm.
 - **Specificity:** Name the model, paper, product, technique, benchmark, or architecture when it is central to the post. Avoid vague claims like "game changer," "major upgrade," and "unlocking the future" unless the copy immediately proves the claim with specifics.
 - **Excitement:** Create momentum through stakes and implications, not through hype words or excessive punctuation.
 - **Point of View:** Make the post about the shift, not merely about the fact that Ylang Labs published something. The CTA can mention the blog, but the first line should usually name the technical idea.
+- **Pragmatic Engineer Voice:** Lead with judgment, then support it with implementation detail. Use plain words, short paragraphs, and decisive claims. Do not posture. Do not hide behind vague futurism.
 - **Variations:** Always provide 2-3 distinct variations.
 - **Formatting:** Prefer 3-5 short paragraphs for LinkedIn. Avoid hashtags by default. Avoid emojis by default unless the user asks for a playful tone or the post clearly benefits from one.
-- **Voice:** Use plain words, short paragraphs, and decisive claims. Avoid "we're excited to share," "check out," "game changer," "unlock the future," and exclamation-mark-driven excitement.
+- **Banned Phrases:** Avoid "we're excited to share," "check out," "game changer," "unlock the future," and exclamation-mark-driven excitement.
 
 ## Hook Patterns
 
@@ -45,6 +54,11 @@ Use one of these patterns when drafting the first line:
 - **Constraint reversal:** "`[Old constraint]` used to be the default. `[...]` changes that."
 - **Builder implication:** "If `[technical shift]` is true, then `[new product/workflow]` becomes possible."
 - **Memory/compounding:** "`[System]` gets better when it has somewhere to put what it learns."
+- **Hidden bottleneck:** "`[Obvious problem]` is not the bottleneck. `[Less obvious constraint]` is."
+- **Failure mode:** "Most `[teams/systems]` do not fail because `[common explanation]`. They fail because `[specific cause]`."
+- **Market bet:** "The next generation of `[tool/category]` will be judged by `[technical criterion]`."
+- **Inside-view:** "Inside `[system/product/team]`: `[specific mechanism]` is doing more work than it looks like."
+- **Numbers-first:** "`[Scale number]` changes the architecture. Here is the part that breaks first."
 
 The hook should be understandable without the rest of the post. If it only works after someone reads paragraph two, rewrite it.
 
@@ -101,13 +115,14 @@ The project update is here: [URL]
 1.  Analyze the provided blog content or project summary.
 2.  Extract the key value proposition or most interesting insight.
 3.  Identify the strongest "what changed" claim before drafting. This is usually more compelling than the topic label.
-4.  Draft 3 variations:
+4.  Identify the proof anchor that makes the strongest claim defensible.
+5.  Draft 3 variations:
     - **Variation 1: LinkedIn Narrative**: 500-900 characters. Lead with a thesis, explain the technical shift, name practical implications, then close with a CTA.
     - **Variation 2: Punchy Short Post**: 240-280 characters. Compress the strongest claim into a short X/Twitter-ready post.
     - **Variation 3: Curiosity Hook**: 400-700 characters. Start with a question or tension, then explain what the post resolves.
-5.  Make the LinkedIn variation the strongest default option, not merely the longest option.
-6.  Include placeholders like `[URL]` for links unless the final URL is provided. If the user provides a real URL, use it exactly.
-7.  Save the variations into a markdown file in the `/posts/` directory (e.g., `/posts/social-media-[topic].md`).
+6.  Make the LinkedIn variation the strongest default option, not merely the longest option.
+7.  Include placeholders like `[URL]` for links unless the final URL is provided. If the user provides a real URL, use it exactly.
+8.  Save the variations into a markdown file in the `/posts/` directory (e.g., `/posts/social-media-[topic].md`).
 
 ## Quality Checklist
 
@@ -115,6 +130,7 @@ Before finalizing, verify:
 
 - The first line can stand alone as an interesting social hook.
 - The post says what changed, not just what the article is about.
+- The hook is ambitious enough to be worth sharing, but the article gives it a proof anchor.
 - The implications are concrete enough that a technical reader understands why to click.
 - The CTA feels natural and specific to the post.
 - The LinkedIn version is not constrained by tweet-length rules.
