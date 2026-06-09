@@ -9,11 +9,9 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 ## Required First Steps
 
 - Check relevant local skills before starting. For this repo, prefer:
-  - `blog-variation-orchestrator` as the default when asked to create, write, draft, ideate, or turn an idea into a new Ylang Labs blog post. It should coordinate five writer subagents, image directions, selection/synthesis, and downstream blog packaging unless the user explicitly requests a different workflow.
-  - `blog-variation-cleanup` after a blog variation has been chosen and the unselected subagent-created drafts, images, refs, social-copy files, or variant notes should be audited, pruned, archived, or reconciled. Default to report-only unless the user explicitly asks to remove or archive artifacts.
   - `blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
   - `content-calendar-management` when asked to use GitHub Issues/Projects as the editorial calendar, create content briefs, schedule posts/projects/social content, or audit planned work.
-  - `blog-publishing-workflow` when continuing from a selected final blog direction, when explicitly requested, or when the task is only the downstream packaging, preparation, or publishing step without five-variant orchestration.
+  - `blog-publishing-workflow` when asked to turn a blog idea or draft into a complete post with optional artwork, blog assets, social copy, and PR publication.
   - `blog-writing-guide` as the primary Ylang Labs writing, rewriting, editing, and editorial review standard for blog posts.
   - `blog-factuality-review` when asked to review, critique, fact-check, validate, or assess publication readiness for Ylang Labs blog drafts.
   - `blog-mdx-authoring` for creating or structuring new blog posts.
@@ -133,6 +131,10 @@ Blog asset standards:
 Blog writing standards:
 
 - The publication focuses on AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, and practical implementation lessons.
+- The default blog writing standard is The Pragmatic Engineer by Gergely Orosz. Use it as the editorial reference for inside-view engineering writing: practical, source-backed, numbers-forward, specific about how teams and systems work, and useful to engineers and engineering leaders. Do not imitate Gergely Orosz's exact prose, recurring phrasing, or author persona.
+- Default to a Pragmatic Engineer-inspired voice: direct, concrete, technically sharp, and written by someone who has shipped the work and understands the failure modes. Prefer useful judgment, named systems, operational tradeoffs, and industry context over banter, hype, or detached research prose.
+- Be ambitious in the blog body and packaging. Titles, summaries, TLDR bullets, openings, and social posts should sell the strongest defensible thesis, tension, payoff, or shift in the article instead of merely naming the topic.
+- Ambition must remain evidence-backed. Every bold title, hook, or claim needs support from a mechanism, example, number, tradeoff, caveat, source, or implementation detail in the article.
 - Default blog posts to 5 minutes or less unless the user explicitly asks for or approves a longer post. If a topic needs more depth, narrow the scope, split follow-up posts, or confirm the longer format before drafting past the default.
 - Prefer concrete technical explanations, architecture diagrams, examples, and citations over generic marketing prose.
 - Use post-type structures rather than one universal article template:
