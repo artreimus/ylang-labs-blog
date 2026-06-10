@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blog Variation Orchestrator"
+  short_description: "Five-agent blog variation workflow"
+  default_prompt: "Use $blog-variation-orchestrator as the default workflow to create a Ylang Labs blog post with five writer variants, image concepts, and a final recommended draft."
