@@ -11,15 +11,45 @@ This is the primary Ylang Labs blog writing skill. It enforces Ylang Labs' blog 
 
 What follows are the core principles to internalize and apply to every piece of content.
 
-## The Ylang Labs Voice
+## The Default Voice
 
-**We sound like:** A senior developer at a conference afterparty explaining something they're genuinely excited about — smart, specific, a little irreverent, deeply knowledgeable.
+The default Ylang Labs blog writing standard is [The Pragmatic Engineer](https://www.pragmaticengineer.com/) by Gergely Orosz.
 
-**We don't sound like:** A corporate blog, a press release, a sales deck, or an AI-generated summary.
+Use it as the editorial reference, not a prose clone. Do not imitate Gergely Orosz's exact wording, recurring phrasing, personal cadence, or author persona.
 
-Be technically precise, opinionated, and direct. Humor is welcome but should serve the content, not replace it. Sarcasm works. One good joke per post is plenty.
+**We sound like:** A Pragmatic Engineer-inspired author who has shipped the thing, debugged the failure modes, and is explaining the useful part to another capable builder. Calm, concrete, technically sharp, and direct.
 
-Use "we" (Ylang Labs) and "you" (the reader). This is a conversation, not a paper.
+**We don't sound like:** A corporate blog, a press release, a sales deck, a hype thread with no implementation detail, or an AI-generated summary.
+
+Write as someone trying to save a strong engineer time. Make the claim early, say why it matters now, show the mechanism, name the tradeoffs, and give the reader a practical way to use the idea.
+
+Use "we" and "you" when useful. This is a conversation between engineers, not a paper.
+
+Personality should come from judgment, specificity, and useful asides. Prefer dry confidence over banter. Humor is welcome only when it sharpens the point. Do not force jokes or sarcasm.
+
+Use these Pragmatic Engineer-inspired editorial traits:
+
+- **Inside view:** Prefer how the system, team, workflow, or market actually works over generic opinion.
+- **Numbers early:** Put scale, cost, latency, adoption, throughput, revenue, failure rate, or time saved near the top when available.
+- **Named specifics:** Name the model, product, framework, architecture, team shape, constraint, or migration path.
+- **Source-backed claims:** Use interviews, docs, code, benchmarks, issues, release notes, papers, or credible reporting. Label inference clearly.
+- **Engineering plus business context:** Explain why the technical choice matters for users, teams, budgets, reliability, hiring, or strategy.
+- **Tradeoffs over cheerleading:** Say what worked, what did not, what was chosen instead, and why.
+- **Operational detail:** Show how a team would build, deploy, debug, measure, or roll back the idea in practice.
+
+## Ambition Without Hype
+
+Posts should be pragmatic, but not timid. Sell the strongest credible thesis behind the work.
+
+This applies to the article body and to the packaging around it:
+
+- **Title:** Sell the thesis, not the topic label. The title should imply a tension, payoff, or shift.
+- **Opening:** State what changed, what became possible, or what mistake the reader can now avoid in the first 2-3 sentences.
+- **Summary:** Give a concrete reason to click. Say what the reader will understand, build, fix, or decide after reading.
+- **TLDR:** Write bullets as useful conclusions, not neutral recaps.
+- **Social copy:** Promote the strongest claim from the post, not the fact that Ylang Labs published a post.
+
+Ambition has to cash out. Every bold claim needs at least one mechanism, example, number, source, tradeoff, or caveat inside the post. If the title is more interesting than the article, revise the article or lower the title.
 
 ## Banned Language
 
@@ -61,9 +91,9 @@ Use this rule while drafting and editing:
 
 ## The Opening (First 2-3 Sentences)
 
-The opening must do one of two things: **state the problem** or **state the conclusion**. Never start with background, company history, or hype.
+The opening must state the problem or conclusion, and it should make the stakes obvious. Never start with background, company history, or hype.
 
-**Good:** "Two weeks before launch, we killed our entire metrics product. Here's why pre-aggregating time-series metrics breaks down for debugging, and how we rebuilt the system from scratch."
+**Good:** "Two weeks before launch, we killed our entire metrics product. Pre-aggregated time-series metrics were fast, but they threw away the debugging context our users needed most."
 
 **Bad:** "At Ylang Labs, we're always looking for ways to improve the developer experience. Today, we're thrilled to share some exciting updates to our metrics product that we think you'll love."
 
@@ -179,19 +209,38 @@ LLM-generated prose has tells. Flag and rewrite these:
 
 ## Title Guidelines
 
-The title is the highest-leverage sentence in the post. It must stop a developer scrolling through their RSS feed or Twitter.
+The title is the highest-leverage sentence in the post. It must stop a developer scrolling through their RSS feed, LinkedIn, or Twitter/X.
 
-**Strong titles** make a specific claim, tell a story, or promise a specific payoff:
+Ylang Labs titles should be ambitious and specific. They should make a capable engineer think, "I need to know how they pulled that off," or "I may be making that mistake."
+
+**Strong titles** make a specific claim, expose a hidden failure mode, tell a story, or promise a concrete payoff:
 
 - "The metrics product we built worked. But we killed it and started over anyway"
 - "How we reduced release delays by 5% by fixing Salt"
 - "Your JavaScript bundle has 47% dead code. Here's how to find it."
+- "Agents Don't Need More Memory. They Need Better Forgetting."
+- "HTML Is the Most Underrated Agent Output Format"
+- "Your AI Agent Is Failing Because Its Context Is a Junk Drawer"
 
 **Weak titles** are vague announcements:
 
 - "Introducing our new metrics product"
 - "Performance improvements in Ylang Labs"
 - "AI-powered debugging with Seer"
+- "Understanding agent memory"
+- "A guide to AI-native software development"
+
+Use these title shapes when drafting:
+
+- **Contrarian thesis:** "`[Common belief]` is not the bottleneck. `[Hidden constraint]` is."
+- **Failure mode:** "Your `[system]` is failing because `[specific cause]`."
+- **Specific payoff:** "How to `[achieve outcome]` without `[costly tradeoff]`."
+- **Technical shift:** "`[Technology]` changes where `[workflow]` can happen."
+- **Build story:** "We built `[thing]`. The hard part was `[surprising constraint]`."
+- **Inside-view deep dive:** "Inside `[system/team/product]`: how `[specific mechanism]` handles `[real constraint]`."
+- **Numbers-first story:** "How `[team/product]` handles `[scale number]` with `[specific architecture or tradeoff]`."
+
+Do not sand the title down into a neutral label. If the strongest title feels too bold, make the post prove it.
 
 ## The Closing
 
@@ -255,7 +304,8 @@ Run through both checklists:
 - Examples are useful and limited, not a catalog of everything that could happen
 - Headings convey information
 - Right length: 5 minutes or less by default, unless the user explicitly allowed a longer post
-- Title is specific and compelling
+- Title is specific, ambitious, and still defensible
+- Summary and TLDR sell the strongest useful takeaway, not just the topic
 
 **Final Check:**
 
