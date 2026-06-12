@@ -24,3 +24,14 @@ Source packet for `data/blogs/bad-tool-design-token-tax.mdx`.
 - Slug: `bad-tool-design-token-tax`
 - Audience: developers building MCP servers, agent runtimes, and tool-heavy LLM apps.
 - Primary takeaway: tool definitions and results should be optimized for the agent's next step, or teams will pay through cost, latency, and lower reliability.
+
+## Generated Assets
+
+- `public/static/images/blogs/bad-tool-design-token-tax/source-artwork.png`
+  - Default painterly cover artwork for the post.
+- `public/static/images/blogs/bad-tool-design-token-tax/tool-loop-comparison.png`
+  - Wide inline technical diagram comparing a wasteful tool loop with a compact tool-search loop.
+- `public/static/images/blogs/bad-tool-design-token-tax/payload-shaping-comparison.png`
+  - Wide inline technical diagram comparing a raw provider payload with an agent-shaped result.
+
+The inline diagrams intentionally use short labels only. Exact claims and interpretation live in the MDX captions and surrounding prose.

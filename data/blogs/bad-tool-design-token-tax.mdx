@@ -24,7 +24,7 @@ That is the new token tax. It shows up as cost, latency, and brittle behavior.
 
 Anthropic's tool-search docs make the input-side problem concrete: a setup with GitHub, Slack, Sentry, Grafana, and Splunk can spend roughly 55k tokens on tool definitions before useful work happens. Their docs also say tool selection starts degrading beyond roughly 30 to 50 available tools. A few MCP servers can get you there.
 
-The Hacker News thread behind this brief is useful as a signal, not as proof by itself. Builders are noticing that agent performance often gets worse because the tool layer is noisy.
+The Hacker News thread behind this brief is useful as a signal, not as proof by itself. Builders are noticing noisy tool layers.
 
 ## Tool bloat has two different failure modes
 
@@ -38,30 +38,22 @@ Teams often fix only one side. They shorten descriptions or defer tool loading, 
 
 Both sides matter because agents work in loops.
 
-<MermaidDiagram>
-  {`
-    flowchart LR
-      A["User task"] --> B["Large tool catalog loaded"]
-      B --> C["Ambiguous tool choice"]
-      C --> D["Raw result payload"]
-      D --> E["Missing next-step ID"]
-      E --> F["Repair call"]
+<Image
+  alt="Before and after comparison of a wasteful AI agent tool loop and a compact tool loop"
+  src="/static/images/blogs/bad-tool-design-token-tax/tool-loop-comparison.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
 
-      A2["User task"] --> B2["Search or load only relevant tools"]
-      B2 --> C2["Narrow tool choice"]
-      C2 --> D2["Shaped result"]
-      D2 --> E2["Next-step ID included"]
-      E2 --> F2["Continue"]
-
-`}
-
-</MermaidDiagram>
+<DiagramSubtitle>
+  Wasteful loops carry a large catalog, ambiguous choices, raw payloads, and repair calls. Compact
+  loops search, select, shape the result, and continue with the next identifier.
+</DiagramSubtitle>
 
 The wasteful loop is not just slower. The model has more irrelevant options, less room for task state, and more chances to make a plausible but wrong call.
 
 ## Long descriptions are useful until they become inventory
-
-There is an uncomfortable tradeoff in tool descriptions.
 
 Anthropic's tool-definition guidance says detailed descriptions are the most important factor in tool performance. A tool should explain what it does, when to use it, what each parameter means, and what it does not return.
 
@@ -95,6 +87,19 @@ Most bad tool outputs are written for humans debugging an API, not for an agent 
 
 That payload gives the model the stable identifier, the reason this result matters, and the likely next operations.
 
+<Image
+  alt="Before and after comparison of a raw tool payload and a shaped agent result"
+  src="/static/images/blogs/bad-tool-design-token-tax/payload-shaping-comparison.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The agent does not need the provider's whole response. It needs the fields that let it choose and
+  continue.
+</DiagramSubtitle>
+
 Raw JSON dumps often fail here. They contain more data but less direction.
 
 ## Tool search is a design pattern, not just a feature
@@ -126,7 +131,7 @@ Before adding another MCP tool, run this checklist:
 
 The last point matters. A smaller tool is not automatically better. If compression removes the caveat that prevents a destructive call, you saved tokens and bought risk.
 
-Measure the full loop: request tokens, response tokens, latency, number of tool calls, repair calls, and final task success.
+Measure the full loop: request tokens, response tokens, latency, tool calls, repair calls, and final task success.
 
 ## The best tools make the next step obvious
 
