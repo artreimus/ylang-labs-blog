@@ -1,6 +1,6 @@
 ---
 name: blog-social-copy
-description: Generate human, simple, thesis-driven social copy for Ylang Labs blog posts and projects. Use this skill when asked to create or revise a LinkedIn post, tweet, launch post, social media post, launch copy, or promotional copy for a blog or project, especially when the user wants it to feel less commercial, more human, or simpler. It produces 2-3 distinct variations with a sharp first line, concrete technical stakes, practical implications, and a natural link pointer.
+description: Generate human, simple, thesis-driven social copy for Ylang Labs blog posts and projects. Use this skill when asked to create or revise a LinkedIn post, tweet, launch post, social media post, launch copy, or promotional copy for a blog or project, especially when the user wants it to feel less commercial, more human, simpler, or to use simple emojis. It produces 2-3 distinct variations with a sharp first line, concrete technical stakes, practical implications, and a natural link pointer.
 ---
 
 # Blog Social Copy
@@ -32,6 +32,15 @@ If the user says "keep it simple," "simpler," "too polished," or similar:
 - Cut any sentence that mostly explains why the post is worth reading.
 - Use 2-4 short paragraphs for LinkedIn unless the post genuinely needs more context.
 
+If the user asks for emojis or provides an emoji example, use them lightly:
+
+- Use 1-2 simple emojis total.
+- Put one signal emoji at the end of the hook when it clarifies the point, such as `📈` for cost, growth, or measurement.
+- Use `🔗` near the final URL when the post benefits from a clear link marker.
+- Do not add emojis to every paragraph.
+- Do not use emoji strings, decorative emoji, or reaction emoji that make the post feel like an ad.
+- Keep the sentence strong without the emoji. The emoji should be an accent, not the point.
+
 ## Core Mandates
 
 - **Structure:** Each post MUST contain:
@@ -60,7 +69,7 @@ If the user says "keep it simple," "simpler," "too polished," or similar:
 - **Point of View:** Make the post about the shift, not merely about the fact that Ylang Labs published something. The link pointer can mention the blog, but the first line should usually name the technical idea.
 - **Pragmatic Engineer Voice:** Lead with judgment, then support it with implementation detail. Use plain words, short paragraphs, and decisive claims. Do not posture. Do not hide behind vague futurism.
 - **Variations:** Always provide 2-3 distinct variations.
-- **Formatting:** Prefer 2-4 short paragraphs for LinkedIn. Avoid hashtags by default. Avoid emojis by default unless the user asks for a playful tone or the post clearly benefits from one.
+- **Formatting:** Prefer 2-4 short paragraphs for LinkedIn. Avoid hashtags by default. Use simple emojis only when the user asks for them, provides an emoji example, or the post clearly benefits from one functional signal emoji and one link emoji.
 - **Banned Phrases:** Avoid "we're excited to share," "check out," "game changer," "unlock the future," "latest blog," "read it here," "we wrote about," "what this unlocks," and exclamation-mark-driven excitement unless the user explicitly asks for launch-style copy.
 
 ## Hook Patterns
@@ -131,13 +140,13 @@ The project update is here: [URL]
 **Example 5:**
 Input: Blog about bad AI agent tool design creating token waste.
 Output:
-I think a lot of agent teams are looking in the wrong place for cost savings.
+Bad tool design is the new token tax. 📈
 
-The model call is easy to blame. But in tool-heavy systems, a lot of waste comes from the tool layer: too many tools loaded, vague descriptions, raw JSON dumps, and missing IDs.
+Too many tools loaded by default. Descriptions that read like API manuals. Raw payloads. Results that forget the ID needed for the next call.
 
-A good tool is not just callable. It helps the agent choose correctly, return the useful part, and keep moving.
+The fix is not just "use fewer tokens." It is designing tools efficiently.
 
-I wrote down the pattern here: [URL]
+Blog here 🔗: [URL]
 
 ## Instructions
 
@@ -164,5 +173,6 @@ Before finalizing, verify:
 - The draft is simple: one core point, one anchor, one reason to care.
 - The link pointer feels natural and specific to the post.
 - The LinkedIn version is not constrained by tweet-length rules.
+- Any emojis are simple, functional, and limited to 1-2 total.
 - The copy does not rely on emojis, hashtags, exclamation points, or launch-announcement language to create interest.
 - The copy sounds like a person sharing a useful note, not a company selling a post.
