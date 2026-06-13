@@ -1,0 +1,151 @@
+---
+title: 'Bad Tool Design Is the New Token Tax'
+date: '2026-06-13'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'Tool-heavy agents spend tokens on bloated schemas, noisy result payloads, and missing handoff data. Here is a practical rubric for designing tools that make the next agent step cheaper and more reliable.'
+tldr: |
+  - Tool design is now a systems problem, not a documentation chore.
+  - The expensive failure mode is usually two-sided: oversized tool definitions go in, and raw payloads come back.
+  - Good tools return the smallest useful answer plus stable identifiers for the next action.
+  - Measure tool quality by loop cost, latency, selection accuracy, and whether the next step succeeds without another repair call.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/bad-tool-design-token-tax/cardImage.png'
+images: ['/static/images/blogs/bad-tool-design-token-tax/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+The next expensive part of an agent system is not always the model call. It is the tool surface wrapped around it.
+
+Bad tool design makes the model read too many schemas, choose between overlapping operations, ingest raw payloads it did not ask for, and then call another tool because the first result forgot the identifier needed for the next step.
+
+That is the new token tax. It shows up as cost, latency, and brittle behavior.
+
+Anthropic's tool-search docs make the input-side problem concrete: a setup with GitHub, Slack, Sentry, Grafana, and Splunk can spend roughly 55k tokens on tool definitions before useful work happens. Their docs also say tool selection starts degrading beyond roughly 30 to 50 available tools. A few MCP servers can get you there.
+
+The Hacker News thread behind this brief is useful as a signal, not as proof by itself. Builders are noticing noisy tool layers.
+
+## Tool bloat has two different failure modes
+
+Tool cost comes from two directions.
+
+The first is schema bloat. Every loaded tool definition takes space before the model has done anything. Names, descriptions, parameters, enums, and caveats all compete with the user's task.
+
+The second is response bloat. A tool returns a raw API response, a huge DOM snapshot, or a nested object where the useful answer is three fields buried in 400 lines of JSON.
+
+Teams often fix only one side. They shorten descriptions or defer tool loading, then still return giant payloads. Or they filter outputs while forcing the model to read 80 tools on every turn.
+
+Both sides matter because agents work in loops.
+
+<Image
+  alt="Before and after comparison of a wasteful AI agent tool loop and a compact tool loop"
+  src="/static/images/blogs/bad-tool-design-token-tax/tool-loop-comparison.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Wasteful loops carry a large catalog, ambiguous choices, raw payloads, and repair calls. Compact
+  loops search, select, shape the result, and continue with the next identifier.
+</DiagramSubtitle>
+
+The wasteful loop is not just slower. The model has more irrelevant options, less room for task state, and more chances to make a plausible but wrong call.
+
+## Long descriptions are useful until they become inventory
+
+Anthropic's tool-definition guidance says detailed descriptions are the most important factor in tool performance. A tool should explain what it does, when to use it, what each parameter means, and what it does not return.
+
+The mistake is turning that into an excuse to dump a product manual into every tool.
+
+A good description answers the selection question. It helps the model decide whether this tool is the right next action.
+
+`github_get_data` with "Gets GitHub data" is too vague. `github_issue_read` with a description that says it reads one issue by owner, repo, and issue number is better. The useful version also says when not to use it, such as for search or mutation.
+
+That description is longer, but it says what the tool is for.
+
+## The result should be designed for the next call
+
+Most bad tool outputs are written for humans debugging an API, not for an agent continuing a task. If the user asks, "Find the open billing bug and comment with this diagnosis," the first search tool should return enough to choose the issue and continue:
+
+```json
+{
+  "items": [
+    {
+      "id": "ISSUE-1842",
+      "title": "Billing webhook retries create duplicate invoices",
+      "state": "open",
+      "url": "https://example.com/issues/1842",
+      "updated_at": "2026-06-10T14:20:00Z",
+      "why_matched": "title and recent comments mention duplicate invoices"
+    }
+  ],
+  "next_actions": ["issue_read", "issue_comment"]
+}
+```
+
+That payload gives the model the stable identifier, the reason this result matters, and the likely next operations.
+
+<Image
+  alt="Before and after comparison of a raw tool payload and a shaped agent result"
+  src="/static/images/blogs/bad-tool-design-token-tax/payload-shaping-comparison.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The agent does not need the provider's whole response. It needs the fields that let it choose and
+  continue.
+</DiagramSubtitle>
+
+Raw JSON dumps often fail here. They contain more data but less direction.
+
+## Tool search is a design pattern, not just a feature
+
+Deferred loading and tool search are the obvious fix for giant catalogs. Anthropic's docs describe loading only the relevant tools on demand, usually a small set rather than the whole catalog. They also describe `defer_loading` as a way to keep most tools out of the initial prompt until the model discovers them through search.
+
+That is a design pattern for agent runtimes.
+
+Keep the always-loaded surface small. Put the most common, low-risk operations in the initial set. Defer the long tail. Search names, descriptions, argument names, and argument descriptions.
+
+This changes the job of your tool descriptions. They now need to work at two levels:
+
+1. A compact searchable summary.
+2. A fuller definition for correct calls after selection.
+
+If those jobs are mashed into one giant description, you will either starve search or flood context.
+
+## A practical rubric for agent-friendly tools
+
+Before adding another MCP tool, run this checklist:
+
+1. **Selection:** Can the model tell when to use this tool and when not to use it?
+2. **Overlap:** Does this duplicate another tool, or should related operations become one tool with an explicit action parameter?
+3. **Inputs:** Are parameters named in the language the user and agent will use, or in internal API vocabulary?
+4. **Output shape:** Does the tool return only fields needed for the next reasoning step?
+5. **Continuation:** Does the result include stable IDs, URLs, cursors, or action hints?
+6. **Error recovery:** When the tool fails, does it say what to change, or does it return an opaque provider error?
+7. **Measurement:** Can you compare token cost, latency, selection accuracy, and task success before and after the change?
+
+The last point matters. A smaller tool is not automatically better. If compression removes the caveat that prevents a destructive call, you saved tokens and bought risk.
+
+Measure the full loop: request tokens, response tokens, latency, tool calls, repair calls, and final task success.
+
+## The best tools make the next step obvious
+
+The agent does not need your whole backend. It needs the right next move.
+
+That is the standard to design against. Load fewer tools by default. Give each tool enough description to be chosen correctly. Return compact results with the identifiers needed to continue. Use search and deferred loading when the catalog gets large.
+
+Tool design used to feel like integration glue. In agent systems, it is part of the runtime.
+
+If the tool surface is noisy, the model pays for it on every turn. If the tool surface is shaped around the next action, the whole loop gets cheaper, faster, and easier to trust.
+
+## References
+
+1. Anthropic, ["Tool search tool"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool), Claude API Docs.
+2. Anthropic, ["Manage tool context"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/manage-tool-context), Claude API Docs.
+3. Anthropic, ["Define tools"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools), Claude API Docs.
+4. Hacker News, ["Bad MCP design costs your agent 5x more tokens"](https://news.ycombinator.com/item?id=48407391).
