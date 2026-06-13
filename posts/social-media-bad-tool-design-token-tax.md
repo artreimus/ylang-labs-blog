@@ -4,30 +4,28 @@
 
 I think a lot of agent teams are looking in the wrong place for cost savings.
 
-The model call is easy to blame. But in tool-heavy systems, a surprising amount of waste comes from the stuff around the model: huge tool catalogs, vague descriptions, raw JSON dumps, and results that forget the ID needed for the next step.
+The model call is easy to blame. But in tool-heavy systems, a lot of waste comes from the tool layer: too many tools loaded, vague descriptions, raw JSON dumps, and missing IDs.
 
-Anthropic's docs give a concrete example where tool definitions alone can take roughly 55k tokens before the real task starts.
+A good tool is not just callable. It helps the agent choose correctly, return the useful part, and keep moving.
 
-That changes how I think about MCP and tool design. A good tool is not just callable. It helps the agent choose correctly, return the useful part, and keep moving.
-
-Notes here: [URL]
+I wrote down the pattern here: [URL]
 
 ## Variation 2: Punchy Short Post
 
 Bad tool design is the new token tax.
 
-Not in a dramatic way. In a boring, expensive way: too many tools loaded, vague descriptions, raw payloads, and missing IDs that force another call.
+Not in a dramatic way. In a boring, expensive way: too many tools loaded, vague descriptions, raw payloads, and missing IDs.
 
-I wrote down the pattern and a practical checklist: [URL]
+Notes here: [URL]
 
 ## Variation 3: Curiosity Hook
 
 What if the expensive part of your agent is not the model?
 
-I keep coming back to this when looking at tool-heavy workflows.
+I keep coming back to the tool layer.
 
-The agent might be doing reasonable work, but every step is surrounded by noise: too many tools loaded by default, descriptions that read like API manuals, raw provider payloads, and results that do not include the thing needed for the next call.
+Too many tools loaded by default. Descriptions that read like API manuals. Raw payloads. Results that forget the ID needed for the next call.
 
-The fix is not only "use fewer tokens." It is designing tools around the next action.
+The fix is not just "use fewer tokens." It is designing tools around the next action.
 
-I put the argument and checklist here: [URL]
+I put the checklist here: [URL]
