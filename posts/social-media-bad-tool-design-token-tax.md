@@ -2,34 +2,32 @@
 
 ## Variation 1: LinkedIn Narrative
 
-The next expensive part of an agent system is not always the model call.
+I think a lot of agent teams are looking in the wrong place for cost savings.
 
-It is the tool surface around it.
+The model call is easy to blame. But in tool-heavy systems, a surprising amount of waste comes from the stuff around the model: huge tool catalogs, vague descriptions, raw JSON dumps, and results that forget the ID needed for the next step.
 
-Tool-heavy agents can burn tokens before useful work starts: oversized schemas, overlapping tool catalogs, raw JSON dumps, and missing identifiers that force another repair call. Anthropic's own docs call out a multi-server setup where tool definitions can consume roughly 55k tokens before the task begins.
+Anthropic's docs give a concrete example where tool definitions alone can take roughly 55k tokens before the real task starts.
 
-That makes tool design a systems problem, not a documentation detail.
+That changes how I think about MCP and tool design. A good tool is not just callable. It helps the agent choose correctly, return the useful part, and keep moving.
 
-We wrote about how to design agent-friendly tools: smaller loaded surfaces, deferred tool search, shaped results, and outputs built for the agent's next action.
-
-Read it here: [URL]
+Notes here: [URL]
 
 ## Variation 2: Punchy Short Post
 
 Bad tool design is the new token tax.
 
-Tool-heavy agents do not just pay for prompts. They pay for bloated schemas, noisy results, ambiguous catalogs, and missing IDs that trigger repair calls.
+Not in a dramatic way. In a boring, expensive way: too many tools loaded, vague descriptions, raw payloads, and missing IDs that force another call.
 
-We wrote a practical rubric for fixing the tool loop: [URL]
+I wrote down the pattern and a practical checklist: [URL]
 
 ## Variation 3: Curiosity Hook
 
-What if your agent's biggest cost problem is not the model?
+What if the expensive part of your agent is not the model?
 
-For tool-heavy systems, the hidden tax is often the tool layer: too many definitions loaded by default, descriptions that read like API manuals, raw provider payloads, and results that forget the ID needed for the next step.
+I keep coming back to this when looking at tool-heavy workflows.
 
-That turns every run into a slower, noisier loop.
+The agent might be doing reasonable work, but every step is surrounded by noise: too many tools loaded by default, descriptions that read like API manuals, raw provider payloads, and results that do not include the thing needed for the next call.
 
-The fix is not just shorter prompts. It is better tool design: deferred loading, tool search, shaped responses, and result payloads built around continuation.
+The fix is not only "use fewer tokens." It is designing tools around the next action.
 
-We broke down the pattern here: [URL]
+I put the argument and checklist here: [URL]
