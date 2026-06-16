@@ -1,0 +1,133 @@
+---
+title: 'Checkpoint, Resume, Repeat: Why Stateful Sandboxes Are Becoming Agent Infrastructure'
+date: '2026-06-16'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'Long-running agents need more than tool calls. They need execution environments that isolate work, preserve state, checkpoint progress, and keep credentials outside the blast radius.'
+tldr: |
+  - The agent runtime is moving from a stateless tool loop to a stateful execution environment.
+  - Local, cloud, browser, and WASM sandboxes solve different parts of the same problem: where work runs, what state survives, and what the agent is allowed to touch.
+  - Checkpointing changes the product behavior. It lets agents pause, resume, fork, inspect failures, and recover without starting from scratch.
+  - The right sandbox boundary should carry policy and auditability, not raw credentials.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/stateful-sandboxes-agent-infrastructure/cardImage.png'
+images: ['/static/images/blogs/stateful-sandboxes-agent-infrastructure/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+The next platform shift in agent engineering is not just smarter models. It is where the agent is allowed to work after it opens a repo, installs a package, starts a browser, writes a file, and comes back tomorrow.
+
+That work does not fit a stateless request/response loop. It needs an execution environment with memory, boundaries, and recovery.
+
+That is why sandboxes are starting to look less like a safety wrapper and more like agent infrastructure. GitHub's Copilot sandbox preview, Anthropic's Managed Agents architecture, LangChain's Sandboxes, and Simon Willison's MicroPython-in-WASM experiment all point at the same problem: one-off execution is easy compared with preserving useful state inside a controlled boundary.
+
+## Stateless tool loops break down on real work
+
+The basic agent loop still works for search, retrieval, classification, or fixed API tools. Ask the model what to do next, run a tool, feed the result back, repeat.
+
+A coding agent may clone a repo, install dependencies, run tests, edit files, start a dev server, inspect browser output, and try again.
+
+The hard part is not the first command. The hard part is the second hour. Where did the files go? Which packages were installed? Can the run survive a pause? Can a human inspect the state that produced the result?
+
+<Image
+  alt="Architecture diagram comparing local, cloud, browser, and WASM sandbox models for AI agent execution"
+  src="/static/images/blogs/stateful-sandboxes-agent-infrastructure/sandbox-architecture-models.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A useful sandbox boundary does more than isolate code. It defines where state lives, how sessions
+  resume, how credentials are mediated, and which network paths are allowed.
+</DiagramSubtitle>
+
+## The boundary choice is really about recovery
+
+Local, cloud, browser, and WASM sandboxes are often compared as security choices. The better comparison is how each boundary fails and recovers.
+
+| Boundary                     | Best fit                                                    | State model                                                | Main tradeoff                                       |
+| ---------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------- |
+| Local sandbox                | Agent works on the repo already open on a developer machine | Local files, tools, and command history under policy       | The host is nearby, so visibility matters           |
+| Cloud sandbox or microVM     | Parallel work, CI-style agents, data jobs, risky installs   | Persistent workspace, snapshots, forks, resumable sessions | More cost and lifecycle decisions                   |
+| Browser session              | Web tasks, UI automation, previews, and scraping            | Cookies, DOM state, local storage, screenshots, artifacts  | Needs strict origin and credential controls         |
+| WASM or embedded interpreter | Narrow code execution with a small capability surface       | Interpreter memory can persist if designed for it          | Strong fit for constrained code, not a full machine |
+
+A cloud microVM fits arbitrary dependencies, parallel runs, forks, or work that must outlive a laptop session. Browser sandboxes fit web-native work. WASM fits narrow execution with a small mediated surface.
+
+The wrong choice shows up when something goes sideways. If the runtime cannot checkpoint, replay, inspect, or delete state, the team is left debugging a ghost.
+
+## Checkpointing changes how agents behave
+
+Checkpointing sounds like an infrastructure feature. In agent systems, it becomes a product feature.
+
+It lets the agent pause when work is expensive or inactive. It lets a human review the workspace before the agent continues. It lets the system fork the same state into multiple attempts. It lets the agent return to a working baseline after a bad edit.
+
+<Image
+  alt="Lifecycle diagram for checkpointing, pausing, resuming, forking, and rolling back a stateful agent sandbox"
+  src="/static/images/blogs/stateful-sandboxes-agent-infrastructure/checkpoint-lifecycle.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Checkpointing lets the runtime pause, resume, fork, and roll back sandbox state.
+</DiagramSubtitle>
+
+This is why LangChain's snapshots and forks are more interesting than the "agent gets a shell" framing. A shell lets the agent act. A snapshot lets the platform recover from action.
+
+It is also why Simon Willison's WASM write-up is useful. His first version could run Python code in WebAssembly, but the hard problem was keeping interpreter state resident so variables and functions could be reused across calls.
+
+State is not automatically good. Persistent workspaces can preserve mistakes, private data, stale dependencies, and confusing context. A serious runtime needs lifecycle rules for what is snapshotted, what is redacted, who can resume it, when it expires, and how it is deleted.
+
+## Policy should sit at the boundary, not inside the prompt
+
+Prompts are a weak place to store runtime policy. The model can be instructed not to read secrets, not to call the network, and not to modify protected files. Those instructions are useful, but they are not a boundary.
+
+That is why the credential story matters.
+
+Anthropic describes credentials living outside the sandbox, with vaults and proxying used when the agent needs access. LangChain describes outbound requests flowing through an auth proxy so secrets do not touch the agent runtime. GitHub's local sandboxing talks about restricted filesystem, network, and system capabilities for commands initiated by Copilot, with enterprise policy configuration through management tooling.
+
+Different products will implement this differently, but the design rule is stable: do not hand the sandbox raw credentials if the runtime can mediate the action.
+
+<Image
+  alt="Policy boundary diagram showing an agent sandbox mediated through credential proxy and egress policy gates"
+  src="/static/images/blogs/stateful-sandboxes-agent-infrastructure/policy-boundary.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The sandbox executes code while credentials and outbound access stay behind runtime policy.
+</DiagramSubtitle>
+
+The same applies to egress. A sandbox that can run arbitrary code but call any host on the internet is only half a boundary. The runtime should know which domains, APIs, package registries, and internal services the session can reach.
+
+## A practical rubric for choosing the execution layer
+
+Before picking a sandbox provider or building your own, write down the behavior you need from the run.
+
+1. **Execution:** Does the agent need a shell, browser, package manager, Python kernel, GPU, or only fixed API tools?
+2. **State:** Which files, browser state, logs, and artifacts must survive between turns?
+3. **Recovery:** Can the system pause, resume, snapshot, fork, replay, and roll back?
+4. **Isolation:** Is container isolation enough, or does generated code need a stronger boundary?
+5. **Credentials and egress:** Can secrets stay outside the sandbox, and which network destinations are allowed?
+6. **Ownership:** Who can inspect, share, resume, or delete a session?
+
+If the agent only calls deterministic APIs, you may not need a sandbox. A retrieval agent with fixed tools and no dynamic code execution can stay simpler.
+
+If the agent writes and runs code, installs packages, opens browsers, or works over minutes and hours, the execution environment is no longer an implementation detail.
+
+Checkpoint, resume, repeat is not a slogan. It is the minimum runtime contract for agents that do real work.
+
+## References
+
+1. GitHub, ["Cloud and local sandboxes for GitHub Copilot now in public preview"](https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview/), June 2, 2026.
+2. Anthropic, ["The evolution of agentic surfaces: building with Claude Managed Agents"](https://claude.com/blog/building-with-claude-managed-agents), June 10, 2026.
+3. Anthropic, ["Claude Managed Agents overview"](https://platform.claude.com/docs/en/managed-agents/overview), Claude API Docs.
+4. LangChain, ["Give your agent its own computer"](https://www.langchain.com/blog/give-your-ai-agent-its-own-computer), June 5, 2026.
+5. LangChain, ["LangSmith Sandboxes are Generally Available"](https://www.langchain.com/blog/langsmith-sandboxes-generally-available), May 13, 2026.
+6. Simon Willison, ["Running Python code in a sandbox with MicroPython and WASM"](https://simonwillison.net/2026/Jun/6/micropython-in-a-sandbox/), June 6, 2026.
