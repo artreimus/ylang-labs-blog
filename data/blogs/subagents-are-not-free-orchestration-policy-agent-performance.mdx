@@ -33,9 +33,31 @@ When the parent already knows the file, the desired change, and the verification
 
 GitHub's post names the same pattern: unnecessary handoffs, repeated searches, sequential waiting, stale file paths, moved files, incorrect relative paths, and workspace mismatches. These are not exotic failures. They are what happens when delegation policy is too eager.
 
+<MermaidDiagram>
+  {`
+    flowchart LR
+      subgraph Eager["Eager delegation"]
+        A["Known edit"] --> B["Spawn"]
+        B --> C["Search again"]
+        C --> D["Parent waits"]
+        D --> E["More failures"]
+      end
+
+      subgraph Selective["Selective policy"]
+        F["Known edit"] --> G["Parent edits"]
+        G --> H["Run check"]
+        H --> I["Done"]
+      end
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  The expensive path is the extra loop when the parent already knows the next move.
+</DiagramSubtitle>
+
 ## A useful subagent policy starts by asking what can stay local
 
-The orchestration decision should be explicit. Start with the narrowest path that can solve the task, then escalate only when another context window or execution lane changes the outcome.
+Start with the narrowest path that can solve the task, then escalate only when another context window or execution lane changes the outcome.
 
 <MermaidDiagram>
   {`
@@ -60,9 +82,7 @@ The orchestration decision should be explicit. Start with the narrowest path tha
   A good orchestration policy treats delegation as escalation, not the default execution mode.
 </DiagramSubtitle>
 
-The most important branch is the first one. If the next step is already narrow, keep it local. "Find this file, make this edit, run this test" does not need a committee.
-
-Delegate when the task needs a clean context window, independent evidence, or real parallelism. Do not delegate just because the word "agent" is available in the product.
+If the next step is already narrow, keep it local. Delegate when the task needs a clean context window, independent evidence, or real parallelism.
 
 ## Prompt policy is enough until branching and retries matter
 
@@ -74,21 +94,38 @@ Anthropic's dynamic workflows for Claude Code show where the ceiling starts. Wor
 
 Xiaomi's MiMo Code makes the stronger runtime argument. Its Dynamic Workflow design moves orchestration logic from natural language into JavaScript executed in an isolated sandbox. The point is not that every agent needs JavaScript workflows. The point is that `if`, `for`, `parallel`, retry, and barrier logic are control flow, and control flow is often better as code than as a paragraph the model might compress away ([Xiaomi MiMo](https://mimo.xiaomi.com/blog/mimo-code-long-horizon)).
 
-Use prompt policy for judgment. Use workflow code when the process has branches, retries, concurrency limits, recovery rules, or a completion condition that must be enforced the same way every time.
+<MermaidDiagram>
+  {`
+    flowchart LR
+      A["Prompt policy"] --> B["Judgment"]
+      A --> C["Simple rules"]
+      D["Workflow code"] --> E["Loops"]
+      D --> F["Retries"]
+      D --> G["Barriers"]
+      H["Meta-harness"] --> I["Budgets"]
+      H --> J["Permissions"]
+      H --> K["Sessions"]
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  Keep judgment in policy, put repeatable control flow in code, and enforce shared limits in the
+  harness.
+</DiagramSubtitle>
 
 ## The policy should decide by cost, uncertainty, and independence
 
-A practical policy can be simple:
+The policy can be simple:
 
 1. If the target file, change, and check are known, keep the parent agent local.
 2. If the task spans unrelated files, hypotheses, or correctness risks, delegate exploration or verification.
 3. If the process has fixed branches, retries, or barriers, move orchestration into code.
 
-You do not add another service call because services are good. You add it when the boundary buys isolation, parallelism, caching, ownership, or fault containment. Subagents deserve the same standard.
+Add the boundary only when it buys isolation, parallelism, caching, ownership, or fault containment.
 
 ## Measure orchestration like a production system
 
-If delegation policy is performance work, it needs measurements: handoffs per completed task, parent idle time, duplicate search, tool failures, time to first useful edit or evidence-backed decision, P75 and P95 wait time, and quality against the same rubric before and after the policy change.
+If delegation policy is performance work, measure handoffs, parent idle time, duplicate search, tool failures, wait time, and quality against the same rubric before and after the change.
 
 The last metric matters. You can make an agent faster by refusing to delegate, then make it worse at broad debugging, migrations, or adversarial review. GitHub's result is interesting because the rollout improved failure and latency metrics while reporting no quality regression.
 
