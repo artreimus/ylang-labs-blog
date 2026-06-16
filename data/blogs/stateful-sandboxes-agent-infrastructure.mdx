@@ -26,7 +26,7 @@ That is why sandboxes are starting to look less like a safety wrapper and more l
 
 The basic agent loop still works for search, retrieval, classification, or fixed API tools. Ask the model what to do next, run a tool, feed the result back, repeat.
 
-A coding agent may clone a repo, install dependencies, run tests, edit files, start a dev server, inspect browser output, and try again. A data agent may download a dataset, cache intermediate files, and generate a report.
+A coding agent may clone a repo, install dependencies, run tests, edit files, start a dev server, inspect browser output, and try again.
 
 The hard part is not the first command. The hard part is the second hour. Where did the files go? Which packages were installed? Can the run survive a pause? Can a human inspect the state that produced the result?
 
@@ -64,6 +64,18 @@ Checkpointing sounds like an infrastructure feature. In agent systems, it become
 
 It lets the agent pause when work is expensive or inactive. It lets a human review the workspace before the agent continues. It lets the system fork the same state into multiple attempts. It lets the agent return to a working baseline after a bad edit.
 
+<Image
+  alt="Lifecycle diagram for checkpointing, pausing, resuming, forking, and rolling back a stateful agent sandbox"
+  src="/static/images/blogs/stateful-sandboxes-agent-infrastructure/checkpoint-lifecycle.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Checkpointing lets the runtime pause, resume, fork, and roll back sandbox state.
+</DiagramSubtitle>
+
 This is why LangChain's snapshots and forks are more interesting than the "agent gets a shell" framing. A shell lets the agent act. A snapshot lets the platform recover from action.
 
 It is also why Simon Willison's WASM write-up is useful. His first version could run Python code in WebAssembly, but the hard problem was keeping interpreter state resident so variables and functions could be reused across calls.
@@ -79,6 +91,18 @@ That is why the credential story matters.
 Anthropic describes credentials living outside the sandbox, with vaults and proxying used when the agent needs access. LangChain describes outbound requests flowing through an auth proxy so secrets do not touch the agent runtime. GitHub's local sandboxing talks about restricted filesystem, network, and system capabilities for commands initiated by Copilot, with enterprise policy configuration through management tooling.
 
 Different products will implement this differently, but the design rule is stable: do not hand the sandbox raw credentials if the runtime can mediate the action.
+
+<Image
+  alt="Policy boundary diagram showing an agent sandbox mediated through credential proxy and egress policy gates"
+  src="/static/images/blogs/stateful-sandboxes-agent-infrastructure/policy-boundary.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The sandbox executes code while credentials and outbound access stay behind runtime policy.
+</DiagramSubtitle>
 
 The same applies to egress. A sandbox that can run arbitrary code but call any host on the internet is only half a boundary. The runtime should know which domains, APIs, package registries, and internal services the session can reach.
 

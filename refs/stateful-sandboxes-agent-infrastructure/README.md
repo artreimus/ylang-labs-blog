@@ -60,3 +60,7 @@ Accessed: 2026-06-16
   - Cropped from source artwork to `1260x700`.
 - `public/static/images/blogs/stateful-sandboxes-agent-infrastructure/sandbox-architecture-models.png`
   - Generated technical process architecture plate comparing local, cloud, browser, and WASM sandbox boundaries.
+- `public/static/images/blogs/stateful-sandboxes-agent-infrastructure/checkpoint-lifecycle.png`
+  - Generated technical process architecture plate showing work, snapshot, pause, resume, fork, and rollback as a state lifecycle.
+- `public/static/images/blogs/stateful-sandboxes-agent-infrastructure/policy-boundary.png`
+  - Generated technical blueprint plate showing the sandbox, credential vault/proxy path, egress policy gate, and audit boundary.
