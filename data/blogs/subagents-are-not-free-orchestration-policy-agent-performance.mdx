@@ -1,0 +1,114 @@
+---
+title: 'Subagents Are Not Free: Orchestration Policy Is the New Performance Work'
+date: '2026-06-16'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'Multi-agent coding systems are only faster when the runtime knows when not to delegate. The next performance wins will come from orchestration policy, not from spawning more helpers.'
+tldr: |
+  - Subagents are useful when they add independent context, parallel execution, or adversarial review.
+  - They are expensive when they repeat search, wait serially, inherit stale paths, or make the parent agent idle.
+  - GitHub's Copilot CLI rollout shows that more selective delegation can reduce tool failures and wait time without a visible product change.
+  - Treat orchestration policy like performance engineering: measure handoffs, duplicate work, parent idle time, tool failures, and quality.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/subagents-are-not-free-orchestration-policy-agent-performance/cardImage.png'
+images:
+  [
+    '/static/images/blogs/subagents-are-not-free-orchestration-policy-agent-performance/blogHeader.png',
+  ]
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Subagents are not a free upgrade. They are another runtime path with latency, context loss, tool failures, duplicated search, and coordination work.
+
+GitHub's recent Copilot CLI rollout makes the point concrete. After making Copilot CLI more selective about delegation, GitHub reported 23% fewer tool failures per session, 27% fewer search tool failures, 18% fewer edit tool failures, 5% lower P95 user wait time, 3% lower P75 wait time, and no quality regression ([GitHub Blog](https://github.blog/ai-and-ml/how-we-made-github-copilot-cli-more-selective-about-delegation/)).
+
+That is not a model benchmark. It is orchestration performance work.
+
+## The expensive failure mode is unnecessary delegation
+
+Subagents help when work can run independently. They can explore a subsystem, verify a claim without sharing the parent agent's bias, run a long command while the parent continues, or compare approaches in parallel.
+
+When the parent already knows the file, the desired change, and the verification command, a subagent often adds a new search loop before doing the same work. If the parent waits for that subagent, the system has converted one focused task into a serial handoff.
+
+GitHub's post names the same pattern: unnecessary handoffs, repeated searches, sequential waiting, stale file paths, moved files, incorrect relative paths, and workspace mismatches. These are not exotic failures. They are what happens when delegation policy is too eager.
+
+## A useful subagent policy starts by asking what can stay local
+
+The orchestration decision should be explicit. Start with the narrowest path that can solve the task, then escalate only when another context window or execution lane changes the outcome.
+
+<MermaidDiagram>
+  {`
+    flowchart TD
+      A["Task"] --> B{"Known next step?"}
+      B -->|Yes| C["Keep local"]
+      B -->|No| D{"Independent work?"}
+      D -->|Yes| E["Fan out"]
+      D -->|No| F{"High risk?"}
+      F -->|Yes| G["Verify"]
+      F -->|No| H["Gather context"]
+      E --> I["Keep parent moving"]
+      G --> J["Merge evidence"]
+      C --> K["Measure"]
+      H --> K
+      I --> K
+      J --> K
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  A good orchestration policy treats delegation as escalation, not the default execution mode.
+</DiagramSubtitle>
+
+The most important branch is the first one. If the next step is already narrow, keep it local. "Find this file, make this edit, run this test" does not need a committee.
+
+Delegate when the task needs a clean context window, independent evidence, or real parallelism. Do not delegate just because the word "agent" is available in the product.
+
+## Prompt policy is enough until branching and retries matter
+
+Most teams start with prompt-level policy: "Use subagents for broad exploration. Keep simple edits local. Continue working while subagents run." That is a good first step because it is cheap to change and easy to inspect.
+
+It also has a ceiling.
+
+Anthropic's dynamic workflows for Claude Code show where the ceiling starts. Workflows can fan out agents, synthesize results, run adversarial verification, execute tournaments, loop until a stop condition is met, and route models based on task complexity. Anthropic also warns that workflows are not needed for every task and may use significantly more tokens ([Anthropic](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code)).
+
+Xiaomi's MiMo Code makes the stronger runtime argument. Its Dynamic Workflow design moves orchestration logic from natural language into JavaScript executed in an isolated sandbox. The point is not that every agent needs JavaScript workflows. The point is that `if`, `for`, `parallel`, retry, and barrier logic are control flow, and control flow is often better as code than as a paragraph the model might compress away ([Xiaomi MiMo](https://mimo.xiaomi.com/blog/mimo-code-long-horizon)).
+
+Use prompt policy for judgment. Use workflow code when the process has branches, retries, concurrency limits, recovery rules, or a completion condition that must be enforced the same way every time.
+
+## The policy should decide by cost, uncertainty, and independence
+
+A practical policy can be simple:
+
+1. If the target file, change, and check are known, keep the parent agent local.
+2. If the task spans unrelated files, hypotheses, or correctness risks, delegate exploration or verification.
+3. If the process has fixed branches, retries, or barriers, move orchestration into code.
+
+You do not add another service call because services are good. You add it when the boundary buys isolation, parallelism, caching, ownership, or fault containment. Subagents deserve the same standard.
+
+## Measure orchestration like a production system
+
+If delegation policy is performance work, it needs measurements: handoffs per completed task, parent idle time, duplicate search, tool failures, time to first useful edit or evidence-backed decision, P75 and P95 wait time, and quality against the same rubric before and after the policy change.
+
+The last metric matters. You can make an agent faster by refusing to delegate, then make it worse at broad debugging, migrations, or adversarial review. GitHub's result is interesting because the rollout improved failure and latency metrics while reporting no quality regression.
+
+The goal is not fewer subagents. The goal is fewer bad handoffs.
+
+## Start with the smallest policy that changes behavior
+
+You do not need a meta-harness to make progress. Start with one rule:
+
+> Keep focused work local. Delegate only when the subagent gets independent context, parallel execution, or verification value.
+
+Then instrument the loop. Count handoffs, duplicate searches, tool failures, idle time, wait time, and quality. Review the worst sessions. Move repeatable branching and retry behavior into code when prompt policy stops being reliable.
+
+Databricks' Omnigent announcement points at the next layer: composition, control, cost budgets, permissions, collaboration, and shared sessions above individual agent harnesses ([Databricks](https://www.databricks.com/blog/introducing-omnigent-meta-harness-combine-control-and-share-your-agents)). The product question changes from "Can we spawn another agent?" to "Which agent should own this step, what budget does it get, and what evidence must it return?"
+
+The next generation of coding agents will not win by spawning the most helpers. They will win by knowing when a helper is worth the cost.
+
+## References
+
+1. GitHub Blog, ["How we made GitHub Copilot CLI more selective about delegation"](https://github.blog/ai-and-ml/how-we-made-github-copilot-cli-more-selective-about-delegation/), June 12, 2026.
+2. Anthropic, ["A harness for every task: dynamic workflows in Claude Code"](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code), June 2, 2026.
+3. Xiaomi MiMo Team, ["MiMo Code: Scaling Coding Agents to Long-Horizon Tasks"](https://mimo.xiaomi.com/blog/mimo-code-long-horizon), June 10, 2026.
+4. Databricks Blog, ["Introducing Omnigent: A Meta-Harness to Combine, Control and Share Your Agents"](https://www.databricks.com/blog/introducing-omnigent-meta-harness-combine-control-and-share-your-agents), June 13, 2026.
