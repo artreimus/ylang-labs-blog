@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blog Logo Watermark"
+  short_description: "Add contrast-aware Ylang logo watermarks"
+  default_prompt: "Use $blog-logo-watermark to add contrast-aware Ylang Labs logo watermarks to both source-image.png and blogHeader.png, keeping an untracked source-image-no-watermark.png backup."

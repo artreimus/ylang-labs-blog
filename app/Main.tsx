@@ -7,8 +7,6 @@ import ProjectCard from '@/components/ProjectCard'
 import { motion, Variants } from 'framer-motion'
 import NextLink from 'next/link'
 
-const MAX_DISPLAY = 5
-
 const container: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -33,7 +31,7 @@ const item: Variants = {
   },
 }
 
-export default function Home({ posts, projects }) {
+export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
   return (
     <>
       {/* Hero Section */}
@@ -49,7 +47,7 @@ export default function Home({ posts, projects }) {
             <span className="text-primary-400">AI Engineering</span>
           </h1>
 
-          <p className="dark:text-whitemd:text-2xl mx-auto max-w-2xl text-lg font-medium leading-relaxed text-secondary-500 dark:text-white sm:text-xl">
+          <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-secondary-500 dark:text-white sm:text-xl md:text-2xl">
             A curated space to deepen your understanding of artificial intelligence. Simplicity in
             thought, precision in code.
           </p>
@@ -77,7 +75,7 @@ export default function Home({ posts, projects }) {
 
             <NextLink
               href="/projects"
-              className="group inline-flex items-center justify-center rounded-full border border-secondary-300 bg-secondary-500 px-8 py-3 font-medium text-white transition-transform duration-300 hover:scale-105 hover:bg-secondary-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:ring-offset-2"
+              className="group inline-flex items-center justify-center rounded-full border border-secondary-700 bg-secondary-600 px-8 py-3 font-medium text-white transition-transform duration-300 hover:scale-105 hover:bg-secondary-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:ring-offset-2"
             >
               <span className="mr-2">View Projects</span>
               <svg
@@ -107,9 +105,9 @@ export default function Home({ posts, projects }) {
         transition={{ duration: 0.8, ease: 'easeOut' }}
       >
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-          <h1 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
+          <h2 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
             Latest Blogs
-          </h1>
+          </h2>
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             Discover insightful blogs on AI engineering
           </p>
@@ -122,7 +120,7 @@ export default function Home({ posts, projects }) {
                 description="The world of AI Engineering is waiting to be explored. Check back soon for cutting-edge insights and practical guides!"
               />
             )}
-            {posts.slice(0, MAX_DISPLAY).map((post) => {
+            {posts.map((post) => {
               const { slug } = post
               return (
                 <div key={slug} className="flex-none pr-3 first:pl-0">
@@ -133,7 +131,7 @@ export default function Home({ posts, projects }) {
           </div>
         </div>
       </motion.div>
-      {posts.length > MAX_DISPLAY && (
+      {hasMorePosts && (
         <div className="mt-1 flex justify-end text-base font-medium leading-6">
           <Link
             href="/blogs"
@@ -154,9 +152,9 @@ export default function Home({ posts, projects }) {
         transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
       >
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-          <h1 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
+          <h2 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
             Latest Projects
-          </h1>
+          </h2>
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             Explore our showcase of AI engineering projects
           </p>
@@ -169,7 +167,7 @@ export default function Home({ posts, projects }) {
                 description="Our showcase of AI Engineering projects is coming soon. Check back for innovative solutions and technical deep-dives!"
               />
             )}
-            {projects?.slice(0, MAX_DISPLAY).map((project) => {
+            {projects?.map((project) => {
               const { slug } = project
               return (
                 <div key={slug} className="flex-none pr-3 first:pl-0">
@@ -180,7 +178,7 @@ export default function Home({ posts, projects }) {
           </div>
         </div>
       </motion.div>
-      {projects?.length > 0 && (
+      {hasProjects && (
         <div className="mt-1 flex justify-end text-base font-medium leading-6">
           <Link
             href="/projects"

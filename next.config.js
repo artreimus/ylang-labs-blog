@@ -67,6 +67,7 @@ module.exports = () => {
     output,
     basePath,
     reactStrictMode: true,
+    transpilePackages: ['github-slugger'],
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     images: {
       remotePatterns: [

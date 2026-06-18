@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blog Variation Cleanup"
+  short_description: "Clean up unchosen blog variants"
+  default_prompt: "Use $blog-variation-cleanup after I choose a blog variant to promote the selected draft and report on unchosen variant artifacts before any prune or archive action."

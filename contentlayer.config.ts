@@ -22,7 +22,7 @@ import rehypeCitation from 'rehype-citation'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+import { sortPosts } from 'pliny/utils/contentlayer.js'
 
 const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
@@ -58,6 +58,15 @@ const computedFields: ComputedFields = {
 }
 
 /**
+ * Write generated JSON in the same shape Prettier/lint-staged expects, so
+ * Contentlayer builds do not leave formatting-only git diffs behind.
+ */
+function writeGeneratedJson(filePath: string, data: Record<string, number>) {
+  const sortedData = Object.fromEntries(Object.entries(data).sort(([a], [b]) => a.localeCompare(b)))
+  writeFileSync(filePath, `${JSON.stringify(sortedData, null, 2)}\n`)
+}
+
+/**
  * Count the occurrences of all tags across blog posts and write to json file
  */
 function createTagCount(allBlogs) {
@@ -74,7 +83,7 @@ function createTagCount(allBlogs) {
       })
     }
   })
-  writeFileSync('./app/blog-tag-data.json', JSON.stringify(tagCount))
+  writeGeneratedJson('./app/blog-tag-data.json', tagCount)
 }
 
 function createProjectTagCount(allProjects) {
@@ -91,7 +100,29 @@ function createProjectTagCount(allProjects) {
       })
     }
   })
-  writeFileSync('./app/project-tag-data.json', JSON.stringify(tagCount))
+  writeGeneratedJson('./app/project-tag-data.json', tagCount)
+}
+
+type SearchDocumentSource = {
+  draft?: boolean
+  title: string
+  date: string
+  path: string
+  summary?: string
+  description?: string
+}
+
+function isSearchableDocument(file: SearchDocumentSource) {
+  return file.draft !== true
+}
+
+function toSearchDocument(file: SearchDocumentSource) {
+  return {
+    title: file.title,
+    date: file.date,
+    path: file.path,
+    summary: file.summary || file.description || '',
+  }
 }
 
 function createSearchIndex(allBlogs, allProjects) {
@@ -99,7 +130,9 @@ function createSearchIndex(allBlogs, allProjects) {
     siteMetadata?.search?.provider === 'kbar' &&
     siteMetadata.search.kbarConfig.searchDocumentsPath
   ) {
-    const searchableContent = allCoreContent(sortPosts([...allBlogs, ...allProjects]))
+    const searchableContent = sortPosts([...allBlogs, ...allProjects])
+      .filter(isSearchableDocument)
+      .map(toSearchDocument)
 
     writeFileSync(
       `public/${path.basename(siteMetadata.search.kbarConfig.searchDocumentsPath)}`,

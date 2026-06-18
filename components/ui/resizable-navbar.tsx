@@ -41,6 +41,7 @@ interface MobileNavHeaderProps {
 interface MobileNavMenuProps {
   children: React.ReactNode
   className?: string
+  id: string
   isOpen: boolean
   onClose: () => void
 }
@@ -188,7 +189,7 @@ export const MobileNavHeader = ({ children, className }: MobileNavHeaderProps) =
   )
 }
 
-export const MobileNavMenu = ({ children, className, isOpen, onClose }: MobileNavMenuProps) => {
+export const MobileNavMenu = ({ children, className, id, isOpen, onClose }: MobileNavMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -198,12 +199,20 @@ export const MobileNavMenu = ({ children, className, isOpen, onClose }: MobileNa
       }
     }
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
     }
   }, [isOpen, onClose])
 
@@ -211,6 +220,7 @@ export const MobileNavMenu = ({ children, className, isOpen, onClose }: MobileNa
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          id={id}
           ref={menuRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -227,11 +237,28 @@ export const MobileNavMenu = ({ children, className, isOpen, onClose }: MobileNa
   )
 }
 
-export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => {
-  return isOpen ? (
-    <IconX className="text-black dark:text-white" onClick={onClick} />
-  ) : (
-    <IconMenu2 className="text-black dark:text-white" onClick={onClick} />
+export const MobileNavToggle = ({
+  controlsId,
+  isOpen,
+  onClick,
+}: {
+  controlsId: string
+  isOpen: boolean
+  onClick: () => void
+}) => {
+  const Icon = isOpen ? IconX : IconMenu2
+
+  return (
+    <button
+      type="button"
+      aria-controls={controlsId}
+      aria-expanded={isOpen}
+      aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+      onClick={onClick}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full text-black transition-colors duration-200 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:text-white dark:hover:bg-gray-800 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
+    >
+      <Icon aria-hidden="true" className="h-6 w-6" />
+    </button>
   )
 }
 

@@ -31,6 +31,7 @@ const CustomNavbarLogo = () => {
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const mobileMenuId = 'mobile-navigation-menu'
 
   const navItems = headerNavLinks
     .filter((link) => link.href !== '/')
@@ -76,13 +77,18 @@ const Header = () => {
             <CustomNavbarLogo />
             <div className="relative z-[70] flex items-center gap-2">
               <MobileNavToggle
+                controlsId={mobileMenuId}
                 isOpen={isMobileMenuOpen}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               />
             </div>
           </MobileNavHeader>
 
-          <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
+          <MobileNavMenu
+            id={mobileMenuId}
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          >
             <div className="flex w-full flex-col">
               {navItems.map((item, idx) => (
                 <Link

@@ -83,8 +83,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
           <SectionContainer>
             <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary-500 focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-gray-950 focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2 dark:focus:ring-primary-300 dark:focus:ring-offset-gray-950"
+              >
+                Skip to main content
+              </a>
               <Header />
-              <main className="mb-auto pt-[var(--header-height)]">{children}</main>
+              <main id="main-content" className="mb-auto pt-[var(--header-height)]">
+                {children}
+              </main>
               <Toaster />
             </SearchProvider>
           </SectionContainer>

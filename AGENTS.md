@@ -9,17 +9,26 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 ## Required First Steps
 
 - Check relevant local skills before starting. For this repo, prefer:
-  - `trending-blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
-  - `end-to-end-blog-creation` when asked to turn a blog idea or draft into a complete post with generated artwork, blog assets, social copy, and PR publication.
-  - `blog-authoring` for creating or structuring new blog posts.
-  - `anthropic-blog-style` when asked to write, rewrite, or critique a blog post in an Anthropic-like style.
-  - `blog-image-creator` for preparing `cardImage.png` and `blogHeader.png`.
-  - `blog-social-post-generator` when asked for social copy tied to a post or project.
-  - `beautiful-oil-painting-image-gen` when asked for oil-painting-style generated artwork.
+  - `blog-topic-research` when asked to research Hacker News, Twitter/X, Reddit, or other current technical discourse for Ylang Labs blog topic ideas.
+  - `content-calendar-management` when asked to use GitHub Issues/Projects as the editorial calendar, create content briefs, schedule posts/projects/social content, or audit planned work.
+  - `blog-publishing-workflow` when asked to turn a blog idea or draft into a complete post with optional artwork, blog assets, social copy, and PR publication.
+  - `blog-writing-guide` as the primary Ylang Labs writing, rewriting, editing, and editorial review standard for blog posts.
+  - `blog-factuality-review` when asked to review, critique, fact-check, validate, or assess publication readiness for Ylang Labs blog drafts.
+  - `blog-mdx-authoring` for creating or structuring new blog posts.
+  - `oil-painting-image-generator` for oil-painting-style generated artwork and normal generated blog cover artwork, `cardImage.png`, `blogHeader.png`, and source artwork unless the user explicitly requests a different cover style.
+  - `blog-image-cropper` for preparing `cardImage.png` and `blogHeader.png` from generated or provided source artwork.
+  - `technical-blog-image-generator` when asked to create section images, inline technical diagrams, architecture plates, process maps, or image-generation prompts for technical visuals. Use it for cover/card/header assets only when the user explicitly requests a technical-diagram cover.
+  - `blueprint-image-generator` when asked for blueprint, engineering drawing, CAD sheet, patent plate, orthographic, exploded-view, or white-line-on-blue generated images.
+  - `blue-terminal-ascii-image-generator` when asked for blue terminal, ASCII-like, dot-matrix, CRT, monospace glyph, or command-line poster generated images.
+  - `technical-blog-image-review` when asked to independently review generated technical blog images for factuality, technical accuracy, readability, crop safety, or design quality.
+  - `blog-social-copy` when asked for social copy tied to a post or project.
+  - `anthropic-style-writing` when asked to write, revise, or critique Ylang Labs content in an Anthropic-like voice.
+- Repo-owned skills live under `.agents/skills/<name>/SKILL.md`. Use clear kebab-case names in the form `<domain>-<job>[-<artifact-or-mode>]`, avoid abbreviations such as `gen`, and keep the directory name aligned with the `name:` frontmatter.
+- Do not rename lockfile-managed imported skills unless intentionally forking them. When renaming a skill, update its directory, `name:` frontmatter, cross-skill references, and this skill list in the same change.
 - Research before planning. Inspect the current files, schemas, layouts, and local docs before writing a plan or changing code.
 - For autonomous trend/topic research, use Codex's available Exa MCP search tool when present. Do not add repo-level Exa SDK dependencies or `EXA_API_KEY` wiring unless the user asks for a standalone scheduled script outside Codex.
 - When a library detail is unclear, use Context7 for current docs. If Context7 is insufficient, use web search and cite external sources in the final answer.
-- Never create a git commit unless explicitly asked. If asked to commit, include only task-related files and exclude temporary plans, scratch files, generated support notes, and unrelated dirty files.
+- Never create a git commit unless explicitly asked. If asked to commit, include only task-related files and exclude temporary plans, scratch files, generated support notes, local-only `refs/` materials, and unrelated dirty files.
 - Preserve unrelated work. This repo may have generated or user-owned changes in the worktree; do not revert or stage them unless the user asks.
 
 ## Commands
@@ -29,6 +38,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 - Build with `pnpm build`.
 - Serve a production build with `pnpm serve`.
 - Lint with `pnpm lint`.
+- Run unit tests with `pnpm test:unit`.
 - Analyze bundle output with `pnpm analyze`.
 
 Use `pnpm` because `package.json` pins `pnpm@9.12.2`. Do not switch package managers or edit lockfiles manually.
@@ -75,6 +85,8 @@ These files may change after a build. Treat unrelated pre-existing generated cha
 
 Blog posts live in `data/blogs/<slug>.mdx`. Use kebab-case slugs and match the asset folder name exactly.
 
+When asked to create a new blog post, create or switch to a dedicated branch in the existing checkout instead of starting from a sibling worktree. Use a clear branch name such as `blog/<slug>` or `codex/blog-<slug>`, preserve unrelated dirty files, and only use a separate worktree when the user explicitly asks for one or when branch work in the current checkout would risk overwriting user changes.
+
 Required or strongly expected blog frontmatter:
 
 ```mdx
@@ -108,15 +120,30 @@ Blog asset standards:
 - Store assets in `public/static/images/blogs/<slug>/`.
 - Use `cardImage.png` for listing/card thumbnails.
 - Use `blogHeader.png` for the post banner.
+- Use `source-artwork.png` as the reusable master artwork for generated/cropped blog art. Keep it square (`1:1`), ideally `1536x1536` or larger when the generation tool allows it, unless the user explicitly requests another source format.
 - Use descriptive names for inline images, diagrams, and figures.
 - Reference images with absolute public paths such as `/static/images/blogs/<slug>/diagram.png`.
-- For generated/cropped blog art, `cardImage.png` should be `1080x1920` and `blogHeader.png` should be `1260x700` unless the user explicitly asks otherwise.
+- For generated cover/card/header art, create the source artwork with `oil-painting-image-generator` first unless the user explicitly asks for another cover style.
+- For generated/cropped blog art, derive `cardImage.png` and `blogHeader.png` from the square `source-artwork.png`; `cardImage.png` should be `1080x1920` and `blogHeader.png` should be `1260x700` unless the user explicitly asks otherwise.
+- For section-level diagrams, architecture plates, process maps, and inline technical figures, use `technical-blog-image-generator`.
+- Do not create SVG/vector/code-native image sources unless the user explicitly asks for manual vector work.
 
 Blog writing standards:
 
 - The publication focuses on AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, and practical implementation lessons.
+- The default blog writing standard is The Pragmatic Engineer by Gergely Orosz. Use it as the editorial reference for inside-view engineering writing: practical, source-backed, numbers-forward, specific about how teams and systems work, and useful to engineers and engineering leaders. Do not imitate Gergely Orosz's exact prose, recurring phrasing, or author persona.
+- Default to a Pragmatic Engineer-inspired voice: direct, concrete, technically sharp, and written by someone who has shipped the work and understands the failure modes. Prefer useful judgment, named systems, operational tradeoffs, and industry context over banter, hype, or detached research prose.
+- Be ambitious in the blog body and packaging. Titles, summaries, TLDR bullets, openings, and social posts should sell the strongest defensible thesis, tension, payoff, or shift in the article instead of merely naming the topic.
+- Ambition must remain evidence-backed. Every bold title, hook, or claim needs support from a mechanism, example, number, tradeoff, caveat, source, or implementation detail in the article.
+- Default blog posts to 5 minutes or less unless the user explicitly asks for or approves a longer post. If a topic needs more depth, narrow the scope, split follow-up posts, or confirm the longer format before drafting past the default.
 - Prefer concrete technical explanations, architecture diagrams, examples, and citations over generic marketing prose.
-- Use the existing editorial pattern: clear intro, technical sections, diagrams or images where useful, and references when relying on external sources.
+- Use post-type structures rather than one universal article template:
+  - Engineering deep dive: problem, mechanism, architecture, tradeoffs, failure modes, practical application, references.
+  - Migration/build story: outcome metrics, old system, constraints, migration design, validation, results, what changed in hindsight.
+  - AI research/explainer: definition, why now, how it works, evaluation, limitations, practical guidance, references.
+  - Opinion/strategy essay: claim, tension, principle, examples, implications, closing stance.
+- Use information-bearing headings. Avoid generic placeholders such as `Introduction`, `Background`, `Section 1`, and `Conclusion` unless the topic makes that wording genuinely useful.
+- Do not add a manual "Key Takeaways" section to the article body when using `PostBanner`; the layout already renders `tldr` or `summary` as "Key Takeaways".
 - For formal references, add entries to `data/references-data.bib`, set `bibliography: references-data.bib`, and cite with `[@citationKey]`.
 - Manual `## References` sections are acceptable for simpler posts.
 - Keep `summary` concise for listing/search/SEO. Use `tldr` for multi-bullet takeaways in `PostBanner`.
@@ -221,17 +248,28 @@ Blog-specific components live under `components/blogs/<slug>/`. Keep new post-sp
 - Prefer the latest stable dependency version unless the user or existing compatibility constraints require a specific version.
 - Before adding a dependency, check whether an existing dependency already solves the problem.
 
+## Testing Standards
+
+- Prefer test-driven development for code changes: write or update focused tests that describe the intended behavior before or alongside implementation.
+- Always write realistic test cases that exercise how the feature is actually used in this repo, including real content shapes, route inputs, component props, and failure modes where practical.
+- Do not stop at happy-path tests. Cover edge cases, invalid or missing inputs, empty content, dark/light mode or responsive variants when relevant, and regressions implied by the bug or feature request.
+- Keep tests scoped to the changed behavior. Avoid brittle snapshots or broad implementation-detail assertions unless they protect a real contract.
+- When a code change has no practical automated test path, explain why and compensate with the narrowest useful validation command or manual check.
+
 ## Validation
 
 For content-only changes:
 
 - Confirm frontmatter matches `contentlayer.config.ts`.
 - Confirm referenced images exist under `public/static/images/...`.
+- Confirm blog drafts stay at 5 minutes or less by default, or explicitly note that the user approved a longer post.
+- Before finalizing any new or materially changed blog post, use an available sub-agent to run an independent `blog-factuality-review` pass, then address or explicitly report the review findings.
 - Run `pnpm build` when feasible, especially for new MDX, citations, components, or route-visible content.
 
 For code/layout changes:
 
 - Run `pnpm lint`.
+- Run `pnpm test:unit` when the change touches testable logic, components, forms, routing behavior, or shared utilities.
 - Run `pnpm build`.
 - If a local dev server is needed for visual validation, use `pnpm dev` and inspect the affected routes in a browser.
 
@@ -249,11 +287,19 @@ Always state which validation ran and any validation that could not be run.
 - Plans must include implementation details: target files, schema changes, component structure, data flow, frontmatter fields, routes, validation, and migration/backfill steps when relevant.
 - Mermaid diagrams are encouraged for complex architecture or content-flow changes.
 - Do not treat old plan files as authoritative without checking the current code.
+- Treat `PLAN_*.md` files as working artifacts by default. Do not commit them unless the user explicitly asks to preserve the plan in the repo or the task is specifically to publish durable planning documentation.
 
 ## Git Hygiene
 
 - Do not commit unless explicitly asked.
 - Do not revert user changes.
-- Check `git status --short` before editing and before finalizing.
-- Keep generated files, plans, local notes, and temporary outputs out of commits unless explicitly requested.
+- Check `git status --short --untracked-files=all` before editing, before staging, and before finalizing.
+- When making changes and committing them to a PR, do not leave the local worktree dirty from your task. Before finalizing, confirm `git status --short` is clean or contains only unrelated pre-existing changes that were intentionally left untouched.
+- When making changes and committing them, do not leave the worktree dirty with those same task-related changes after they are already committed. Clean up task-owned generated output, staged leftovers, and duplicate dirty files before finalizing, while preserving unrelated pre-existing work.
+- Keep generated files, plans, local notes, temporary outputs, and private research materials out of commits unless explicitly requested.
+- Before committing, inspect `git diff --cached --name-status` and reject accidental support artifacts such as `PLAN_*.md`, `posts/*-options.md`, `.DS_Store`, `.tmp`, `.bak`, `.orig`, `.rej`, `.next/`, `coverage/`, `test-results/`, and ignored generated files.
+- Treat `posts/social-media-<slug>.md` as publishable only when social launch copy is explicitly requested or the task is an end-to-end publishing package. Otherwise leave it untracked locally or remove it during cleanup.
+- Treat `refs/<slug>/README.md` as a publication-safe source log only when it lists visible/supporting sources for a sourced post. Do not commit private `refs` scratch files such as `deep-research.md`, transcript-derived notes, raw extracts, prompt transcripts, or image-generation prompts unless the user explicitly approves them for repo visibility.
+- For blog publication or cleanup PRs, compare `data/blogs/<slug>.mdx` with `public/static/images/blogs/<slug>/`, `refs/<slug>/`, and `posts/social-media-<slug>.md` on the target branch. Remove orphaned asset folders, stale social-copy files, and obsolete source packets only after confirming the matching MDX is absent or no longer references them.
+- Keep generated churn such as `next-env.d.ts`, `app/*-tag-data.json`, and `public/search.json` out of commits unless the generated output is an intentional part of the task.
 - If unrelated files are already dirty, mention that they were left untouched.
