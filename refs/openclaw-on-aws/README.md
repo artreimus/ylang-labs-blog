@@ -4,11 +4,6 @@ This reference packet supports the Ylang Labs blog post `data/blogs/openclaw-on-
 
 Access date for web sources: 2026-05-08.
 
-## Local Research
-
-1. `refs/openclaw-on-aws/deep-research.md`
-   - Blog-ready research synthesis covering AWS deployment options, tradeoffs, and recommended patterns.
-
 ## Visual Assets
 
 1. `public/static/images/blogs/openclaw-on-aws/source-artwork.png`
@@ -110,7 +105,7 @@ Access date for web sources: 2026-05-08.
 27. AWS, [Amazon EC2 Mac instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html), accessed 2026-05-08.
     - Supports the macOS-specific option, hardware families, Dedicated Host billing model, 24-hour minimum allocation, and EBS recommendation.
 
-## AWS Sample And Local Implementation Sources
+## AWS Sample Sources
 
 1. AWS Samples, [sample-multi-tenancy-openclaw-on-eks](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks), published 2026-03-05.
    - Supports the EKS multi-tenant OpenClaw orchestration pattern, including router, orchestrator, Redis, DynamoDB, S3, Karpenter, Kata, Pod Identity, and NetworkPolicy.
@@ -118,21 +113,10 @@ Access date for web sources: 2026-05-08.
    - Supports detailed sample architecture, component roles, message flow, pod lifecycle, S3 state sync, warm pool, and isolation decisions.
 3. AWS Samples, [Cold Start Time Analysis](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/cold-start-analysis.md), dated 2026-03-03.
    - Supports measured Kata/runc cold and warm start timings and optimization opportunities.
-4. Local MorningHQ, `/Users/artreimus/Repositories/morning-hq/morninghq/docs/AWS_DEPLOYMENT_INFRA_AND_OPENCLAW.md`, accessed 2026-05-08.
-   - Supports field-tested SaaS runtime-plane architecture: ECS app plane, EKS OpenClaw plane, DynamoDB bindings/pins, S3 live state, internal NLB, and per-user runtime pods.
-5. Local MorningHQ, `/Users/artreimus/Repositories/morning-hq/morninghq/docs/OPENCLAW_EC2_DEPLOYMENT_RUNBOOK.md`, accessed 2026-05-08.
-   - Supports field-tested manual EC2 lane: SSM, CodeBuild, ECR, Secrets Manager, EBS persistence, swap, and Bedrock through instance roles.
-6. Local MorningHQ, `/Users/artreimus/Repositories/morning-hq/morninghq/docs/OPENCLAW_LOCAL_AND_PROD_CONNECTIVITY.md`, accessed 2026-05-08.
-   - Supports local-vs-production connectivity, backend-owned gateway token handling, private networking, and OpenAI-compatible gateway relay.
-7. Local MorningHQ, `/Users/artreimus/Repositories/morning-hq/morninghq/docs/OPENCLAW_EKS_ONBOARDING_RESEARCH.md`, accessed 2026-05-08.
-   - Supports adaptation guidance for the AWS sample, including retaining FastAPI as the trust boundary and using EKS for the runtime plane.
-8. Local MorningHQ, `/Users/artreimus/Repositories/morning-hq/morninghq/docs/infra/OPENCLAW_RUNTIME_NETWORK_COST_POSTURE.md`, accessed 2026-05-08.
-   - Supports cost posture around VPC endpoints, NAT, internal NLB, ECS/EKS split, and cross-AZ traffic.
 
 ## Claim Boundaries
 
 - Treat the AWS sample as a reference implementation, not an endorsed production blueprint.
-- Treat local MorningHQ docs as implementation evidence and field notes, not generic OpenClaw upstream documentation.
 - Treat Bedrock AgentCore as an adjacent managed AWS agent runtime. It is not documented as a drop-in OpenClaw Gateway host.
 - Avoid hard cost numbers unless the blog refreshes live AWS pricing in the final drafting pass.
 - Verify current OpenClaw release notes and AWS regional availability before publishing deployment commands.
