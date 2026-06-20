@@ -1,15 +1,14 @@
 ---
 title: 'OpenClaw on AWS'
-date: '2026-05-08'
+date: '2026-06-20'
 tags: ['AI/ML', 'Agents', 'Cloud']
 draft: false
-summary: 'A practical decision guide for running OpenClaw on AWS, from the official Lightsail blueprint to EC2, ECS, EKS, AgentCore, Lambda, Batch, and Bedrock.'
+summary: 'A practical decision guide for running OpenClaw on AWS, from the official Lightsail blueprint to EC2, ECS, EKS, and Bedrock model access.'
 tldr: |
   - OpenClaw is a stateful Gateway plus workspace, sessions, skills, scheduled jobs, and provider credentials. Storage and lifecycle design matter as much as compute.
   - Lightsail is the shortest official AWS-hosted path for one private OpenClaw instance. EC2 Docker is the better lane when you need host control and repeatable deployment.
   - ECS can run small stable Gateway fleets, but persistence, sandbox behavior, and replacement semantics need deliberate design.
   - EKS is the SaaS shape: one runtime boundary per user or workspace, private routing, S3 state, DynamoDB binding records, Pod Identity, NetworkPolicy, and warm pools.
-  - AgentCore, Lambda, Batch, EventBridge, and App Runner belong around OpenClaw unless you have proven they can host the full Gateway lifecycle.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/openclaw-on-aws/cardImage.png'
 images: ['/static/images/blogs/openclaw-on-aws/blogHeader.png']
@@ -43,12 +42,10 @@ The useful answer is a decision tree.
       Need --> Controlled["Controlled single runtime"]
       Need --> Fleet["Small managed fleet"]
       Need --> SaaS["Per-user runtime plane"]
-      Need --> Jobs["Short jobs and wakeups"]
       Private --> Lightsail["Lightsail blueprint"]
       Controlled --> EC2["EC2 Docker<br/>EBS, ECR, SSM"]
       Fleet --> ECS["ECS<br/>explicit persistence"]
       SaaS --> EKS["EKS<br/>router, orchestrator, pods"]
-      Jobs --> Around["AgentCore, Lambda,<br/>Batch, EventBridge"]
   `}
 </MermaidDiagram>
 
@@ -179,16 +176,6 @@ Start with normal `runc` pods unless you can name the isolation requirement in o
 
 The AWS sample's March 2026 cold-start analysis gives useful sizing numbers from its tested path: `runc` warm start was roughly 54 seconds, `runc` cold start was roughly 2 minutes and 14 seconds, Kata warm start was roughly 43 seconds, and Kata cold start was roughly 5 minutes. Use those numbers to size the problem, not as guarantees for your cluster.
 
-## AgentCore and serverless belong around OpenClaw
-
-Amazon Bedrock AgentCore Runtime belongs in the architecture conversation. AWS positions it as a managed, framework-agnostic runtime for real-time and long-running agent workloads. Sessions run in isolated microVMs, can stream, and can keep context across invocations. AWS also announced managed session storage in public preview, with 1 GB per session and 14-day idle retention.
-
-That makes AgentCore a good option to evaluate for custom agents, deterministic tools, or new agent code that can adopt AgentCore's lifecycle directly. It is not currently documented as a drop-in host for OpenClaw's Gateway, channel lifecycle, Control UI, WebSocket behavior, OpenAI-compatible endpoints, skills, cron, and workspace model.
-
-Lambda, EventBridge, Batch, and App Runner are similar: useful around the runtime, risky under it. Use Lambda for webhooks, short-lived token minting, wake triggers, or small deterministic tools. Use EventBridge Scheduler when AWS should wake an AWS API target, backend endpoint, Step Function, ECS task, or Batch job. Use Batch for offline research, document processing, or report generation. Use App Runner only for a constrained demo where all state is externalized.
-
-Do not use those services as the default full Gateway host until you have proven lifecycle, filesystem persistence, network posture, private access, and channel behavior.
-
 ## What I would ship first
 
 For a personal runtime, start with Lightsail. For an internal operator runtime, ship EC2 Docker with EBS state, ECR images, CodeBuild builds, Secrets Manager, SSM, Bedrock through an instance role, and Gateway health checks through a private tunnel. For SaaS, use an EKS runtime plane where the product backend owns auth and policy, while the runtime control plane owns wake, pod lifecycle, binding state, state storage, and private routing.
@@ -204,12 +191,8 @@ For a personal runtime, start with Lightsail. For an internal operator runtime, 
 7. AWS Samples, [Multi-tenancy OpenClaw on EKS](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks).
 8. AWS Samples, [OpenClaw on EKS architecture](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/architecture.md).
 9. AWS Samples, [OpenClaw cold-start analysis](https://github.com/aws-samples/sample-multi-tenancy-openclaw-on-eks/blob/main/docs/cold-start-analysis.md).
-10. AWS, [Host agents and tools with Amazon Bedrock AgentCore Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agents-tools-runtime.html).
-11. AWS, [Use isolated sessions for agents](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-sessions.html).
-12. AWS, [Amazon ECS launch types and capacity providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html).
-13. AWS, [Fargate task ephemeral storage for Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html).
-14. AWS, [Use Amazon EFS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html).
-15. AWS, [Use Amazon EBS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html).
-16. AWS, [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html).
-17. AWS, [Configure Lambda function timeout](https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html).
-18. AWS, [AgentCore Runtime session storage public preview announcement](https://aws.amazon.com/about-aws/whats-new/2026/03/bedrock-agentcore-runtime-session-storage/).
+10. AWS, [Amazon ECS launch types and capacity providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html).
+11. AWS, [Fargate task ephemeral storage for Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html).
+12. AWS, [Use Amazon EFS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html).
+13. AWS, [Use Amazon EBS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html).
+14. AWS, [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html).

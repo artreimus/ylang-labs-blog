@@ -50,60 +50,34 @@ Access date for web sources: 2026-05-08.
 
 ## AWS Primary Sources
 
-1. AWS, [Host agent or tools with Amazon Bedrock AgentCore Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agents-tools-runtime.html), accessed 2026-05-08.
-   - Supports AgentCore Runtime as a managed, framework-agnostic agent hosting option with isolated sessions, long-running workloads, persistent filesystem support, and streaming.
-2. AWS, [Use isolated sessions for agents](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-sessions.html), accessed 2026-05-08.
-   - Supports AgentCore session isolation, microVM lifecycle, session headers, default idle timeout, and up-to-8-hour lifecycle limits.
-3. AWS, [Amazon Bedrock AgentCore FAQs](https://aws.amazon.com/bedrock/agentcore/faqs/), accessed 2026-05-08.
-   - Supports AgentCore scaling, framework/protocol/model flexibility, and serverless runtime positioning.
-4. AWS, [AgentCore Runtime session storage public preview announcement](https://aws.amazon.com/about-aws/whats-new/2026/03/bedrock-agentcore-runtime-session-storage/), published 2026-03-25.
-   - Supports the managed session storage preview note, 1 GB per session storage limit, and 14-day idle retention.
-5. AWS, [Amazon ECS launch types and capacity providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html), accessed 2026-05-08.
+1. AWS, [Introducing OpenClaw on Amazon Lightsail to run your autonomous private AI agents](https://aws.amazon.com/blogs/aws/introducing-openclaw-on-amazon-lightsail-to-run-your-autonomous-private-ai-agents/), accessed 2026-05-08.
+   - Supports the official Lightsail blueprint, Bedrock default-provider framing, and one-instance starter path.
+2. AWS, [Get started with OpenClaw on Lightsail](https://docs.aws.amazon.com/lightsail/latest/userguide/amazon-lightsail-quick-start-guide-openclaw.html), accessed 2026-05-08.
+   - Supports the Lightsail setup flow, 4 GB memory recommendation, browser pairing, CloudShell setup, and messaging-channel guidance.
+3. AWS, [Amazon ECS launch types and capacity providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/capacity-launch-type-comparison.html), accessed 2026-05-08.
    - Supports ECS Fargate, EC2, External, ECS Managed Instances, and capacity-provider tradeoffs.
-6. AWS, [Fargate task ephemeral storage for Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html), accessed 2026-05-08.
+4. AWS, [Fargate task ephemeral storage for Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html), accessed 2026-05-08.
    - Supports Fargate ephemeral storage defaults and the 200 GiB upper bound.
-7. AWS, [Use Amazon EFS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html), accessed 2026-05-08.
+5. AWS, [Use Amazon EFS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html), accessed 2026-05-08.
    - Supports ECS/EFS persistence, Fargate platform requirement, and access point guidance.
-8. AWS, [Use Amazon EBS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html), accessed 2026-05-08.
+6. AWS, [Use Amazon EBS volumes with Amazon ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html), accessed 2026-05-08.
    - Supports ECS task-attached EBS volume behavior and the caveat that service-managed task volumes are deleted on task termination.
-9. AWS, [Amazon ECS task IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html), accessed 2026-05-08.
+7. AWS, [Amazon ECS task IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html), accessed 2026-05-08.
    - Supports ECS task roles for AWS API access from containers.
-10. AWS, [Automate cluster infrastructure with EKS Auto Mode](https://docs.aws.amazon.com/eks/latest/userguide/automode.html), accessed 2026-05-08.
-    - Supports EKS Auto Mode managed compute, networking, load balancing, DNS, block storage, and GPU support.
-11. AWS, [EKS Auto Mode best practices](https://docs.aws.amazon.com/eks/latest/best-practices/automode.html), accessed 2026-05-08.
-    - Supports Auto Mode's Karpenter-based scaling, managed NodePools/NodeClasses, and shared responsibility caveats.
-12. AWS, [Learn how EKS Pod Identity grants pods access to AWS services](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html), accessed 2026-05-08.
-    - Supports Pod Identity, service-account IAM role association, least privilege, credential isolation, and limitations.
-13. AWS, [Use elastic file system storage with Amazon EFS](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html), accessed 2026-05-08.
-    - Supports EKS EFS CSI persistent-volume guidance and Fargate limitations.
-14. AWS, [AWS App Runner architecture and concepts](https://docs.aws.amazon.com/apprunner/latest/dg/architecture.html), accessed 2026-05-08.
-    - Supports App Runner's source-code/source-image service model.
-15. AWS, [Managing App Runner automatic scaling](https://docs.aws.amazon.com/apprunner/latest/dg/manage-autoscaling.html), accessed 2026-05-08.
-    - Supports App Runner autoscaling knobs and cost behavior.
-16. AWS, [Configure Lambda function timeout](https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html), accessed 2026-05-08.
-    - Supports Lambda's standard 900-second maximum timeout.
-17. AWS, [Configure Lambda ephemeral storage](https://docs.aws.amazon.com/lambda/latest/dg/configuration-ephemeral-storage.html), accessed 2026-05-08.
-    - Supports Lambda `/tmp` storage range from 512 MB to 10,240 MB.
-18. AWS, [Create a Lambda function using a container image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html), accessed 2026-05-08.
-    - Supports Lambda container-image constraints, read-only filesystem, writable `/tmp`, Linux-only images, and 10 GB image size limit.
-19. AWS, [What is AWS Batch?](https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html), accessed 2026-05-08.
-    - Supports Batch as a managed service for batch workloads on ECS, EKS, EC2, and Fargate.
-20. AWS, [AWS Batch documentation overview](https://aws.amazon.com/documentation-overview/batch/), accessed 2026-05-08.
-    - Supports Batch job queues, compute environments, dependencies, and integration with ECS/EKS/Fargate.
-21. AWS, [Amazon EventBridge Scheduler](https://docs.aws.amazon.com/eventbridge/latest/userguide/using-eventbridge-scheduler.html), accessed 2026-05-08.
-    - Supports managed scheduled invocation, one-time and recurring schedules, retries, flexible windows, and DLQs.
-22. AWS, [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html), accessed 2026-05-08.
+8. AWS, [Learn how EKS Pod Identity grants pods access to AWS services](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html), accessed 2026-05-08.
+   - Supports Pod Identity, service-account IAM role association, least privilege, credential isolation, and limitations.
+9. AWS, [Use elastic file system storage with Amazon EFS](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html), accessed 2026-05-08.
+   - Supports EKS EFS CSI persistent-volume guidance and Fargate limitations.
+10. AWS, [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html), accessed 2026-05-08.
     - Supports SSM access without inbound SSH or bastions.
-23. AWS, [Start a Session Manager session](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html), accessed 2026-05-08.
+11. AWS, [Start a Session Manager session](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html), accessed 2026-05-08.
     - Supports Session Manager port forwarding.
-24. AWS, [IAM roles for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html), accessed 2026-05-08.
+12. AWS, [IAM roles for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html), accessed 2026-05-08.
     - Supports EC2 instance-profile credential flow and least-privilege guidance.
-25. AWS, [Amazon ECR private registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html), accessed 2026-05-08.
+13. AWS, [Amazon ECR private registry](https://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html), accessed 2026-05-08.
     - Supports ECR private image storage and authentication.
-26. AWS, [AWS CodeBuild documentation](https://aws.amazon.com/documentation-overview/codebuild/), accessed 2026-05-08.
+14. AWS, [AWS CodeBuild documentation](https://aws.amazon.com/documentation-overview/codebuild/), accessed 2026-05-08.
     - Supports CodeBuild-managed image builds and custom build environments.
-27. AWS, [Amazon EC2 Mac instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html), accessed 2026-05-08.
-    - Supports the macOS-specific option, hardware families, Dedicated Host billing model, 24-hour minimum allocation, and EBS recommendation.
 
 ## AWS Sample Sources
 
@@ -117,6 +91,5 @@ Access date for web sources: 2026-05-08.
 ## Claim Boundaries
 
 - Treat the AWS sample as a reference implementation, not an endorsed production blueprint.
-- Treat Bedrock AgentCore as an adjacent managed AWS agent runtime. It is not documented as a drop-in OpenClaw Gateway host.
 - Avoid hard cost numbers unless the blog refreshes live AWS pricing in the final drafting pass.
 - Verify current OpenClaw release notes and AWS regional availability before publishing deployment commands.
