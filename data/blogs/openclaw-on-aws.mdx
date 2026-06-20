@@ -20,14 +20,6 @@ Running OpenClaw on AWS is not about finding the cheapest place to put a Node pr
 
 It is about deciding how much of a stateful agent runtime you want AWS to own. OpenClaw is a long-running Gateway, a workspace, a session store, a skills system, a scheduler, a model-provider client, and a tool-execution surface. Treat it like a stateless web app and the design will lie to you.
 
-<Image
-  alt="An abstract OpenClaw on AWS runtime gateway with private routing, persistent state, and model-provider connections"
-  src="/static/images/blogs/openclaw-on-aws/source-artwork.png"
-  width={1800}
-  height={1800}
-  className="mx-auto rounded-md bg-white"
-/>
-
 <DiagramSubtitle>
   The hard part is not booting a container. It is deciding which runtime state survives, who can
   reach the Gateway, and how each user boundary is enforced.
