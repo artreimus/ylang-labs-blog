@@ -52,6 +52,8 @@ import AgentMemory from './blogs/key-elements-of-multi-agent-systems/AgentMemory
 import MemoryArchitecture from './blogs/context-engineering-for-ai-agents/MemoryArchitecture'
 import ProcessFlow from './blogs/context-engineering-for-ai-agents/ProcessFlow'
 import HtmlMarkdownArtifactExperience from './blogs/the-unreasonable-effectiveness-of-html-for-agent-output/HtmlMarkdownArtifactExperience'
+import DeepSWELeaderboard from './blogs/deepswe-coding-agent-benchmark/DeepSWELeaderboard'
+import TweetEmbed from './blogs/deepswe-coding-agent-benchmark/TweetEmbed'
 
 // Core MDX Components
 const coreMDXComponents = {
@@ -120,6 +122,11 @@ const htmlVsMarkdownBlogComponents = {
   HtmlMarkdownArtifactExperience,
 }
 
+const deepSWEBlogComponents = {
+  DeepSWELeaderboard,
+  TweetEmbed,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
@@ -130,4 +137,5 @@ export const components: MDXComponents = {
   ...multiAgentBlogComponents,
   ...contextEngineeringBlogComponents,
   ...htmlVsMarkdownBlogComponents,
+  ...deepSWEBlogComponents,
 }

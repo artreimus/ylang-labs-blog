@@ -1,0 +1,176 @@
+---
+title: 'DeepSWE Tests Whether Coding Agents Can Do Real Repository Work'
+date: '2026-05-27'
+tags: ['AI/ML', 'Agents', 'Generative AI']
+draft: false
+summary: 'DeepSWE is a coding-agent benchmark built from original long-horizon repository tasks, isolated task packages, and behavioral verifiers. The interesting part is not only the leaderboard, but the benchmark design.'
+tldr: |
+  - DeepSWE packages each task with a pinned repo state, instruction, reproducible environment, grading tests, and held-out reference solution.
+  - Its tasks are original rather than copied from public commits or PRs, which makes the benchmark a cleaner test of problem-solving than recall.
+  - The key technical move is behavioral verification: tests check observable behavior and regressions, not whether the agent matched the author's patch.
+  - The leaderboard is useful because the benchmark separates frontier agents, but the stronger lesson is how teams should design their own coding-agent evals.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/deepswe-coding-agent-benchmark/cardImage.png'
+images: ['/static/images/blogs/deepswe-coding-agent-benchmark/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+DeepSWE is interesting because it treats coding-agent evaluation like software engineering, not trivia.
+
+The benchmark does not ask a model to complete a toy function or reproduce a public pull request. It asks an agent to enter an unfamiliar repository, understand a behavior change, edit the right files, and pass a verifier that checks the resulting software.
+
+That is the part of coding-agent work most benchmarks still sand down.
+
+That is also why the reaction to DeepSWE matters. Developers and founders were not just sharing another leaderboard; they were pointing at a benchmark that finally matched what coding agents feel like in real repository work.
+
+<TweetEmbed id="2059552963094511618" />
+
+<TweetEmbed id="2059326763579392130" />
+
+The technical claim is simple: for coding agents, benchmark packaging and verifier quality matter as much as task selection. If the repo state is loose, the environment is noisy, or the grader rewards one implementation shape instead of behavior, the leaderboard becomes a measurement of benchmark artifacts.
+
+## What DeepSWE is
+
+DeepSWE is Datacurve's benchmark for measuring frontier coding agents on original, long-horizon engineering tasks. It contains 113 tasks drawn from 91 active open-source repositories across TypeScript, Go, Python, JavaScript, and Rust.
+
+The examples are real repository work: aborting pending body reads during `happy-dom` shutdown, fixing typed label sorting in Prometheus, adding deterministic conflict detection to Yjs maps, and implementing XML diff, patch, and merge operations in `etree`.
+
+The phrase "long-horizon" matters. A DeepSWE task is not a single local edit. Datacurve reports mean reference solutions of 668 lines added across 7 files. SWE-Bench Pro, by comparison, is reported at 120 lines added across 5 files, while SWE-Bench Verified is reported at 10 lines in 1 file.
+
+The prompts are also shorter, not longer. DeepSWE's mean prompt is 2,158 characters, compared with 4,614 for SWE-Bench Pro. That means the benchmark is testing whether an agent can recover missing context from the repository, not whether it can follow a fully specified patch recipe.
+
+That is closer to how developers actually use coding agents: describe the behavior, let the agent inspect the repo, then make it prove the change with tests.
+
+The size comparison makes the design choice obvious:
+
+| Dataset            | Tasks | Mean prompt length | Mean solution size | Mean files changed |
+| ------------------ | ----- | ------------------ | ------------------ | ------------------ |
+| DeepSWE            | 113   | 2,158 chars        | 668 lines          | 7.41 files         |
+| SWE-Bench Pro      | 731   | 4,614 chars        | 120 lines          | 5.07 files         |
+| SWE-Bench Verified | 500   | 1,700 chars        | 10 lines           | 1.25 files         |
+
+DeepSWE is not just "bigger SWE-Bench." It flips the ratio: less prompt, more required code, more room for the agent to choose the wrong path. That is the useful pressure test. The agent has to recover structure from the repository instead of being handed a map.
+
+## The task package is the benchmark
+
+The important design choice is that every DeepSWE task is a reproducible package, not just a prompt.
+
+The public repository describes the task format as:
+
+1. `task.toml` for metadata, including repository, base commit, language, image, and resource limits.
+2. `instruction.md` for the prompt the agent sees.
+3. `environment/` for the Dockerfile that can reproduce the task image.
+4. `tests/` for the verifier entry point and test patch applied at grading time.
+5. `solution/` for a held-out reference solution used during review, not shown to the agent.
+
+That structure makes the benchmark inspectable, rerunnable, and hard to hand-wave. A result can be traced back to the exact repo commit, the instruction the agent saw, the verifier that graded it, and the held-out solution reviewers used as a sanity check.
+
+If an eval does not pin the repository state, isolate the environment, and ship the verifier alongside the prompt, it is not really measuring coding-agent capability. It is measuring whatever happened on that machine, with that dependency cache, against tests no one can audit.
+
+## Original tasks reduce the memorization problem
+
+Public coding benchmarks have a contamination problem. If a task is adapted from a merged commit or public PR, the model may have seen the patch, the discussion, the tests, or enough surrounding text during training.
+
+DeepSWE's answer is to make the tasks original. The reference solutions are written from scratch rather than copied from public commits or PRs. Some tasks may be motivated by unresolved GitHub issues, but the implementation itself is new and is not merged upstream.
+
+That does not make contamination impossible forever. Once a benchmark is public, future training pipelines can absorb it.
+
+But it does make the first measurement much cleaner. A model that passes has to solve a new repository problem, not recall a known GitHub fix.
+
+## The verifier is where the signal lives
+
+The strongest part of DeepSWE is not the task count. It is the verifier design.
+
+Each verifier extends the repository's own test infrastructure with new tests that exercise the requested behavior. The tests are meant to assert through public APIs, command output, persisted state, or other observable behavior rather than private helper names or one specific implementation shape.
+
+That distinction matters because real software tasks usually have more than one valid implementation. A benchmark should care whether the user-visible behavior is correct, not whether the patch looks like the benchmark author's patch.
+
+Datacurve also reports two reliability checks:
+
+1. Verifiers are run three times during authoring, and flaky verifiers are sent back for revision.
+2. Each trial includes regression checks from the repository's existing tests plus any new regression tests the author adds.
+
+That is what makes this feel like an engineering benchmark rather than a leaderboard wrapper. The grader is trying to answer the same question a maintainer would ask: did the patch implement the behavior without breaking nearby behavior?
+
+## Why verifier quality changes the leaderboard
+
+Bad verifiers flatten leaderboards. If the grader accepts wrong patches or rejects correct ones, small differences between models are noise.
+
+Datacurve audited this directly. They sampled 30 tasks from DeepSWE and SWE-Bench Pro, ran 3 rollouts across 10 frontier agent configurations, then used an analyzer to review each trajectory against the task definition, reference solution, and verifier result.
+
+The reported difference is large:
+
+| Benchmark     | False positives | False negatives | Reviewed rollouts |
+| ------------- | --------------- | --------------- | ----------------- |
+| SWE-Bench Pro | 8.5%            | 24.0%           | 789               |
+| DeepSWE       | 0.3%            | 1.1%            | 735               |
+
+The analyzer disagreed with SWE-Bench Pro's pass/fail result on 32% of reviewed trials. It disagreed with DeepSWE on 1.4%.
+
+You should not treat an AI analyzer as ground truth. But as a comparative audit, that result explains why DeepSWE produces a sharper leaderboard: the scoring function is less noisy.
+
+## DeepSWE changes how agents behave
+
+One of Datacurve's more useful measurements is not pass rate. It is how agents checked their own work.
+
+Across 5,685 classified trajectories, models were much more likely to author new tests on DeepSWE than on SWE-Bench Pro. GPT-5.4 wrote new tests in 462 of 542 DeepSWE trials, versus 16 of 90 SWE-Bench Pro trials. Claude Opus 4.7 wrote new tests in 449 of 540 DeepSWE trials, versus 25 of 90 SWE-Bench Pro trials.
+
+That is partly a prompt artifact. Datacurve points out that SWE-Bench Pro's prompt tells agents the test files are already handled and that they should not modify the testing logic or tests. DeepSWE does not include that instruction, so the test-writing behavior comes back.
+
+This is exactly why benchmark prompts matter. If the prompt template suppresses the behavior you want in production, the benchmark is no longer measuring the system you think it is measuring.
+
+## The leaderboard matters because the gaps are visible
+
+<DeepSWELeaderboard />
+
+The current leaderboard has GPT-5.5 at 70% +/-4, GPT-5.4 at 56% +/-5, and Claude Opus 4.7 at 54% +/-5. After that, the drop is steep: Claude Sonnet 4.6 reaches 32% +/-4, Gemini 3.5 Flash reaches 28% +/-4, and several recognizable models sit much lower.
+
+That result has two readings.
+
+The optimistic reading is that a 70% pass rate on original, long-horizon repository tasks is a real milestone.
+
+The sober reading is that 70% still fails about three out of ten tasks. For production engineering, that is not "replace the maintainer." It is "give the maintainer a faster junior engineer with tests, code review, and rollback paths."
+
+That reaction makes more sense once the spread is visible. The leaderboard is not interesting because people reacted to it. People reacted because the spread makes an experience developers already had much easier to measure: older SWE-Bench-style scores often made strong coding agents look closer together than they felt in actual repo work.
+
+## The fixed harness is useful, but it is not the whole product
+
+All leaderboard runs use mini-swe-agent. That is a good benchmark choice because it holds the scaffolding constant: same agent loop, same broad tool surface, same evaluation path.
+
+It also limits what the score can answer.
+
+DeepSWE is a strong model-and-harness benchmark. It is not a direct procurement answer for Codex, Claude Code, Cursor, Gemini CLI, or an internal agent platform. Production tools add retrieval, editor context, patch primitives, test selection, code review, policy, and human workflow.
+
+So use the leaderboard to reason about base capability. Use your own evals to choose the product or internal system your team can actually trust.
+
+## What teams should copy from DeepSWE
+
+The practical lesson is not "paste DeepSWE scores into a vendor spreadsheet." The lesson is to copy the benchmark architecture.
+
+For internal coding-agent evals, a good task should have:
+
+1. A pinned repo state.
+2. A short behavior-focused instruction.
+3. A reproducible environment.
+4. A hidden verifier that checks observable behavior.
+5. Regression tests that catch collateral damage.
+6. A held-out reference solution for human review, not exact-match grading.
+
+Then run the same task set twice: once against a fixed harness for model signal, and once against product-native harnesses for deployment signal. Those are different questions. A fixed harness asks which model can solve the task under equal scaffolding. A product-native harness asks which system your team can actually ship into a workflow.
+
+If every model ties near the top, the eval is probably too easy or the verifier is too weak. If the same model wins every task with no failure analysis, the eval probably is not telling you where your system breaks.
+
+DeepSWE's value is that it gives us a better shape for making coding agents fail in ways that look like real engineering work. That is the bar internal evals should copy.
+
+## References
+
+1. Datacurve, [DeepSWE](https://deepswe.datacurve.ai/), accessed May 28, 2026.
+2. Wenqi Huang, Charley Lee, Leonard Tng, and Serena Ge, [Measuring frontier coding agents on original, long-horizon engineering tasks](https://deepswe.datacurve.ai/blog), Datacurve, 2026.
+3. Datacurve, [DeepSWE corpus statistics artifact](https://deepswe.datacurve.ai/artifacts/corpus-stats.json), accessed May 28, 2026.
+4. Datacurve, [DeepSWE verification behavior artifact](https://deepswe.datacurve.ai/artifacts/verification-behavior.json), accessed May 28, 2026.
+5. Datacurve AI, [datacurve-ai/deep-swe](https://github.com/datacurve-ai/deep-swe), GitHub.
+6. SWE-agent, [mini-swe-agent](https://github.com/SWE-agent/mini-swe-agent), GitHub.
+7. Kol Tregaskes, [DeepSWE reaction post](https://x.com/koltregaskes/status/2059552963094511618), X post, May 27, 2026.
+8. Garry Tan, [DeepSWE engineering evals post](https://x.com/garrytan/status/2059326763579392130), X post, May 26, 2026.
+9. Matthew Berman, [DeepSWE engineering benchmark post](https://x.com/MatthewBerman/status/2059682104733278569), X post, May 27, 2026.
