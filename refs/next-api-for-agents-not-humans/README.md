@@ -34,26 +34,19 @@ Access date for web sources: 2026-07-09.
    - Publication date: 2026-07-05
    - Use: Practitioner evidence that CLI affordances and agent-readable workflows matter when agents need to operate software, inspect output, and produce durable evidence.
 
-5. Reddit r/LocalLLaMA discussion, "Anyone else building MCP servers?"
-
-   - URL: https://www.reddit.com/r/LocalLLaMA/comments/1r3mdqe/anyone_else_building_mcp_servers_whats_your/
-   - Publisher: Reddit
-   - Publication date: 2026-07
-   - Use: Community signal from MCP builders about tool surface design, server shape, and practical friction.
-
-6. OpenAI Docs, "Function calling"
+5. OpenAI Docs, "Function calling"
 
    - URL: https://platform.openai.com/docs/guides/function-calling
    - Publisher: OpenAI
    - Use: Primary documentation for tool definitions, JSON Schema parameters, and strict structured outputs.
 
-7. Anthropic Docs, "Tool use overview"
+6. Anthropic Docs, "Tool use overview"
 
    - URL: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview
    - Publisher: Anthropic
    - Use: Primary documentation for tool names, descriptions, and input schemas as model-facing API contracts.
 
-8. Model Context Protocol, "Tools"
+7. Model Context Protocol, "Tools"
    - URL: https://modelcontextprotocol.io/specification/2025-06-18/server/tools
    - Publisher: Model Context Protocol
    - Specification date: 2025-06-18

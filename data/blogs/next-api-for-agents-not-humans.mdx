@@ -6,7 +6,7 @@ draft: false
 summary: 'Agent-facing APIs are now a product surface. Tool schemas, CLI help, parameter names, and result payloads decide whether agents continue cleanly or burn retries, latency, and trust.'
 tldr: |
   - Agent ergonomics now live in schemas, payloads, edit primitives, and CLI affordances, not just chat prompts.
-  - Strict tool schemas stop malformed calls, but they do not make the next step obvious by themselves.
+  - Strict tool schemas can reduce malformed calls, but they do not make the next step obvious by themselves.
   - Good agent-facing APIs return compact evidence, stable identifiers, and a small set of legal follow-up actions.
   - Measure interface quality with retries, repair calls, latency, token cost, and task completion after the interface changes.
 authors: ['arthur-reimus']
@@ -96,7 +96,7 @@ The generic request tool is flexible, but it hides policy decisions. Task-shaped
 
 Agent-facing API design should leave a measurable trail. Before and after changing a tool surface, compare retries, validation errors, repair calls, latency, token cost, task completion, and human intervention.
 
-This is where the topic moves from prompt taste to engineering. Willison's DSPy work on Datasette prompts is useful because it tested prompt changes against real tool implementations and custom metrics. If a payload adds `next_actions` and `issue_id`, task completion should improve or repair calls should fall. If a schema splits one generic mutation into three specific tools, selection errors should drop.
+This is where the topic moves from prompt taste to engineering. Willison's DSPy work on Datasette prompts is useful because it tested prompt changes against real tool implementations and custom metrics. If a payload adds `next_actions` and `issue_id`, you should be able to measure whether task completion improves or repair calls fall. If a schema splits one generic mutation into three specific tools, selection errors should be something you can track.
 
 ## Agent APIs are product surfaces now
 
@@ -104,7 +104,7 @@ For years, API design meant designing for developers. Clear docs, stable endpoin
 
 Agents change the caller. A production agent API still needs to serve humans, but it also needs to serve a model that is choosing and chaining actions under uncertainty.
 
-The teams that get this right will not only have better tool docs. They will have faster loops, fewer repairs, lower cost, and agents that fail in ways engineers can debug.
+The teams that get this right will not only have better tool docs. They will have a clearer path to faster loops, fewer repairs, lower cost, and failures engineers can debug.
 
 ## References
 
@@ -114,4 +114,3 @@ The teams that get this right will not only have better tool docs. They will hav
 4. OpenAI Docs, ["Function calling"](https://platform.openai.com/docs/guides/function-calling).
 5. Anthropic Docs, ["Tool use overview"](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview).
 6. Model Context Protocol, ["Tools"](https://modelcontextprotocol.io/specification/2025-06-18/server/tools).
-7. Reddit r/LocalLLaMA, ["Anyone else building MCP servers?"](https://www.reddit.com/r/LocalLLaMA/comments/1r3mdqe/anyone_else_building_mcp_servers_whats_your/).
