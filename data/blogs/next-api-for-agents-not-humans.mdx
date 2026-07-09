@@ -1,0 +1,117 @@
+---
+title: 'The Next API Is for Agents, Not Humans'
+date: '2026-07-09'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'Agent-facing APIs are now a product surface. Tool schemas, CLI help, parameter names, and result payloads decide whether agents continue cleanly or burn retries, latency, and trust.'
+tldr: |
+  - Agent ergonomics now live in schemas, payloads, edit primitives, and CLI affordances, not just chat prompts.
+  - Strict tool schemas stop malformed calls, but they do not make the next step obvious by themselves.
+  - Good agent-facing APIs return compact evidence, stable identifiers, and a small set of legal follow-up actions.
+  - Measure interface quality with retries, repair calls, latency, token cost, and task completion after the interface changes.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/next-api-for-agents-not-humans/cardImage.png'
+images: ['/static/images/blogs/next-api-for-agents-not-humans/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+The next API fight is not REST versus GraphQL. It is human-facing versus agent-facing.
+
+Agents do not use software the way humans do. They call tools, inspect partial results, repair failures, and decide the next step from whatever your interface returns.
+
+If that interface was only designed for a human scanning docs or a terminal, the model pays for the mismatch on every loop. Tool design is no longer just a token-cost issue. It is an API-design problem.
+
+## Good enough for humans is not good enough for agents
+
+A CLI can print a wall of help text because a developer can skim it, infer the right flag, and search the docs. A backend API can return provider-shaped JSON because a human can recognize the relevant fields and copy the next ID.
+
+Armin Ronacher made the failure concrete in his July 2026 post on better models and worse tools: a newer Claude model could produce a correct edit while adding invented fields to a nested tool schema, forcing the harness to reject and retry the call.
+
+<MermaidDiagram>
+  {`
+    flowchart LR
+      subgraph H["Human-oriented surface"]
+        H1["CLI help: prose and examples"] --> H2["Human reads and infers"]
+        H2 --> H3["Raw provider output"]
+        H3 --> H4["Human finds the next ID"]
+      end
+
+      subgraph A["Agent-oriented API"]
+        A1["Typed schema"] --> A2["Small action set"]
+        A2 --> A3["Compact result"]
+        A3 --> A4["Stable ID plus next actions"]
+      end
+
+      H4 -. "hidden judgment becomes explicit contract" .-> A1
+
+`}
+
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  Agent-facing interfaces have to encode the judgment humans usually supply outside the API.
+</DiagramSubtitle>
+
+The practical question is not "can the model eventually figure it out?" It is how many retries, repair calls, tokens, and seconds it burns before it does.
+
+## Strict schemas are the floor
+
+OpenAI's function calling docs, Anthropic's tool-use docs, and the MCP tool specification all point to the baseline: tools need names, descriptions, and typed input schemas.
+
+That is progress. A strict JSON Schema can constrain malformed arguments. A good description can help the model choose between tools. MCP's `inputSchema` and optional `outputSchema` make contracts explicit enough to reason about.
+
+But strict schemas are only the floor.
+
+`update(id, data)` can be valid schema and still be a bad agent API. It tells the model almost nothing about the object, allowed fields, partial update semantics, validation errors, conflict behavior, or the next action after success. It is type-checked ambiguity.
+
+Agent-facing APIs need narrower names, parameter vocabulary that matches the task, enums where the choice space is small, and error messages that tell the model what to change.
+
+## The result payload is part of the API
+
+Most teams spend more time on input schemas than output shape. That is backwards for multi-step work. The model does not only need to call the tool. It needs to continue after the tool returns.
+
+For a search tool, the useful result is rarely the full backend object. It is a compact ranked list with `issue_id`, `title`, `why_matched`, `url`, and `next_actions`. That payload is smaller than the raw provider response, but it carries more operational information: a candidate, a reason, a stable identifier, and a constrained next move.
+
+The same idea applies to CLI output. A human-oriented `--help` page can be generous with prose. An agent-oriented CLI should also expose machine-readable examples, exit-code meanings, structured output flags, and commands that produce IDs instead of terminal decoration.
+
+Willison's shot-scraper video workflow is a useful reminder here. Once agents operate real tools, the CLI becomes part of the model's action space.
+
+## Design for the next legal move
+
+The best agent-facing interfaces make the next legal move obvious. Four surfaces deserve API-design attention:
+
+1. **Tool names and descriptions:** Make selection cheap. Say what the tool does, when to use it, and when not to use it.
+2. **Input schemas:** Constrain the choice space. Prefer precise fields, enums, and domain language over generic blobs.
+3. **Result payloads:** Return compact evidence, stable identifiers, cursors, and action hints.
+4. **Failure messages:** Explain the repair. Tell the model which field was wrong, what values are allowed, and whether retrying is safe.
+
+Do not make every tool tiny. Over-compressed tools can remove the caveat that prevents a destructive call. The standard is the smallest complete contract for the next step.
+
+In practice, this often means replacing generic tools like `github_request(method, path, body)` with task-shaped operations such as `issue_search(query, repo, state)`, `issue_comment(issue_id, body, idempotency_key)`, and `pull_request_review_threads(pr_number, unresolved_only)`.
+
+The generic request tool is flexible, but it hides policy decisions. Task-shaped tools make the legal operation explicit.
+
+## Measure the interface, not the vibes
+
+Agent-facing API design should leave a measurable trail. Before and after changing a tool surface, compare retries, validation errors, repair calls, latency, token cost, task completion, and human intervention.
+
+This is where the topic moves from prompt taste to engineering. Willison's DSPy work on Datasette prompts is useful because it tested prompt changes against real tool implementations and custom metrics. If a payload adds `next_actions` and `issue_id`, task completion should improve or repair calls should fall. If a schema splits one generic mutation into three specific tools, selection errors should drop.
+
+## Agent APIs are product surfaces now
+
+For years, API design meant designing for developers. Clear docs, stable endpoints, predictable errors, and useful examples were enough.
+
+Agents change the caller. A production agent API still needs to serve humans, but it also needs to serve a model that is choosing and chaining actions under uncertainty.
+
+The teams that get this right will not only have better tool docs. They will have faster loops, fewer repairs, lower cost, and agents that fail in ways engineers can debug.
+
+## References
+
+1. Armin Ronacher, ["Better Models, Worse Tools"](https://lucumr.pocoo.org/2026/7/4/better-models-worse-tools/), July 4, 2026.
+2. Simon Willison, ["Optimizing prompts for text-to-SQL using DSPy against a Datasette Cloud data warehouse"](https://simonwillison.net/2026/Jul/2/dspy-datasette-agent-prompts/), July 2, 2026.
+3. Simon Willison, ["Have your AI agent record video demos"](https://simonw.substack.com/p/have-your-agent-record-video-demos), July 5, 2026.
+4. OpenAI Docs, ["Function calling"](https://platform.openai.com/docs/guides/function-calling).
+5. Anthropic Docs, ["Tool use overview"](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview).
+6. Model Context Protocol, ["Tools"](https://modelcontextprotocol.io/specification/2025-06-18/server/tools).
+7. Reddit r/LocalLLaMA, ["Anyone else building MCP servers?"](https://www.reddit.com/r/LocalLLaMA/comments/1r3mdqe/anyone_else_building_mcp_servers_whats_your/).
