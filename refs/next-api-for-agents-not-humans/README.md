@@ -2,7 +2,7 @@
 
 Source packet for `data/blogs/next-api-for-agents-not-humans.mdx`.
 
-Access date for web sources: 2026-07-09.
+Access date for web sources: 2026-07-10.
 
 ## Source Log
 
@@ -13,21 +13,21 @@ Access date for web sources: 2026-07-09.
    - Publication date: 2026-07-09
    - Use: Primary content brief, slug, working title, tags, angle, target audience, and acceptance criteria.
 
-2. Armin Ronacher, "Better Models, Worse Tools"
+2. Armin Ronacher, "Better Models: Worse Tools"
 
    - URL: https://lucumr.pocoo.org/2026/7/4/better-models-worse-tools/
    - Publisher: lucumr.pocoo.org
    - Publication date: 2026-07-04
    - Use: Practitioner evidence that model-tool interactions can fail at schema and harness boundaries even when the model produces a semantically correct edit.
 
-3. Simon Willison, "Optimizing prompts for text-to-SQL using DSPy against a Datasette Cloud data warehouse"
+3. Simon Willison, "Using DSPy to evaluate and improve Datasette Agent's SQL system prompts"
 
    - URL: https://simonwillison.net/2026/Jul/2/dspy-datasette-agent-prompts/
    - Publisher: Simon Willison's Weblog
    - Publication date: 2026-07-02
    - Use: Practitioner evidence that prompt/tool interface design can be measured, iterated, and optimized against task outcomes.
 
-4. Simon Willison, "Have your AI agent record video demos"
+4. Simon Willison, "Have your agent record video demos of its work with shot-scraper video"
 
    - URL: https://simonw.substack.com/p/have-your-agent-record-video-demos
    - Publisher: Simon Willison's Substack
@@ -36,13 +36,13 @@ Access date for web sources: 2026-07-09.
 
 5. OpenAI Docs, "Function calling"
 
-   - URL: https://platform.openai.com/docs/guides/function-calling
+   - URL: https://developers.openai.com/api/docs/guides/function-calling
    - Publisher: OpenAI
-   - Use: Primary documentation for tool definitions, JSON Schema parameters, and strict structured outputs.
+   - Use: Primary documentation for tool definitions, JSON Schema parameters, strict-mode enforcement, and strict-mode schema requirements.
 
-6. Anthropic Docs, "Tool use overview"
+6. Anthropic Docs, "Tool use with Claude"
 
-   - URL: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview
+   - URL: https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
    - Publisher: Anthropic
    - Use: Primary documentation for tool names, descriptions, and input schemas as model-facing API contracts.
 
@@ -56,7 +56,7 @@ Access date for web sources: 2026-07-09.
 
 - The post's central claim comes from the issue brief: agent-era interface design has moved into tool schemas, parameter names, CLI help, edit primitives, and result payload shapes.
 - Armin Ronacher and Simon Willison are used as practitioner evidence streams, not as exhaustive proof.
-- OpenAI, Anthropic, and MCP documentation anchor the API-design claims in current tool-calling contracts.
+- OpenAI, Anthropic, and MCP documentation anchor the API-design claims in current tool-calling contracts. OpenAI's strict-mode documentation supports the distinction between declaring a schema and enforcing it.
 - The Mermaid diagram is original and compares two interface styles: a human-oriented surface that relies on hidden judgment and an agent-oriented API that carries typed inputs, compact results, stable identifiers, and next actions.
 
 ## Cover Artwork
