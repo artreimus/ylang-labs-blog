@@ -47,9 +47,9 @@ Access date for web sources: 2026-07-09.
    - Use: Primary documentation for tool names, descriptions, and input schemas as model-facing API contracts.
 
 7. Model Context Protocol, "Tools"
-   - URL: https://modelcontextprotocol.io/specification/2025-06-18/server/tools
+   - URL: https://modelcontextprotocol.io/specification/2025-11-25/server/tools
    - Publisher: Model Context Protocol
-   - Specification date: 2025-06-18
+   - Specification date: 2025-11-25
    - Use: Primary specification for MCP tool metadata, input schemas, output schemas, annotations, result content, and error signaling.
 
 ## Claim Map
