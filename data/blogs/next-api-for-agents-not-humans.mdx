@@ -1,14 +1,14 @@
 ---
-title: 'The Next API Is for Agents, Not Humans'
+title: 'The Next API Must Work for Agents, Not Just Humans'
 date: '2026-07-09'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
-summary: 'A technically valid API can still make agents guess. Design schemas, mutations, results, and errors for the next tool call, then measure whether retries fall.'
+summary: 'A model can produce valid JSON and still waste calls guessing what to do next. Agent-facing APIs need enforced schemas, explicit mutations, compact results, and errors that explain the repair.'
 tldr: |
-  - Declaring a JSON Schema is not enough. Enforce it, then design the next legal move.
-  - Mutations need clear patch or replace semantics, idempotency, and errors an agent can repair.
-  - Return compact evidence, stable identifiers, and a small set of legal follow-up actions.
-  - Track retries, validation errors, repair calls, latency, token cost, and completion before and after interface changes.
+  - A schema can reject malformed calls, but it cannot make an ambiguous tool easy to use.
+  - Mutations should state what changes, whether retries are safe, and how to recover from conflicts.
+  - Results should return the evidence and identifiers the next call needs, not the full backend object.
+  - Measure task completion, retries, repair calls, latency, and token cost before and after an interface change.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/next-api-for-agents-not-humans/cardImage.png'
 images: ['/static/images/blogs/next-api-for-agents-not-humans/blogHeader.png']
@@ -16,104 +16,104 @@ imageTheme: 'white'
 layout: 'PostBanner'
 ---
 
-The next API fight is not REST versus GraphQL. It is whether the interface works for agents as well as humans.
+Most APIs assume a developer will fill in the gaps. An agent can often infer the missing step, but every inference adds another chance to retry, burn tokens, or fail the task.
 
-Agents call tools, inspect partial results, repair failures, and choose the next step from the interface response.
+If a tool hides its mutation semantics, returns the backend object unchanged, or reports an error without a repair path, the model has to guess. Those guesses show up as retries, tokens, latency, and failed tasks.
 
-When that interface was designed only for a human scanning docs or a terminal, the mismatch burns retries, tokens, and time. Tool design is now an API-design problem.
+That is why the next API fight is not REST versus GraphQL. It is whether the interface makes the next correct action obvious to a model.
 
-## Good enough for humans is not good enough for agents
+## A valid call can still be the wrong operation
 
-Developers can skim a wall of CLI help or provider-shaped JSON, infer the right flag, and copy the next ID. When an interface leaves that judgment implicit, the model has to infer it again.
+Imagine an agent deploying a new image for `checkout-api`. The available tool is `update_service(service_id, data)`, and the model sends a schema-valid payload:
 
-Armin Ronacher documented a newer Claude model producing a correct edit but inventing fields in a nested schema, which forced Pi's harness to reject and retry the call.
+```json
+{
+  "service_id": "checkout-api",
+  "data": {
+    "image": "registry.example/checkout@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  }
+}
+```
+
+The call is valid, but the interface has left the dangerous decisions implicit. Does `data` patch the service or replace it? If the request times out, can the agent retry without creating a second deployment? If another release changed the service first, will this call overwrite it?
+
+The model chose a reasonable payload. The API did not give it enough information to act safely.
 
 <MermaidDiagram>
   {`
     flowchart LR
-      subgraph H["Human-oriented surface"]
-        H1["CLI help: prose and examples"] --> H2["Human reads and infers"]
-        H2 --> H3["Raw provider output"]
-        H3 --> H4["Human finds the next ID"]
+      subgraph H["Generic update surface"]
+        H1["update_service(id, data)"] --> H2["Guess patch or replace"]
+        H2 --> H3["Raw cloud response"]
+        H3 --> H4["Find the deployment ID"]
       end
 
-      subgraph A["Agent-oriented API"]
-        A1["Typed schema"] --> A2["Small action set"]
-        A2 --> A3["Compact result"]
-        A3 --> A4["Stable ID plus next actions"]
+      subgraph A["Deployment operation"]
+        A1["deploy_release(...)"] --> A2["Version precondition"]
+        A2 --> A3["Deployment ID plus status"]
+        A3 --> A4["Poll or cancel"]
       end
 
-      H4 -. "hidden judgment becomes explicit contract" .-> A1
+      H4 -. "hidden decisions become API fields" .-> A1
 
 `}
 
 </MermaidDiagram>
 
 <DiagramSubtitle>
-  Agent-facing interfaces have to encode the judgment humans usually supply outside the API.
+  A task-shaped operation makes the state change and the next legal action explicit.
 </DiagramSubtitle>
 
-The question is how many retries, repair calls, tokens, and seconds the model burns before it succeeds.
+Humans bridge awkward interfaces by reading documentation, interpreting prose, and copying the right identifier. An agent repeats that inference inside every tool loop. A good agent-facing API removes as much of that hidden judgment as it can.
 
-## Schema enforcement is the floor, not the interface
+## A schema can reject mistakes without teaching the next move
 
-Across OpenAI, Anthropic, and MCP, tool contracts expose a name, model-facing metadata, and a typed input schema.
+Across OpenAI, Anthropic, and MCP, tool contracts expose a name, model-facing description, and typed input schema.
 
-Provider enforcement matters. Declaring JSON Schema alone cannot prevent invalid calls. OpenAI's strict mode requires `additionalProperties: false` on every object and all properties marked required, with nullable types for optional fields.
+Enforcement matters. Declaring JSON Schema alone cannot prevent invalid calls. OpenAI's strict mode requires `additionalProperties: false` on every object and all properties marked as required, with nullable types when a field is optional.
 
-A good description can help the model choose between tools. MCP's `inputSchema` and optional `outputSchema` make input and structured-output contracts explicit.
+Descriptions help the model choose between tools. MCP's `inputSchema` and optional `outputSchema` make the input and structured result explicit.
 
-But a valid call can still be a bad interface.
+But validity only solves the shape of the call.
 
-`update(id, data)` can be schema-valid and still hide the object's allowed fields, patch semantics, validation errors, conflicts, and next action. It is type-checked ambiguity.
+For the deployment example, replace the generic update with an operation such as `deploy_release(service_id, image_digest, expected_version, idempotency_key)`. Each field removes a decision the model would otherwise have to infer.
 
-Agent-facing APIs need narrower names, parameter vocabulary that matches the task, enums where the choice space is small, and error messages that tell the model what to change.
+The error contract matters too. A version conflict should return the current version and tell the caller to read the service before retrying. A timeout should say whether the idempotency key can be reused. "Request failed" does neither.
 
 ## The result payload is part of the API
 
 Input schemas get more attention than output shape, but multi-step work depends on what the model can do after a tool returns.
 
-A search tool rarely needs the full backend object. A ranked list with `issue_id`, `title`, `why_matched`, `url`, and `next_actions` is smaller and carries what the next step needs: evidence, identity, and constrained actions.
+After `deploy_release`, return the fields the next call needs: `deployment_id`, `service_id`, `status`, `observed_version`, and the allowed next actions. The agent can now call `deployment(action, deployment_id)` with `status` or `cancel` instead of searching a raw cloud response for identifiers.
 
-The same idea applies to CLI output. A human-oriented `--help` page can be generous with prose. An agent-oriented CLI should also expose parseable output, documented exit codes, stable IDs, and examples an agent can follow.
+Do not return build logs, image metadata, service configuration, and provider diagnostics by default. Make that detail available through a separate inspection call when the deployment fails.
 
-Willison demonstrated this with `shot-scraper video`: a coding agent read the command's `--help`, wrote a YAML storyboard, and recorded a browser demo. The help page was effectively part of the tool contract.
+The same rule applies to CLIs. A `deployctl release --help` page should explain the required image digest, version precondition, idempotency key, JSON output mode, and exit codes. The command should carry enough information for an agent to construct a safe call without searching a separate guide.
 
-## Design for the next legal move
+## Put policy in the operation, not the prompt
 
-The best agent-facing interfaces make the next legal move obvious. Five surfaces deserve API-design attention:
+The best agent-facing interfaces make the next legal move obvious. Before exposing a tool, ask five questions:
 
-1. **Tool names and descriptions:** Make selection cheap. Say what the tool does, when to use it, and when not to use it.
-2. **Input schemas:** Constrain the choice space. Prefer precise fields, enums, and domain language over generic blobs.
-3. **Mutation semantics:** Say whether a call patches, replaces, retries safely, or destroys state. Use preconditions or idempotency keys where duplicate execution would be costly.
-4. **Result payloads:** Return compact evidence, stable identifiers, cursors, and action hints.
-5. **Failure messages:** Explain the repair. Tell the model which field was wrong, what values are allowed, and whether retrying is safe.
+1. Can the model choose the operation from its name and description?
+2. Can the schema reject fields and values the operation does not support?
+3. Does the mutation say what changes and whether repeated execution is safe?
+4. Does the result return the identifiers and evidence needed for the next call?
+5. Does each expected failure explain how to repair or abandon the call?
 
-Do not make every tool tiny. The standard is the smallest complete contract that preserves safety and the next step.
+Do not split every endpoint into its own tool. A larger tool surface creates another selection problem, so related operations often belong in one tool with an explicit action parameter.
 
-For example, replace `github_request(method, path, body)` with task-shaped operations such as `issue_search(...)`, `issue_comment(..., idempotency_key)`, and `pull_request_review_threads(...)`. A generic tool can hide policy decisions; task-shaped tools can make them explicit.
+For common or high-risk work, expose a small set of domain actions that state the rules clearly. Keep a generic request as an escape hatch for the long tail, but do not make it the easiest way to perform a destructive mutation.
 
-## Measure the interface, not the vibes
+## Run the same deployment tasks before and after the change
 
-Agent-facing API design should leave a measurable trail. Before and after changing a tool surface, compare retries, validation errors, repair calls, latency, token cost, task completion, and human intervention.
+Build a fixed set of tasks around the old and new interfaces: deploy a release, retry after a timeout, recover from a version conflict, inspect a failed deployment, and cancel one in progress. Run the same agent and model settings against both versions.
 
-Willison's DSPy work tested prompt changes against real Datasette tools and custom metrics. Apply that discipline to interfaces: if a result adds `next_actions`, measure task completion and repair calls; if one generic mutation becomes three specific tools, track selection errors.
+Compare completion rate, validation failures, retries, end-to-end latency, token cost, and human intervention. Do not stop at fewer schema errors. The new interface should also reduce repair calls and help more runs reach the intended deployment state.
 
-## Agent APIs are product surfaces now
-
-For years, API design meant designing for developers. Clear docs, stable endpoints, predictable errors, and useful examples were the standard.
-
-Agents do not remove the human-facing API. They add a caller that chooses and chains actions under uncertainty.
-
-Treat that boundary as a product surface: enforce schemas, make mutations explicit, return continuation state, and preserve enough evidence to debug the loop.
-
-Then measure the result. If those metrics do not move in the right direction, a cleaner schema has not demonstrated a better interface.
+Agents do not replace the human-facing API. They add a caller that selects and chains actions under uncertainty. If the deployment tasks do not succeed more often or with less repair work, the interface is tidier, but not better.
 
 ## References
 
-1. Armin Ronacher, ["Better Models: Worse Tools"](https://lucumr.pocoo.org/2026/7/4/better-models-worse-tools/), July 4, 2026.
-2. Simon Willison, ["Using DSPy to evaluate and improve Datasette Agent's SQL system prompts"](https://simonwillison.net/2026/Jul/2/dspy-datasette-agent-prompts/), July 2, 2026.
-3. Simon Willison, ["Have your agent record video demos of its work with shot-scraper video"](https://simonw.substack.com/p/have-your-agent-record-video-demos), July 5, 2026.
-4. OpenAI Docs, ["Function calling"](https://developers.openai.com/api/docs/guides/function-calling).
-5. Anthropic Docs, ["Tool use with Claude"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview).
-6. Model Context Protocol, ["Tools"](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
+1. OpenAI Docs, ["Function calling"](https://developers.openai.com/api/docs/guides/function-calling).
+2. Anthropic Docs, ["Define tools"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools).
+3. Model Context Protocol, ["Tools"](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
