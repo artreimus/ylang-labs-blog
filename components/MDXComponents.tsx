@@ -52,6 +52,7 @@ import AgentMemory from './blogs/key-elements-of-multi-agent-systems/AgentMemory
 import MemoryArchitecture from './blogs/context-engineering-for-ai-agents/MemoryArchitecture'
 import ProcessFlow from './blogs/context-engineering-for-ai-agents/ProcessFlow'
 import HtmlMarkdownArtifactExperience from './blogs/the-unreasonable-effectiveness-of-html-for-agent-output/HtmlMarkdownArtifactExperience'
+import XllmBenchmarkCharts from './blogs/xllm-cluster-architecture-ai-inference/XllmBenchmarkCharts'
 
 // Core MDX Components
 const coreMDXComponents = {
@@ -120,6 +121,10 @@ const htmlVsMarkdownBlogComponents = {
   HtmlMarkdownArtifactExperience,
 }
 
+const xllmBlogComponents = {
+  XllmBenchmarkCharts,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
@@ -130,4 +135,5 @@ export const components: MDXComponents = {
   ...multiAgentBlogComponents,
   ...contextEngineeringBlogComponents,
   ...htmlVsMarkdownBlogComponents,
+  ...xllmBlogComponents,
 }

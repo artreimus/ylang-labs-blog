@@ -36,7 +36,24 @@ The **KV cache** stores attention keys and values already calculated for previou
 
 **Continuous batching** lets requests enter and leave a batch between generation steps. It improves utilization, but the scheduler must admit new prefill work without delaying active decodes.
 
-<MermaidDiagram>
+<Image
+  alt="A conceptual inference pipeline showing prompt tokens processed through parallel prefill lanes, stored in a paged KV cache, then read and appended to during sequential token-by-token decode"
+  src="/static/images/blogs/xllm-cluster-architecture-ai-inference/prefill-decode-kv-cache.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Prefill can process prompt positions in parallel. Decode depends on the tokens already produced,
+  then reads and appends to the KV cache at each generation step. Conceptual illustration; not
+  benchmark data.
+</DiagramSubtitle>
+
+<MermaidDiagram
+  label="LLM request lifecycle from scheduling through streaming"
+  description="An incoming request enters the scheduler queue, then moves through prefill to create KV cache state. Decode reads and updates that cache while producing one token at a time for the stream. Prefill usually dominates time to first token, the first decoded token ends TTFT, and TPOT is measured between later decoded tokens. Continuous batching adds work to the queue and active decode batch."
+>
   {`
     flowchart LR
       Request["Incoming request"] --> Queue["Scheduler queue"]
@@ -72,7 +89,24 @@ The [service layer](https://docs.xllm-ai.com/en/features/xllm_service_overview/)
 
 The [technical report](https://arxiv.org/abs/2510.14686) describes one device per engine process. Remote procedure calls, or RPCs, coordinate control work. Collectives such as all-reduce and all-to-all move tensors for distributed model execution.
 
-<MermaidDiagram>
+<Image
+  alt="A conceptual architecture plate showing one service control plane coordinating three heterogeneous inference-engine instances, each with its own local cache pool, while network arrows carry KV state between instances"
+  src="/static/images/blogs/xllm-cluster-architecture-ai-inference/xllm-service-engine-plate.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The service layer coordinates routing and distributed cache metadata. Each engine keeps
+  device-local execution and cache resources, while the network carries KV state between instances.
+  Conceptual illustration; not a literal deployment topology.
+</DiagramSubtitle>
+
+<MermaidDiagram
+  label="xLLM service and per-device engine architecture"
+  description="Clients send requests to xLLM-Service, which coordinates a global scheduler, event metrics, ETCD metadata, and global KV cache management. The scheduler assigns work to separate one-device prefill and decode engine processes. Prefill engines transfer KV state to decode engines, while decode engines participate in collective model computation and all engine processes exchange control messages with the service layer."
+>
   {`
     flowchart TD
       Client["Clients and API gateway"] --> Service["xLLM-Service"]
@@ -128,6 +162,20 @@ Serving traffic does not keep one shape. Batch size, prompt length, cache length
 
 Captured graphs require stable virtual addresses. Separate physical buffers make memory grow toward `sum(shape)`. xLLM gives graph shapes distinct virtual views over shared physical memory, aiming for physical use closer to `max(shape)`.
 
+<Image
+  alt="A conceptual graph virtual-memory diagram showing several alternative execution-graph shapes mapped through virtual address views onto one reusable pool of physical memory pages"
+  src="/static/images/blogs/xllm-cluster-architecture-ai-inference/graph-virtual-memory.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Alternative captured graph shapes can keep stable virtual views while reusing a bounded physical
+  page pool over time. The right-hand ghost pools represent the duplication this design aims to
+  avoid. Conceptual illustration; not a memory benchmark.
+</DiagramSubtitle>
+
 Two more tools target idle time. [Multi-stream parallelism](https://docs.xllm-ai.com/en/features/multi_streams/) lets one micro-batch compute while another communicates. [Expert Parallel Load Balancing](https://docs.xllm-ai.com/en/features/eplb/) monitors mixture-of-experts demand and updates redundant expert placement layer by layer. Their value depends on the model, topology, and traffic.
 
 ## xLLM, vLLM, SGLang, and TensorRT-LLM optimize different defaults
@@ -160,6 +208,8 @@ For DeepSeek-R1, it reports an average 12x improvement over vLLM-Ascend on the t
 In a PD comparison with 2,048-token inputs and outputs under a 100-millisecond TPOT constraint, xLLM reaches 11,351.58 tokens per second versus MindIE's 8,476.44, about 34% higher.
 
 The paper does not benchmark SGLang, TensorRT-LLM, or upstream vLLM on NVIDIA. Calling this simply “xLLM versus vLLM” would erase the backend, versions, hardware, workload, and TPOT constraint that produced the result.
+
+<XllmBenchmarkCharts />
 
 ## Choose by SLO-bounded goodput, not the largest throughput bar
 

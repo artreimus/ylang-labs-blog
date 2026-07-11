@@ -126,6 +126,8 @@ Blog asset standards:
 - For generated cover/card/header art, create the source artwork with `oil-painting-image-generator` first unless the user explicitly asks for another cover style.
 - For generated/cropped blog art, derive `cardImage.png` and `blogHeader.png` from the square `source-artwork.png`; `cardImage.png` should be `1080x1920` and `blogHeader.png` should be `1260x700` unless the user explicitly asks otherwise.
 - For section-level diagrams, architecture plates, process maps, and inline technical figures, use `technical-blog-image-generator`.
+- When benchmarks, time-series data, or multi-series comparisons are central to a post, add a chart when it materially improves comprehension. Prefer repo-native shadcn chart components backed by Recharts for responsive, interactive quantitative visuals; include the exact source conditions, an accessible text or table fallback, light and dark mode support, and clear caveats when results are not directly comparable.
+- Use generated raster images for conceptual explanation and editorial context, not as the source of truth for exact benchmark values. Keep exact numbers, axes, labels, and citations in repo-native charts, MDX text, or captions.
 - Do not create SVG/vector/code-native image sources unless the user explicitly asks for manual vector work.
 
 Blog writing standards:
