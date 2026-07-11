@@ -8,7 +8,7 @@ tldr: |
   - A schema can reject malformed calls, but the tool name, result, and errors still need to guide the next action.
   - Tools that change data should say exactly what changes, prevent stale updates, and make retries safe.
   - Results should return the identifiers and next actions the agent needs, not the full backend response.
-  - Measure task completion, retries, repair calls, latency, and token cost before and after an interface change.
+  - Judge an interface by whether agents make fewer wrong calls and recover with less help, not by whether the schema looks cleaner.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/next-api-for-agents-not-humans/cardImage.png'
 images: ['/static/images/blogs/next-api-for-agents-not-humans/blogHeader.png']
@@ -106,13 +106,17 @@ Related follow-up actions can share `deployment(action, deployment_id)` only whe
 
 Keep a generic request tool for uncommon cases, but do not make it the easiest way to perform a destructive change.
 
-## Run the same deployment tasks before and after the change
+## If the agent still guesses, the interface did not improve
 
-Build a fixed set of tasks around the old and new interfaces: deploy a release, retry after a timeout, recover from a version conflict, inspect a failed deployment, and cancel one in progress. Run the same agent and model settings against both versions.
+Treat the redesign as an evaluation, not a cleanup. Give the old and new interfaces the same deployment scenarios: a normal release, a retry after a timeout, a stale-version conflict, a failed deployment, and a cancellation.
 
-Compare completion rate, validation failures, retries, end-to-end latency, token cost, and human intervention. Do not stop at fewer schema errors. The new interface should also reduce repair calls and help more runs reach the intended deployment state.
+Keep the model, system prompt, agent loop, and inference settings fixed. Run each scenario several times and change only the tool interface.
 
-Agents do not replace the human-facing API. They add a caller that selects and chains actions under uncertainty. If the deployment tasks do not succeed more often or with less repair work, the interface is tidier, but not better.
+Then inspect the call trace. Did the agent choose the correct operation first? Did it reuse the same idempotency key after the timeout? Did it recover from the version conflict without a human hint? Could it find the deployment ID and next allowed action directly in the result?
+
+Measure completion rate, wrong-tool calls, repair calls, latency, token cost, and human intervention. The goal is not to prove that the schema looks cleaner. It is to show that the agent makes fewer guesses between the user's request and a successful deployment.
+
+Compare the traces, then revise every step where the agent still has to guess what changed, whether a retry is safe, or what to call next.
 
 ## References
 
