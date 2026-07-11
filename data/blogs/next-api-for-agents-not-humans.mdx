@@ -3,11 +3,11 @@ title: 'The Next API Must Work for Agents, Not Just Humans'
 date: '2026-07-09'
 tags: ['AI/ML', 'Agents', 'Context Engineering']
 draft: false
-summary: 'A model can produce valid JSON and still waste calls guessing what to do next. Agent-facing APIs need enforced schemas, explicit mutations, compact results, and errors that explain the repair.'
+summary: 'A tool can accept valid JSON and still leave an agent guessing. Better agent-facing APIs say what changes, make retries safe, return what the next call needs, and explain how to recover from errors.'
 tldr: |
-  - A schema can reject malformed calls, but it cannot make an ambiguous tool easy to use.
-  - Mutations should state what changes, whether retries are safe, and how to recover from conflicts.
-  - Results should return the evidence and identifiers the next call needs, not the full backend object.
+  - A schema can reject malformed calls, but the tool name, result, and errors still need to guide the next action.
+  - Tools that change data should say exactly what changes, prevent stale updates, and make retries safe.
+  - Results should return the identifiers and next actions the agent needs, not the full backend response.
   - Measure task completion, retries, repair calls, latency, and token cost before and after an interface change.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/next-api-for-agents-not-humans/cardImage.png'
@@ -16,15 +16,15 @@ imageTheme: 'white'
 layout: 'PostBanner'
 ---
 
-Most APIs assume a developer will fill in the gaps. An agent can often infer the missing step, but every inference adds another chance to retry, burn tokens, or fail the task.
+Most APIs assume a developer will read the documentation and fill in any missing steps. An agent-facing API gives that job to an AI model. The model has to choose and chain calls from the tool name, its description and accepted inputs, and the previous result.
 
-If a tool hides its mutation semantics, returns the backend object unchanged, or reports an error without a repair path, the model has to guess. Those guesses show up as retries, tokens, latency, and failed tasks.
+When those clues are vague, the agent has to guess. It may repeat a call, use more tokens, add latency, or fail the task.
 
-That is why the next API fight is not REST versus GraphQL. It is whether the interface makes the next correct action obvious to a model.
+That is why the next API fight is not REST versus GraphQL. It is whether the interface makes the next safe action obvious to a model.
 
 ## A valid call can still be the wrong operation
 
-Imagine an agent deploying a new image for `checkout-api`. The available tool is `update_service(service_id, data)`, and the model sends a schema-valid payload:
+Imagine an agent deploying a new image for `checkout-api`. The available tool is `update_service(service_id, data)`, and the model sends a payload that matches the schema:
 
 ```json
 {
@@ -43,66 +43,68 @@ The model chose a reasonable payload. The API did not give it enough information
   {`
     flowchart LR
       subgraph H["Generic update surface"]
-        H1["update_service(id, data)"] --> H2["Guess patch or replace"]
-        H2 --> H3["Raw cloud response"]
-        H3 --> H4["Find the deployment ID"]
+        H1["update_service(id, data)"] --> H2["Guess what data means"]
+        H2 --> H3["Search a large response"]
+        H3 --> H4["Work out the next action"]
       end
 
       subgraph A["Deployment operation"]
-        A1["deploy_release(...)"] --> A2["Version precondition"]
-        A2 --> A3["Deployment ID plus status"]
+        A1["deploy_release(...)"] --> A2["Reject a stale version"]
+        A2 --> A3["Return deployment ID and status"]
         A3 --> A4["Poll or cancel"]
       end
 
-      H4 -. "hidden decisions become API fields" .-> A1
+      H4 -. "move hidden decisions into fields" .-> A1
 
 `}
 
 </MermaidDiagram>
 
 <DiagramSubtitle>
-  A task-shaped operation makes the state change and the next legal action explicit.
+  A task-specific tool states what changes, rejects stale updates, and returns the next actions.
 </DiagramSubtitle>
 
-Humans bridge awkward interfaces by reading documentation, interpreting prose, and copying the right identifier. An agent repeats that inference inside every tool loop. A good agent-facing API removes as much of that hidden judgment as it can.
+Humans repair awkward interfaces by reading documentation, interpreting prose, and copying the right identifier. An agent has to repeat those judgments at every step. A good agent-facing API removes as much of that guesswork as it can.
 
 ## A schema can reject mistakes without teaching the next move
 
-Across OpenAI, Anthropic, and MCP, tool contracts expose a name, model-facing description, and typed input schema.
+Across OpenAI, Anthropic, and MCP, tool definitions include a name, a description for the model, and a typed input schema.
 
-Enforcement matters. Declaring JSON Schema alone cannot prevent invalid calls. OpenAI's strict mode requires `additionalProperties: false` on every object and all properties marked as required, with nullable types when a field is optional.
+A JSON Schema describes valid arguments, but non-strict tool calling can still produce arguments that do not match it. OpenAI's strict mode enforces schema adherence. It requires `additionalProperties: false` on every object and every property to be marked as required. Optional fields use a nullable type.
 
 Descriptions help the model choose between tools. MCP's `inputSchema` and optional `outputSchema` make the input and structured result explicit.
 
 But validity only solves the shape of the call.
 
-For the deployment example, replace the generic update with an operation such as `deploy_release(service_id, image_digest, expected_version, idempotency_key)`. Each field removes a decision the model would otherwise have to infer.
+For the deployment example, replace the generic update with `deploy_release(service_id, image_digest, expected_version, idempotency_key)`. The operation name says what it does. `expected_version` rejects the call if another release has already changed the service. `idempotency_key` lets a retry refer to the same deployment instead of starting a second one.
 
-The error contract matters too. A version conflict should return the current version and tell the caller to read the service before retrying. A timeout should say whether the idempotency key can be reused. "Request failed" does neither.
+Errors should also tell the agent what to do next. If the service version has changed, return the current version and tell the caller to read the service before retrying. If the request times out, say whether the same idempotency key can be reused. "Request failed" does neither.
 
 ## The result payload is part of the API
 
 Input schemas get more attention than output shape, but multi-step work depends on what the model can do after a tool returns.
 
-After `deploy_release`, return the fields the next call needs: `deployment_id`, `service_id`, `status`, `observed_version`, and the allowed next actions. The agent can now call `deployment(action, deployment_id)` with `status` or `cancel` instead of searching a raw cloud response for identifiers.
+After `deploy_release`, return the fields the next call needs: `deployment_id`, `service_id`, `status`, `observed_version`, and the allowed next actions. `observed_version` tells the caller which version of the service the deployment actually used. The agent can now call `deployment(action, deployment_id)` with `status` or `cancel` instead of searching a large cloud response for identifiers.
 
-Do not return build logs, image metadata, service configuration, and provider diagnostics by default. Make that detail available through a separate inspection call when the deployment fails.
+Keep the default result focused. Return the deployment identifier, current state, and possible next actions. Make build logs, image metadata, service configuration, and provider diagnostics available through a separate inspection call when the deployment fails.
 
-The same rule applies to CLIs. A `deployctl release --help` page should explain the required image digest, version precondition, idempotency key, JSON output mode, and exit codes. The command should carry enough information for an agent to construct a safe call without searching a separate guide.
+The same rule applies to CLIs. A `deployctl release --help` page should explain the required image digest, how `expected_version` prevents stale updates, when an `idempotency_key` can be reused, the JSON output mode, and the exit codes. The command should carry enough information for an agent to construct a safe call without searching a separate guide.
 
-## Put policy in the operation, not the prompt
+## Put safety rules in the tool, not the prompt
 
-The best agent-facing interfaces make the next legal move obvious. Before exposing a tool, ask five questions:
+The best agent-facing interfaces make the next safe move obvious. Before exposing a tool, ask five questions:
 
 1. Can the model choose the operation from its name and description?
-2. Can the schema reject fields and values the operation does not support?
-3. Does the mutation say what changes and whether repeated execution is safe?
+2. Does the tool validate its arguments and reject unsupported fields or values?
+3. Does the operation say exactly what changes and whether a retry is safe?
 4. Does the result return the identifiers and evidence needed for the next call?
-5. Does each expected failure explain how to repair or abandon the call?
+5. Does each expected failure explain the next move or when to stop?
 
-Do not split every endpoint into its own tool. A larger tool surface creates another selection problem, so related operations often belong in one tool with an explicit action parameter.
+Do not decide by endpoint count alone. Split an operation when combining it would hide different inputs, side effects, or retry rules. Starting a release deserves `deploy_release(...)` because it creates a deployment and needs a current-version check and a safe-retry key.
 
-For common or high-risk work, expose a small set of domain actions that state the rules clearly. Keep a generic request as an escape hatch for the long tail, but do not make it the easiest way to perform a destructive mutation.
+Related follow-up actions can share `deployment(action, deployment_id)` only when each action's behavior and safeguards remain explicit. For example, `status` can be read-only, while `cancel` must be marked as destructive and may require confirmation or an expected state. If one tool cannot make that distinction obvious, split the actions into separate tools.
+
+Keep a generic request tool for uncommon cases, but do not make it the easiest way to perform a destructive change.
 
 ## Run the same deployment tasks before and after the change
 
