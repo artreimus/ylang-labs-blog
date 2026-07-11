@@ -1,0 +1,195 @@
+---
+title: 'The Fastest LLM Inference Engine Does Not Exist. xLLM Shows Why.'
+date: '2026-07-11'
+tags: ['AI/ML', 'Generative AI']
+draft: false
+summary: 'xLLM shows why inference performance depends on hardware, workload, latency targets, and cluster design, not one universal speed ranking.'
+tldr: |
+  - xLLM separates cluster scheduling and shared state from model execution on each accelerator.
+  - Its Ascend 910B and 910C results do not prove universal superiority over vLLM, SGLang, or TensorRT-LLM.
+  - Its differentiators include Chinese accelerator support, dynamic prefill-decode placement, global KV management, virtual memory, graph execution, and MoE balancing.
+  - Choose a stack by measuring SLO-bounded goodput on your workload and hardware.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/xllm-cluster-architecture-ai-inference/cardImage.png'
+images: ['/static/images/blogs/xllm-cluster-architecture-ai-inference/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+There is no fastest LLM inference engine, only the fastest for a model, hardware, request mix, and latency target.
+
+xLLM makes that constraint visible. Its authors report an average 12x throughput improvement over vLLM-Ascend across the tested DeepSeek-R1 configurations on 16 Ascend 910B accelerators. The more important contribution is a cluster architecture for hardware-specific execution, shared cache state, and changing prefill and decode demand.
+
+## Five concepts explain most LLM inference performance
+
+An **inference engine** turns model weights into a service. It allocates memory, batches requests, executes operations, and returns tokens. Engines differ in scheduling, memory, kernels, and distributed execution.
+
+Each text-generation request has two main compute phases.
+
+**Prefill** processes the prompt in parallel and builds the attention state needed to generate. Long prompts increase this work and delay the first response token.
+
+**Decode** produces the response one token at a time, repeatedly reading model weights and attention state. Long answers and high concurrency make it expensive.
+
+These phases produce two user-facing metrics. **Time to first token (TTFT)** measures the delay to the first token. Queueing and prefill usually dominate it. **Time per output token (TPOT)** measures the interval between later tokens. A response can start quickly yet stream slowly, so both matter.
+
+The **KV cache** stores attention keys and values already calculated for previous tokens. It avoids recomputing the full history for every new token, but can consume much of the accelerator's memory with long contexts and high concurrency.
+
+**Continuous batching** lets requests enter and leave a batch between generation steps. It improves utilization, but the scheduler must admit new prefill work without delaying active decodes.
+
+<MermaidDiagram>
+  {`
+    flowchart LR
+      Request["Incoming request"] --> Queue["Scheduler queue"]
+      Queue --> Prefill["Prefill<br/>process prompt"]
+      Prefill -->|"Often dominates TTFT"| KV["KV cache<br/>store attention state"]
+      KV --> Decode["Decode<br/>generate one token per step"]
+      Decode -->|"First token ends TTFT"| Stream["Stream tokens to client"]
+      Decode --> KV
+      Decode -. "TPOT measured after first token" .-> Stream
+      Batch["Continuous batching"] --> Queue
+      Batch --> Decode
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  Prefill determines when generation can begin. Decode determines how steadily later tokens arrive,
+  while the KV cache prevents repeated attention work.
+</DiagramSubtitle>
+
+## The workload decides which optimization matters
+
+A document service with 20,000-token prompts may be prefill-bound. A reasoning model with long answers may be decode-bound. Repeated system prompts may make prefix-cache hits more valuable than a faster matrix multiplication kernel. Multimodal requests add encoding before prefill.
+
+Hardware, topology, parallelism, and quantization change the ranking again. Raw tokens per second is incomplete because a server can admit more work while making users wait longer. Measure how much work finishes inside the service-level objectives, or SLOs.
+
+## xLLM separates cluster decisions from device execution
+
+[xLLM](https://github.com/xLLM-AI/xllm) is an Apache-2.0 framework for language, multimodal, diffusion, and recommendation models. It centers Ascend NPU, Cambricon MLU, Moore Threads MUSA, Hygon DCU, MetaX MACA, and Iluvatar CoreX. A CUDA development path exists, but the [overview](https://docs.xllm-ai.com/en/features/overview/) and [model matrix](https://docs.xllm-ai.com/en/supported_models/) keep domestic accelerators central. [v0.10.0](https://github.com/xLLM-AI/xllm/releases/tag/v0.10.0) arrived July 1, 2026. [OpenAtom announced the donation signing](https://www.openatom.org/journalism/detail/nACUwDkcHx6W) on June 25; the xLLM repository marked the donation official on July 6.
+
+xLLM's main architectural choice is a split between **xLLM-Service** and **xLLM-Engine**.
+
+The [service layer](https://docs.xllm-ai.com/en/features/xllm_service_overview/) sees the cluster. It registers instances, stores metadata, receives metrics, routes requests, plans capacity changes, and manages shared KV information. The engine layer schedules local batches, manages device memory, runs operators, and communicates with other engine processes when the model spans devices.
+
+The [technical report](https://arxiv.org/abs/2510.14686) describes one device per engine process. Remote procedure calls, or RPCs, coordinate control work. Collectives such as all-reduce and all-to-all move tensors for distributed model execution.
+
+<MermaidDiagram>
+  {`
+    flowchart TD
+      Client["Clients and API gateway"] --> Service["xLLM-Service"]
+      Service --> Scheduler["Global scheduler and planner"]
+      Service --> Events["Event plane and runtime metrics"]
+      Service --> ETCD["ETCD<br/>instances, requests, cache metadata"]
+      Service --> GlobalKV["Global KV cache manager"]
+      GlobalKV --> Mooncake["Mooncake and cache storage<br/>offload, prefetch, transfer"]
+      Scheduler --> P["Prefill engine process<br/>one device"]
+      Scheduler --> D1["Decode engine process<br/>one device"]
+      Scheduler --> D2["Decode engine process<br/>one device"]
+      P -. "RPC control" .-> Service
+      D1 -. "RPC control" .-> Service
+      D2 -. "RPC control" .-> Service
+      P -->|"KV transfer"| D1
+      P -->|"KV transfer"| D2
+      D1 <-->|"collective model compute"| D2
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  xLLM-Service makes cluster-level placement and state decisions. Each xLLM-Engine process owns one
+  device and participates in model computation or KV transfer.
+</DiagramSubtitle>
+
+This enables cluster-wide decisions, but xLLM must be evaluated with ETCD, cache transport, routing, and failure behavior, not only as a kernel runtime.
+
+## Dynamic PD and multimodal EPD move work between specialized pools
+
+Prefill and decode compete when they share devices. A long prefill can delay decode and push TPOT above its target. Static prefill-decode disaggregation assigns separate device pools to each phase, but a fixed split wastes capacity when traffic changes.
+
+xLLM's [disaggregated PD design](https://docs.xllm-ai.com/en/features/disagg_pd/) uses xLLM-Service, ETCD, and separate prefill and decode instances. The report describes dynamic role changes based on TTFT, TPOT, request lengths, and memory use. As demand changes, the planner can shift eligible capacity between the two pools.
+
+Disaggregation adds KV-transfer latency, network load, and another failure path. The right ratio depends on request lengths, arrival bursts, devices, and the protected SLO.
+
+Multimodal inference adds an encode phase for images or video. xLLM's report describes **encode-prefill-decode (EPD)** profiles such as E+P+D or EP+D. A cluster can isolate a heavy vision encoder when that reduces interference, but keep phases together when transfer overhead costs more than it saves.
+
+## Global KV cache and xTensor attack different memory problems
+
+xLLM uses ETCD for cluster registration, load information, and cache metadata. Its [Global KV Cache documentation](https://docs.xllm-ai.com/en/features/global_kvcache/) describes routing requests toward instances with reusable prefixes, then offloading and prefetching cache data through local and external storage. The repository credits [Mooncake](https://github.com/kvcache-ai/Mooncake) as the basis for this hybrid cache management.
+
+There is an important current limitation: the same documentation says Global KV Cache does not support PD separation and instructs users to set `--enable_disagg_pd=false`. Features appearing in one architecture do not necessarily compose in the current release.
+
+Within an engine, **xTensor** addresses another problem. Paged KV caches allocate physical memory in blocks, avoiding maximum-length reservations for every request, but operators need block tables to find those pages. xTensor maps a preallocated physical page pool into contiguous virtual addresses. Operators see a contiguous tensor while physical pages are mapped on demand, reused, and prepared asynchronously.
+
+Like operating-system virtual memory, this preserves paging efficiency but requires accelerator virtual-memory support and backend-specific operator work.
+
+## Graph execution saves launch overhead but dynamic shapes complicate memory
+
+LLM execution launches many small operations. Graph execution captures a sequence and replays it, reducing host overhead and accelerator idle gaps.
+
+Serving traffic does not keep one shape. Batch size, prompt length, cache length, and communication volume change continuously. xLLM's [Graph Mode design](https://docs.xllm-ai.com/en/design/graph_mode_design/) uses shape buckets, dynamic parameters, and **Piecewise Graphs**. Stable segments are captured while dynamic work can remain in eager execution.
+
+Captured graphs require stable virtual addresses. Separate physical buffers make memory grow toward `sum(shape)`. xLLM gives graph shapes distinct virtual views over shared physical memory, aiming for physical use closer to `max(shape)`.
+
+Two more tools target idle time. [Multi-stream parallelism](https://docs.xllm-ai.com/en/features/multi_streams/) lets one micro-batch compute while another communicates. [Expert Parallel Load Balancing](https://docs.xllm-ai.com/en/features/eplb/) monitors mixture-of-experts demand and updates redundant expert placement layer by layer. Their value depends on the model, topology, and traffic.
+
+## xLLM, vLLM, SGLang, and TensorRT-LLM optimize different defaults
+
+The four frameworks overlap substantially. The useful comparison is the environment each makes easiest to optimize.
+
+| Framework        | Strongest default fit                                                                          | Architectural emphasis                                                                                      | First question to test                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **xLLM**         | Listed Chinese accelerators and clusters needing service-level scheduling                      | Service-engine separation, dynamic PD/EPD, global KV state, xTensor, graph modes, and MoE balancing         | Does the required feature combination work on the target accelerator?  |
+| **vLLM**         | Broad model and API coverage                                                                   | PagedAttention, token-budget scheduling, prefix caching, chunked prefill, graphs, speculative decoding      | Does the upstream or plugin path meet the target SLO?                  |
+| **SGLang**       | Prefix-heavy agents, structured generation, multi-LoRA, and reinforcement-learning integration | RadixAttention prefix reuse, continuous batching, structured outputs, speculative decoding, distributed use | Does real traffic reuse enough prefixes to retain cache value?         |
+| **TensorRT-LLM** | NVIDIA deployments willing to tune closely to the hardware                                     | Compiled or PyTorch runtimes, in-flight batching, paged KV, overlap scheduling, and quantization            | Does its matrix support the checkpoint, precision, and GPU generation? |
+
+[vLLM](https://github.com/vllm-project/vllm) is a broad baseline with many models, APIs, quantization paths, and hardware plugins. Its [V1 scheduler](https://docs.vllm.ai/en/stable/api/vllm/config/scheduler/) allocates a token budget per iteration. [Disaggregated prefill](https://docs.vllm.ai/en/stable/features/disagg_prefill/) tunes TTFT and inter-token latency independently, but does not automatically improve throughput.
+
+[SGLang](https://github.com/sgl-project/sglang) targets shared-prefix workloads with RadixAttention, plus paged attention, structured outputs, speculative decoding, parallelism, and post-training integrations.
+
+[TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM) is NVIDIA-specific, combining in-flight batching, paged KV, overlap scheduling, quantization, and [disaggregated serving](https://nvidia.github.io/TensorRT-LLM/latest/features/disagg-serving.html), subject to support matrices.
+
+Hugging Face's [Text Generation Inference](https://github.com/huggingface/text-generation-inference) is in maintenance mode; its maintainers recommend vLLM, SGLang, and local engines for new work.
+
+## xLLM's benchmark numbers are strong and narrowly scoped
+
+The xLLM paper compares against vLLM-Ascend 0.10.rc1 and MindIE 2.1.rc1 on Ascend 910B and 910C. These are author-reported results, not an independent cross-hardware leaderboard.
+
+For Qwen-series ShareGPT workloads with 2,048-token inputs and outputs under a 50-millisecond TPOT constraint, the paper reports up to 1.9x vLLM-Ascend throughput on 910B and 2.2x on 910C.
+
+For DeepSeek-R1, it reports an average 12x improvement over vLLM-Ascend on the tested 910B configuration. The 910C baseline is excluded because it missed the required TPOT threshold, so there is no 910C ratio against it.
+
+In a PD comparison with 2,048-token inputs and outputs under a 100-millisecond TPOT constraint, xLLM reaches 11,351.58 tokens per second versus MindIE's 8,476.44, about 34% higher.
+
+The paper does not benchmark SGLang, TensorRT-LLM, or upstream vLLM on NVIDIA. Calling this simply “xLLM versus vLLM” would erase the backend, versions, hardware, workload, and TPOT constraint that produced the result.
+
+## Choose by SLO-bounded goodput, not the largest throughput bar
+
+First confirm support for the checkpoint, tokenizer, precision, context length, output behavior, and parallel layout. Compare deterministic outputs before speed.
+
+Then hold the experiment constant:
+
+1. Pin model, framework, backend, driver, firmware, and container versions.
+2. Match precision, quantization, and sampling.
+3. Fix accelerator count, interconnect, and parallel topology.
+4. Replay one request distribution, separating cold and warm caches.
+5. Sweep through saturation; report latency percentiles, errors, cache hits, KV transfers, and memory failures.
+
+The final metric should be **goodput**: requests or tokens completed per second while meeting every required SLO. Work that misses latency or error targets should not make the system appear more productive.
+
+An illustrative decision record would read: “On eight Ascend 910B devices serving checkpoint X in BF16, xLLM v0.10.0 completed [measured percentage] more requests within our p95 TTFT and p99 TPOT targets than vLLM-Ascend version Y under trace Z.”
+
+That result can guide capacity planning. “Framework A produced more tokens per second” cannot.
+
+xLLM is compelling when its hardware focus and cluster architecture match your constraints. vLLM may be the broad default, SGLang may fit prefix-heavy agent traffic, and TensorRT-LLM may suit an NVIDIA-specific deployment. The fastest engine is the one that meets your workload's SLOs on the hardware you operate.
+
+## References
+
+1. [xLLM repository](https://github.com/xLLM-AI/xllm)
+2. [xLLM Technical Report](https://arxiv.org/abs/2510.14686)
+3. [xLLM feature overview](https://docs.xllm-ai.com/en/features/overview/)
+4. [xLLM-Service overview](https://docs.xllm-ai.com/en/features/xllm_service_overview/)
+5. [xLLM Global KV Cache](https://docs.xllm-ai.com/en/features/global_kvcache/)
+6. [xLLM Graph Mode design](https://docs.xllm-ai.com/en/design/graph_mode_design/)
+7. [vLLM documentation](https://docs.vllm.ai/en/stable/)
+8. [SGLang documentation](https://docs.sglang.io/)
+9. [TensorRT-LLM documentation](https://nvidia.github.io/TensorRT-LLM/)
+10. [Text Generation Inference maintenance notice](https://huggingface.co/docs/text-generation-inference/main/index)
