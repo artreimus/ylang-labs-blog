@@ -104,11 +104,36 @@ export default function Footer() {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-gray-200 pt-8 text-sm text-gray-500 dark:border-white/10 lg:justify-between">
+          <section
+            aria-labelledby="site-disclaimer-title"
+            className="grid gap-3 border-y border-gray-200 py-6 text-sm leading-relaxed text-gray-600 dark:border-white/10 dark:text-gray-400 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-8"
+          >
+            <h2
+              id="site-disclaimer-title"
+              className="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-200"
+            >
+              Personal publishing note
+            </h2>
+            <p className="max-w-4xl">
+              Articles express their authors’ personal views and do not represent or imply
+              endorsement by any employer, client, or partner. We publish from public sources and
+              personal experience and do not knowingly include confidential, proprietary, or
+              employer-owned material. Original articles and site code are open source under the{' '}
+              <Link
+                href={`${siteMetadata.siteRepo}/blob/main/LICENSE`}
+                className="font-medium text-gray-900 underline decoration-gray-300 underline-offset-4 transition hover:decoration-primary-500 dark:text-gray-200 dark:decoration-gray-600 dark:hover:decoration-primary-400"
+              >
+                MIT License
+              </Link>{' '}
+              unless otherwise noted. Content is for educational purposes, not professional advice.
+            </p>
+          </section>
+
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-4 text-sm text-gray-500 lg:justify-between">
             <div className="flex items-center text-gray-600 dark:text-gray-500">
               <DynamicLogo />
             </div>
-            <div className="text-gray-600 dark:text-gray-500">{`© ${currentYear} ${siteMetadata.title}. All rights reserved.`}</div>
+            <div className="text-gray-600 dark:text-gray-500">{`© ${currentYear} ${siteMetadata.title}.`}</div>
             <div className="flex flex-wrap items-center gap-3 text-gray-600 dark:text-gray-500">
               {socialIconLinks.map(({ kind, href }) => (
                 <SocialIcon
