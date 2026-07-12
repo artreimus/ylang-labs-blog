@@ -22,6 +22,7 @@ This is the default create-blog workflow for this repo. When the user says "crea
 - If the user asks to save every variant, assign each writer a unique output path under `posts/variants/<slug>/<variant-id>.md`.
 - If the user asks to generate full image files for every variant, assign each variant a unique asset folder such as `public/static/images/blogs/<slug>-variant-<variant-id>/`.
 - Preserve unrelated work. Run `git status --short --untracked-files=all` before repo writes and do not touch unrelated dirty files.
+- Keep all integrated blog work in the repository's existing checkout. Create or switch to the task branch there when needed. Do not create or use a separate worktree unless the user explicitly asks for one; if local changes block a safe switch, stop and ask how to proceed.
 - Do not commit unless the user explicitly asks.
 
 ## Orchestrator Role

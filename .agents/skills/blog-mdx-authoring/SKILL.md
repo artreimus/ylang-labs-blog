@@ -15,6 +15,7 @@ This skill guides you through creating a new blog post for the `ylang-labs-blog`
 - Authors are defined in `data/authors/*.mdx`.
 - Calendar-tracked posts are represented by GitHub issues and Project items through `.agents/skills/content-calendar-management/SKILL.md`.
 - Primary prose and editorial standards are handled through `.agents/skills/blog-writing-guide/SKILL.md`.
+- Create and edit the post in the repository's existing checkout. Create or switch to the task branch there when needed. Do not create or use a separate worktree unless the user explicitly asks for one; if local changes block a safe switch, stop and ask how to proceed.
 
 ## 2. Information Gathering
 

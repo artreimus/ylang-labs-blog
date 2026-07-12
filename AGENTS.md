@@ -29,7 +29,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
 - For autonomous trend/topic research, use Codex's available Exa MCP search tool when present. Do not add repo-level Exa SDK dependencies or `EXA_API_KEY` wiring unless the user asks for a standalone scheduled script outside Codex.
 - When a library detail is unclear, use Context7 for current docs. If Context7 is insufficient, use web search and cite external sources in the final answer.
 - Never create a git commit unless explicitly asked. If asked to commit, include only task-related files and exclude temporary plans, scratch files, generated support notes, local-only `refs/` materials, and unrelated dirty files.
-- Preserve unrelated work. This repo may have generated or user-owned changes in the worktree; do not revert or stage them unless the user asks.
+- Preserve unrelated work. This repo may have generated or user-owned changes in the checkout; do not revert or stage them unless the user asks.
 
 ## Commands
 
@@ -85,7 +85,7 @@ These files may change after a build. Treat unrelated pre-existing generated cha
 
 Blog posts live in `data/blogs/<slug>.mdx`. Use kebab-case slugs and match the asset folder name exactly.
 
-When asked to create a new blog post, create or switch to a dedicated branch in the existing checkout instead of starting from a sibling worktree. Use a clear branch name such as `blog/<slug>` or `codex/blog-<slug>`, preserve unrelated dirty files, and only use a separate worktree when the user explicitly asks for one or when branch work in the current checkout would risk overwriting user changes.
+When asked to create or update a blog post, work in this repository's existing checkout. Create or switch to a dedicated branch in the same checkout, using a clear name such as `blog/<slug>` or `codex/blog-<slug>`, and preserve unrelated dirty files by staging only task-owned paths. Do not create or use a separate worktree unless the user explicitly asks for one. If the current checkout cannot switch branches safely because local changes would be overwritten, stop and ask the user how to proceed instead of automatically moving the work to another worktree.
 
 Required or strongly expected blog frontmatter:
 
@@ -296,8 +296,8 @@ Always state which validation ran and any validation that could not be run.
 - Do not commit unless explicitly asked.
 - Do not revert user changes.
 - Check `git status --short --untracked-files=all` before editing, before staging, and before finalizing.
-- When making changes and committing them to a PR, do not leave the local worktree dirty from your task. Before finalizing, confirm `git status --short` is clean or contains only unrelated pre-existing changes that were intentionally left untouched.
-- When making changes and committing them, do not leave the worktree dirty with those same task-related changes after they are already committed. Clean up task-owned generated output, staged leftovers, and duplicate dirty files before finalizing, while preserving unrelated pre-existing work.
+- When making changes and committing them to a PR, do not leave the local checkout dirty from your task. Before finalizing, confirm `git status --short` is clean or contains only unrelated pre-existing changes that were intentionally left untouched.
+- When making changes and committing them, do not leave the checkout dirty with those same task-related changes after they are already committed. Clean up task-owned generated output, staged leftovers, and duplicate dirty files before finalizing, while preserving unrelated pre-existing work.
 - Keep generated files, plans, local notes, temporary outputs, and private research materials out of commits unless explicitly requested.
 - Before committing, inspect `git diff --cached --name-status` and reject accidental support artifacts such as `PLAN_*.md`, `posts/*-options.md`, `.DS_Store`, `.tmp`, `.bak`, `.orig`, `.rej`, `.next/`, `coverage/`, `test-results/`, and ignored generated files.
 - Treat `posts/social-media-<slug>.md` as publishable only when social launch copy is explicitly requested or the task is an end-to-end publishing package. Otherwise leave it untracked locally or remove it during cleanup.
