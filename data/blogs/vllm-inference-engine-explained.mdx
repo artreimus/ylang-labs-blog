@@ -1,6 +1,6 @@
 ---
 title: 'vLLM Explained: Why LLM Inference Is a Memory and Scheduling Problem'
-date: '2026-07-12'
+date: '2026-07-18'
 tags: ['AI/ML', 'Generative AI']
 draft: false
 summary: 'Learn how LLM inference really works, why KV-cache memory and request scheduling become the bottlenecks, and how vLLM turns both into a production serving system.'
@@ -38,6 +38,7 @@ That last dependency is fundamental. The model cannot accept token 20 until toke
 <MermaidDiagram
   label="Autoregressive LLM token generation loop"
   description="The model scores one next token, appends the selection to its context, and repeats until a stop condition."
+  className="mx-auto max-w-xl"
 >
   {`
     flowchart TD
