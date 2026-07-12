@@ -1,0 +1,341 @@
+---
+title: 'vLLM Explained: Why LLM Inference Is a Memory and Scheduling Problem'
+date: '2026-07-12'
+tags: ['AI/ML', 'Generative AI']
+draft: false
+summary: 'Learn how LLM inference really works, why KV-cache memory and request scheduling become the bottlenecks, and how vLLM turns both into a production serving system.'
+tldr: |
+  - LLM generation has two different phases: batched prompt processing during prefill, then autoregressive token generation during decode.
+  - The KV cache saves repeated attention work, but its size grows with live tokens and often limits concurrency before raw compute does.
+  - vLLM combines PagedAttention, continuous batching, chunked prefill, and prefix caching to allocate memory on demand and keep useful work flowing through the GPU.
+  - Judge any inference setup by workload-specific TTFT, inter-token latency, and goodput inside an SLO, not by an isolated tokens-per-second claim.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/vllm-inference-engine-explained/cardImage.png'
+images: ['/static/images/blogs/vllm-inference-engine-explained/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+Serving a large language model takes more than fast math. Once weights fit, memory determines concurrency, and scheduling determines whether the accelerator does useful work.
+
+[vLLM](https://github.com/vllm-project/vllm) is built around that observation. Its best-known idea, PagedAttention, makes the attention cache behave more like paged virtual memory. Its scheduler then mixes work from requests that arrive, grow, and finish at different times. To understand why those choices matter, we first need to follow one token through ordinary LLM inference.
+
+## How an LLM turns a prompt into the next token
+
+An LLM is trained before it reaches an inference server. During inference, the server normally loads fixed model weights and uses them to predict tokens. It is not updating those weights or learning from the request.
+
+For a decoder-only Transformer, one generation step looks like this:
+
+1. **Tokenization converts text into token IDs.** A token may be a word, word part, or punctuation. `Where is the leave policy?` becomes integers from the model's vocabulary.
+2. **Embeddings turn IDs into vectors.** Positional information records where each token appears.
+3. **Transformer layers process the vectors.** Self-attention uses relevant earlier positions, then feed-forward networks transform the result. The [Transformer paper](https://arxiv.org/abs/1706.03762) explains this architecture.
+4. **The final layer produces logits**, which score possible next tokens.
+5. **A decoding rule selects one token.** Greedy decoding takes the highest score. Sampling controls such as temperature and top-p trade determinism for variety.
+6. **The token joins the context.** The model runs again until an end token, length limit, or other stop condition.
+
+That last dependency is fundamental. The model cannot accept token 20 until tokens 1 through 19 are part of the accepted sequence. Speculative decoding may draft several candidates together, but it still verifies them against that autoregressive dependency.
+
+<MermaidDiagram
+  label="Autoregressive LLM token generation loop"
+  description="The model scores one next token, appends the selection to its context, and repeats until a stop condition."
+>
+  {`
+    flowchart TD
+      Text["Prompt text"] --> Tokens["Tokenizer<br/>token IDs"]
+      Tokens --> Embed["Embeddings and positions"]
+      Embed --> Model["Transformer forward pass<br/>fixed weights"]
+      Model --> Logits["Next-token logits"]
+      Logits --> Sample["Select or sample one token"]
+      Sample --> Stop{"Stop condition?"}
+      Stop -->|"No"| Append["Append token to context"]
+      Append --> Embed
+      Stop -->|"Yes"| Output["Return completed output"]
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  Text generation is autoregressive. Each selected token changes the input to the next forward pass.
+</DiagramSubtitle>
+
+## Prefill starts the answer; decode controls the stream
+
+Inference engines divide that loop into two phases with different performance profiles.
+
+**Prefill** processes the prompt positions together, builds their attention state, and produces the logits used to select the first output token. Although attention respects causal order, the accelerator can compute many prompt positions in one forward pass. Long prompts usually delay the first visible token.
+
+**Decode** uses the cached prompt and generated-token state to produce later tokens. In ordinary non-speculative decoding, an engine step usually schedules one new token position per request. Speculative decoding can draft and verify multiple positions, but accepted tokens remain autoregressive. Because one request is sequential, batching independent requests gives the accelerator more work at once.
+
+Consider an illustrative internal policy assistant, not a Ylang Labs production system. Twelve employees share a system prompt and handbook, but ask different questions and receive uneven answer lengths. The common prefix makes prefill substantial. The uneven outputs make fixed batching awkward.
+
+<MermaidDiagram
+  label="Prefill and decode latency timeline"
+  description="TTFT ends at the first output token. ITL or TPOT measures the gaps between later decode tokens."
+>
+  {`
+    flowchart LR
+      Arrive["Request arrives"] --> Queue["Queueing"]
+      Queue --> Prefill["Prefill and first-token work<br/>process prompt, select token"]
+      Prefill --> T1["First output token"]
+      T1 --> T2["Decode token 2"]
+      T2 --> T3["Decode token 3"]
+      T3 --> More["More decode steps"]
+      Arrive -. "TTFT" .-> T1
+      T1 -. "ITL / TPOT" .-> T2
+      T2 -. "ITL / TPOT" .-> T3
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  A service can have a good TTFT and poor streaming speed, or the reverse. Measure both phases.
+</DiagramSubtitle>
+
+The core serving metrics describe different user experiences:
+
+| Metric         | What it measures                                    | What commonly changes it                                        |
+| -------------- | --------------------------------------------------- | --------------------------------------------------------------- |
+| **TTFT**       | Time from request arrival to the first output token | Queueing, prompt length, prefix reuse, prefill scheduling       |
+| **ITL / TPOT** | Delay between output tokens after the first         | Decode batch, interference from prefill, kernels, communication |
+| **Throughput** | Requests or tokens completed per unit of time       | Concurrency, batching, model and hardware, input/output mix     |
+| **Goodput**    | Work completed while meeting chosen latency SLOs    | Admission policy, scheduling, tail latency, workload shape      |
+
+## The KV cache trades repeated compute for growing memory
+
+Self-attention derives a key and value vector for every relevant token at every attention layer. During decode, earlier keys and values do not need to be recalculated because the model weights and earlier tokens have not changed. An inference engine stores them in the **KV cache** and computes only the state for the new token.
+
+This avoids repeated arithmetic, but each live sequence consumes more memory as its context grows. For a conventional decoder-only Transformer, a first-order estimate is:
+
+```text
+KV bytes ≈ live tokens × 2 × layers × KV heads × head dimension × bytes per element
+```
+
+The factor of two represents keys and values. This is proportional sizing, not a universal byte count. Grouped-query attention, quantization, and parallel layout change the terms. Multi-head latent attention and hybrid models use different layouts. Metadata, activations, and workspaces sit outside the formula.
+
+Model weights are mostly fixed after loading, but KV memory grows with live tokens. An accelerator that fits the weights can still run out of capacity under concurrency.
+
+## Fixed batches and contiguous reservations leave expensive holes
+
+Static shapes fit requests that arrive and finish at different times poorly. In a **static batch**, a 40-token answer can leave an idle slot while another runs for 400. Reserving contiguous KV memory to a request's maximum length also holds space for tokens that may never exist.
+
+| Serving choice             | Why it looks simple                     | Capacity it can waste                                                |
+| -------------------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| Fixed request batch        | One rectangular tensor, one shared loop | Slots from early-finished sequences and time waiting to fill a batch |
+| Maximum-length reservation | Stable address range for every request  | Unused tokens between actual and maximum length                      |
+| Growing contiguous buffer  | Allocate closer to current need         | Free gaps, reallocation, or copying as sequences grow                |
+
+The 2023 [PagedAttention paper](https://arxiv.org/abs/2309.06180) reported 2 to 4 times higher throughput at the same latency than FasterTransformer and Orca in its evaluated configurations. That supports the paper-era design, not a current universal speed claim. Models, hardware, kernels, and runtimes have changed, so a modern comparison needs a fresh controlled benchmark.
+
+## PagedAttention separates a request's logical cache from physical memory
+
+PagedAttention borrows an idea from operating systems. A process sees a contiguous virtual address space even when its pages occupy scattered physical memory. Similarly, vLLM divides a request's logical KV cache into fixed-size blocks and maps those logical blocks to available physical blocks in a shared KV pool.
+
+The request still sees token positions in order. The attention kernel follows its block table to find the corresponding keys and values. Physical blocks can be allocated as the sequence grows, so a request does not need one maximum-length contiguous reservation. When the request finishes, its blocks become available for reuse. Prefix-cached blocks may remain indexed until they are reused or evicted.
+
+<MermaidDiagram
+  label="PagedAttention logical blocks mapped to a physical KV pool"
+  description="A request's ordered logical KV blocks map to scattered blocks in a shared physical pool."
+>
+  {`
+    flowchart TD
+      subgraph Logical["Request A logical KV blocks"]
+        L0["Logical 0"] --> L1["Logical 1"] --> L2["Logical 2"] --> L3["Logical 3"]
+      end
+      subgraph Table["Request A block table"]
+        M0["0 maps to 7"]
+        M1["1 maps to 2"]
+        M2["2 maps to 11"]
+        M3["3 maps to 5"]
+      end
+      subgraph Pool["Shared physical KV pool"]
+        P2["Physical 2"]
+        P5["Physical 5"]
+        P7["Physical 7"]
+        P11["Physical 11"]
+        Other["Other blocks<br/>used or free"]
+      end
+      L0 --> M0 --> P7
+      L1 --> M1 --> P2
+      L2 --> M2 --> P11
+      L3 --> M3 --> P5
+      Other ~~~ P11
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  Logical order stays contiguous for the request. Physical KV blocks do not need to sit next to one
+  another in accelerator memory.
+</DiagramSubtitle>
+
+Paging still leaves a partial final block and needs block-table metadata. In return, it avoids maximum-length reservations and enables prefix sharing.
+
+## Continuous batching schedules the work that is ready now
+
+**Continuous batching** keeps live requests moving. Instead of freezing a batch until every member finishes, the scheduler can retire completed requests and admit new work between engine iterations.
+
+vLLM V1 treats each iteration's token count as a budget. Running requests need decode tokens or remaining prefill tokens. Waiting requests enter when memory and budget allow. In the [scheduler configuration](https://docs.vllm.ai/en/stable/api/vllm/config/scheduler/), `max_num_batched_tokens` caps tokens processed in one iteration. `max_num_scheduled_tokens` normally follows it, but may be lower for features such as speculative decoding.
+
+Decode often needs one position while a long prompt needs thousands. The scheduler mixes decode steps with bounded prefill pieces. Requests join and leave between iterations.
+
+## Chunked prefill protects streaming tokens from long prompts
+
+A long prefill can consume a large iteration and delay active decodes. **Chunked prefill** splits that prompt work so it can fit beside decode work inside the token budget. In V1, the [optimization guide](https://docs.vllm.ai/en/latest/configuration/optimization/) says chunked prefill is enabled by default whenever possible and decode requests are prioritized before pending prefills.
+
+For the policy assistant, a handbook-heavy question may require substantial prefill while other users still expect tokens to stream. Chunking serves those decode steps, then spends the remaining budget on the prompt.
+
+<MermaidDiagram
+  label="Chunked prefill sharing an iteration with decode"
+  description="Each iteration schedules active decode tokens, then uses remaining capacity for part of a long prefill."
+>
+  {`
+    flowchart LR
+      Prompt["Long prompt"] --> C1["Prefill chunk A"] --> C2["Prefill chunk B"] --> C3["Prefill chunk C"]
+      D1["Iteration 1<br/>active decodes + chunk A"] --> D2["Iteration 2<br/>active decodes + chunk B"]
+      D2 --> D3["Iteration 3<br/>active decodes + chunk C"]
+      C1 -.-> D1
+      C2 -.-> D2
+      C3 -.-> D3
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  This is a scheduling illustration, not a benchmark or a claim about a fixed number of tokens per
+  iteration.
+</DiagramSubtitle>
+
+Smaller prefill allowances can protect ITL. Larger allowances can improve waiting prompts' TTFT and may raise throughput. Tune the budget against the prompt and output distribution you serve.
+
+## Automatic prefix caching skips shared prefill, not decode
+
+Paged KV blocks can be reused when requests begin with the same token prefix. vLLM's [automatic prefix caching](https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/) identifies completed KV blocks by their token content and prefix context. A later request with matching blocks can reuse that cached state instead of recomputing the shared part of prefill.
+
+The illustrative assistant shares a system message and handbook. After one request computes full prefix blocks, matching requests can reuse them.
+
+The limits matter:
+
+- Prefix tokens must match. A changed template, tokenizer output, adapter, or inserted metadata can break reuse.
+- Only completed reusable blocks help. A partial tail still needs computation.
+- Cache entries occupy finite memory and may be evicted.
+- The first request still computes the prefix.
+- Prefix caching reduces prefill work. It does not make the model generate new output tokens faster, so long decode-heavy answers may see little benefit.
+
+## V1 separates HTTP handling, scheduling, and GPU execution
+
+The [vLLM architecture overview](https://docs.vllm.ai/en/latest/design/arch_overview/) describes a multi-process V1 server.
+
+The **API server process** accepts HTTP requests, tokenizes inputs, loads multimodal data, and streams responses to clients. It communicates with the **engine core process** over ZMQ. The engine core owns scheduling and KV coordination. One **GPU worker process** per GPU loads weights, manages device memory, and runs forward passes.
+
+<MermaidDiagram
+  label="vLLM V1 online serving process architecture"
+  description="The API process handles clients, the engine core schedules work and KV state, and GPU workers run forward passes."
+>
+  {`
+    flowchart TD
+      Client["Clients"] --> API["API server process<br/>HTTP, tokenization, streaming"]
+      API <-->|"ZMQ"| Core["Engine core process<br/>scheduler and KV cache"]
+      Core --> W1["GPU worker 1<br/>weights and forward pass"]
+      Core --> W2["GPU worker 2<br/>weights and forward pass"]
+      Core --> WN["GPU worker N<br/>when configured"]
+      W1 --> Core
+      W2 --> Core
+      WN --> Core
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  The diagram shows the main V1 responsibilities. Data-parallel deployments add engine cores and
+  conditional coordination, so process counts depend on the parallel configuration.
+</DiagramSubtitle>
+
+GPU sizing is incomplete. Tokenization, media loading, routing, and streaming also need CPU and network capacity.
+
+## Kernels, graphs, and parallelism finish the serving pipeline
+
+Memory and scheduling are the organizing ideas, but vLLM also has to execute model operations efficiently.
+
+| Mechanism                             | High-level job                                                                                   | Main tradeoff                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Optimized attention and model kernels | Run common operations with hardware-aware implementations                                        | Support and best backend depend on model, dtype, and accelerator                                     |
+| Compilation and CUDA graphs           | Compile model regions and replay captured GPU work to reduce dispatch and kernel-launch overhead | Dynamic shapes, backend support, capture coverage, warmup time, and graph memory complicate the gain |
+| Tensor parallelism                    | Shard tensor operations across GPUs                                                              | Collective communication can offset compute gains                                                    |
+| Pipeline parallelism                  | Put different layer ranges on different stages                                                   | Pipeline bubbles and stage balance matter                                                            |
+| Data parallelism                      | Run model replicas on different request groups                                                   | Each replica needs model memory and load balancing                                                   |
+
+More GPUs do not guarantee lower latency because communication can offset gains. If a model fits one device, replicas may beat splitting each request. Benchmark the topology.
+
+## Start an OpenAI-compatible vLLM server
+
+The following quickstart is for Linux with a supported NVIDIA GPU and matches the official [vLLM quickstart](https://docs.vllm.ai/en/latest/getting_started/quickstart/) as reviewed on July 12, 2026. It is source-aligned, but it was not executed in this GPU-less writing environment.
+
+```bash
+uv venv --python 3.12 --seed
+source .venv/bin/activate
+uv pip install vllm --torch-backend=auto
+
+vllm serve Qwen/Qwen2.5-1.5B-Instruct
+```
+
+By default, the server listens on `localhost:8000` and exposes OpenAI-compatible endpoints. In another terminal:
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "messages": [
+      {"role": "user", "content": "Explain prefill and decode in two sentences."}
+    ],
+    "temperature": 0.2
+  }'
+```
+
+OpenAI-compatible describes the request format, not identical behavior. Test chat templates, tokenization, tools, structured outputs, errors, and sampling defaults.
+
+One subtle default can change output comparisons. If the model repository includes `generation_config.json`, vLLM applies its recommended sampling parameters unless the request overrides them. Launch with `--generation-config vllm` when you intentionally want vLLM's defaults instead.
+
+## Tune for SLO-bounded goodput, not a headline number
+
+A useful benchmark is controlled, not a race between default commands.
+
+1. **Freeze the serving contract.** Record model revision, tokenizer, precision, context limit, template, sampling, vLLM version, driver, accelerator, and topology.
+2. **Replay a representative workload.** Preserve input/output lengths, arrival bursts, streaming, prefix repetition, and concurrency. Uniform requests hide scheduling problems.
+3. **Measure distributions.** Track p50, p95, and p99 TTFT, ITL or TPOT, end-to-end latency, failures, and throughput. Define goodput with explicit SLOs.
+4. **Sweep offered load.** Raise arrival rate or concurrency until latency bends or errors appear. Compare systems at the same quality and latency target.
+5. **Watch memory.** Record KV utilization, prefix-cache hits, preemptions, and out-of-memory failures. Lower `max_model_len` only when the contract permits it.
+6. **Tune one scheduler dimension at a time.** Test `max_num_batched_tokens`, concurrency, chunked prefill, and prefix caching against TTFT and ITL.
+7. **Validate parallelism and quantization separately.** Communication can erase scaling gains, while lower precision may change quality. Re-run application evals.
+
+We do not turn the paper's historical 2 to 4 times result into a modern comparison graph because the axes would imply comparability that does not exist. A defensible graph needs the same model revision, hardware, software versions, request distribution, sampling settings, and latency target. Without those conditions, a precise bar is less informative than the caveat.
+
+vLLM is not the automatic choice for every deployment. A managed API may be cheaper for low or uncertain load. Another runtime may better support a required model, accelerator, quantization format, or deterministic behavior. A single offline request gains little from multi-request batching, and small local models may fit a simpler runtime. Follow measured workload constraints, not project popularity.
+
+## FAQ
+
+### Does vLLM make an LLM more accurate?
+
+No. The model, prompt, decoding settings, quantization, and application logic determine quality. Serving changes can affect numerical or sampling behavior, so keep quality tests.
+
+### Is vLLM the same thing as PagedAttention?
+
+No. PagedAttention is its paged KV-cache mechanism. vLLM is the larger serving system, including APIs, scheduling, model execution, workers, and observability.
+
+### Does automatic prefix caching speed up token generation?
+
+It can reduce prefill and TTFT for matching prefixes. It does not reduce sequential decode work.
+
+### Is an OpenAI-compatible endpoint a drop-in replacement?
+
+It can reduce client integration work, but compatibility is not identity. Test the endpoints, parameters, chat templates, token counts, tool behavior, streaming events, and error cases your application relies on.
+
+The practical next step is to run the small server, capture TTFT and ITL for your real prompts, then add concurrency until the service misses its SLO. That curve will tell you more than a universal throughput claim. Use the [vLLM repository](https://github.com/vllm-project/vllm), [architecture overview](https://docs.vllm.ai/en/latest/design/arch_overview/), and [optimization guide](https://docs.vllm.ai/en/latest/configuration/optimization/) to explain each change you test.
+
+## References
+
+1. Vaswani et al., [Attention Is All You Need](https://arxiv.org/abs/1706.03762), 2017.
+2. Kwon et al., [Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180), 2023.
+3. vLLM Project, [vLLM source repository](https://github.com/vllm-project/vllm).
+4. vLLM Project, [Architecture Overview](https://docs.vllm.ai/en/latest/design/arch_overview/).
+5. vLLM Project, [Quickstart](https://docs.vllm.ai/en/latest/getting_started/quickstart/).
+6. vLLM Project, [Optimization and Tuning](https://docs.vllm.ai/en/latest/configuration/optimization/).
+7. vLLM Project, [Automatic Prefix Caching](https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/).
+8. vLLM Project, [Scheduler Configuration API](https://docs.vllm.ai/en/stable/api/vllm/config/scheduler/).
+9. vLLM Project, [Parallelism and Scaling](https://docs.vllm.ai/en/latest/serving/parallelism_scaling/).
+10. vLLM Project, [CUDA Graphs](https://docs.vllm.ai/en/latest/design/cuda_graphs/).
