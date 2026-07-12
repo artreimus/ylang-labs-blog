@@ -7,7 +7,7 @@ const siteMetadata = {
   language: 'en-us',
   theme: 'light', // system, dark or light
   siteUrl: 'https://ylanglabs.com',
-  siteRepo: 'https://github.com/artreimus/ylang-labs',
+  siteRepo: 'https://github.com/artreimus/ylang-labs-blog',
   siteLogo: `${process.env.BASE_PATH || ''}/static/images/logo-white.png`,
   socialBanner: `${process.env.BASE_PATH || ''}/static/images/social-banner.png`,
   // mastodon: 'https://mastodon.social/@mastodonuser',
