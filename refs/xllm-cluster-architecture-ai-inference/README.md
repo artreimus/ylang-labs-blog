@@ -132,6 +132,13 @@ Access date for all web sources: 2026-07-11.
 - Date: Continuously updated; reviewed 2026-07-11
 - Supports: TGI's maintenance-mode status and the maintainers' recommendation of vLLM, SGLang, and local engines for new deployments.
 
+### 19. Official xLLM logo asset
+
+- URL: https://github.com/xLLM-AI/xllm/blob/main/docs/assets/logo_with_llm.png
+- Publisher/author: xLLM project contributors
+- Date: Continuously updated; reviewed 2026-07-12
+- Supports: Official xLLM wordmark composited into the article's generated cover, header, card, and social post artwork.
+
 ## Claim boundaries
 
 - The xLLM benchmark results are author-reported and specific to the paper's model, version, hardware, topology, request lengths, and TPOT constraints.
