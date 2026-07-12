@@ -16,6 +16,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
   - `blog-factuality-review` when asked to review, critique, fact-check, validate, or assess publication readiness for Ylang Labs blog drafts.
   - `blog-mdx-authoring` for creating or structuring new blog posts.
   - `oil-painting-image-generator` for oil-painting-style generated artwork and normal generated blog cover artwork, `cardImage.png`, `blogHeader.png`, and source artwork unless the user explicitly requests a different cover style.
+  - `blog-oil-logo-art` for reusable cover packages that combine an oil-painting source, an official technology logo overlay, Ylang watermarking, and final card/header/post crops.
   - `blog-image-cropper` for preparing `cardImage.png` and `blogHeader.png` from generated or provided source artwork.
   - `technical-blog-image-generator` when asked to create section images, inline technical diagrams, architecture plates, process maps, or image-generation prompts for technical visuals. Use it for cover/card/header assets only when the user explicitly requests a technical-diagram cover.
   - `blueprint-image-generator` when asked for blueprint, engineering drawing, CAD sheet, patent plate, orthographic, exploded-view, or white-line-on-blue generated images.
