@@ -1,6 +1,6 @@
 ---
 name: blog-oil-logo-art
-description: Create Ylang Labs blog cover packages that combine an original museum-quality oil painting with an exact official technology logo. Use this skill whenever a user asks for a source artwork, card image, blog header, cover image, social post image, or blog artwork that should place a real model, framework, product, or company logo over a painterly background. Generate the painting first, fetch the official logo separately, composite it after cropping, add the Ylang watermark, and validate every final asset.
+description: Create Ylang Labs blog cover packages that combine an original museum-quality oil painting with an exact official technology logo. Use this skill whenever a user asks for a source artwork, card image, blog header, cover image, social post image, or blog artwork that should place a real model, framework, product, or company logo over a painterly background. Generate the painting first, fetch the official logo separately, composite it onto the square source image, derive the crops, add the Ylang watermark, and validate every final asset.
 ---
 
 # Oil-Painting Technology-Logo Blog Art
@@ -16,13 +16,9 @@ The separation matters. Image models are useful for atmosphere and composition, 
 
 For a normal blog cover request, create:
 
-- `public/static/images/blogs/<slug>/source-artwork.png`: square `1:1` master painting, ideally `1536x1536` or larger.
+- `public/static/images/blogs/<slug>/source-artwork.png`: square `1:1` master image containing the generated painting **and the exact technology-logo overlay**, ideally `1536x1536` or larger. If the target slug already uses the repository's `source-image.png` convention, use that name consistently instead.
 - `public/static/images/blogs/<slug>/cardImage.png`: exactly `1080x1920` portrait crop.
 - `public/static/images/blogs/<slug>/blogHeader.png`: exactly `1260x700` wide crop.
-
-When the user asks for a social or square post image, also create:
-
-- `public/static/images/blogs/<slug>/postImage.png`: exactly `1080x1080`.
 
 Keep the official logo as `tech-logo.png` only when the asset is appropriate for repository distribution and the source log records its provenance. Otherwise keep it in an ignored temporary staging directory and commit only the composites.
 
@@ -39,9 +35,9 @@ Keep the official logo as `tech-logo.png` only when the asset is appropriate for
 
 If replacing an existing package, inspect the old source and crops first. Keep the old versions recoverable through Git or an explicitly untracked local backup; do not overwrite unrelated assets.
 
-## Source painting
+## Source painting and branded master
 
-Generate the source artwork with the built-in image-generation tool through the oil-painting workflow.
+Generate an unbranded square painting as a temporary intermediate with the built-in image-generation tool through the oil-painting workflow. Then composite the official technology logo onto that square image and save the result as the committed `source-artwork.png` (or the established `source-image.png`). This branded square is the reusable source image for every downstream crop; there is no separate `postImage.png` output.
 
 The prompt should specify:
 
@@ -52,7 +48,7 @@ The prompt should specify:
 - Specific lighting, palette, brushwork, materials, and mood.
 - An explicit ban on text, logos, letters, numbers, signatures, watermarks, pseudo-text, UI panels, and copied famous compositions.
 
-The square source master should normally remain unbranded. This keeps it reusable and prevents the logo from being cut off in the portrait crop. The logo is added separately to each final crop at a format-appropriate size.
+The square branded source master must keep the logo inside a crop-safe focal area so it survives both portrait and landscape derivatives. Do not add a second technology-logo overlay to the card or header after cropping unless the source logo would otherwise become illegible; prefer cropping the already-branded source to avoid duplicate or inconsistent marks.
 
 Do not use a generated approximation of the technology logo. Do not ask the painting model to render a brand name.
 
@@ -78,19 +74,17 @@ If no official logo can be found, stop and ask the user whether to use a text-fr
 
 ## Crop before logo compositing
 
-Use `blog-image-cropper` to inspect the square master and choose separate crop windows:
+Use `blog-image-cropper` to inspect the branded square master and choose separate crop windows:
 
 - **Card:** crop a strong vertical composition at `1080x1920`. Keep the logo-safe center, the main visual metaphor, and enough context above and below. Avoid cutting important instruments, faces, or architectural edges.
 - **Header:** crop a wide composition at `1260x700`. Preserve horizontal context and leave enough central negative space for the wordmark. Do not simply use the card crop resized wide.
-- **Post image:** crop a square `1080x1080` composition when requested, usually centered on the logo-safe field and the strongest surrounding context.
-
-Inspect each crop before adding the logo. The crop is the editorial composition; the logo should not be used to hide an accidental crop.
+  Inspect each crop after deriving it. The crop is the editorial composition; the logo should not be used to hide an accidental crop.
 
 ## Composite the technology logo
 
 Use deterministic local raster compositing with `sharp`, ImageMagick, or an equivalent installed tool. Do not use image generation for this step.
 
-For each target:
+For the square source image:
 
 1. Resize the official logo proportionally. Never stretch it.
 2. Place it in the intended focal area, usually centered over the prepared negative space.
@@ -98,23 +92,23 @@ For each target:
 4. Use a subtle shadow or dark/light backing only when needed for contrast; do not add a competing badge or invented text.
 5. Inspect at the final display size, especially the portrait card on a narrow screen.
 
-Use different logo widths for different aspect ratios when necessary. A wordmark that fits a wide header may be too wide for a `9:16` card. If the official asset includes a full wordmark and an icon-only variant, choose the version that remains legible without crowding the composition.
+Use a logo size that remains legible in the source image and survives both downstream crops. If the official asset includes a full wordmark and an icon-only variant, choose the version that remains legible without crowding the composition.
 
 The final logo must be visually exact. Check letterforms, spacing, icon geometry, color, and transparency against the downloaded source.
 
 ## Add the Ylang watermark
 
-After the technology logo is composited, use `.agents/skills/blog-logo-watermark/scripts/apply-logo-watermark.mjs` for the Ylang mark:
+After the technology logo is composited, use `.agents/skills/blog-logo-watermark/scripts/apply-logo-watermark.mjs` for the Ylang mark on the branded source image:
 
 ```bash
 node .agents/skills/blog-logo-watermark/scripts/apply-logo-watermark.mjs \
-  --input public/static/images/blogs/<slug>/blogHeader.png \
-  --output public/static/images/blogs/<slug>/blogHeader.png \
+  --input public/static/images/blogs/<slug>/source-artwork.png \
+  --output public/static/images/blogs/<slug>/source-artwork.png \
   --corner lower-right \
   --logo auto
 ```
 
-Repeat for `cardImage.png` and the optional `postImage.png`. Do not watermark the square source master unless the user explicitly asks for a branded source master. Keep the Ylang mark subordinate to the technology logo and the painting.
+Then derive `cardImage.png` and `blogHeader.png` from the branded source, preserving the logo and Ylang mark. Do not add another Ylang watermark pass to the crops unless the crop removes the source watermark or the user explicitly requests per-format watermark placement. Keep the Ylang mark subordinate to the technology logo and the painting.
 
 ## Provenance and frontmatter
 
@@ -127,23 +121,22 @@ cardImage: '/static/images/blogs/<slug>/cardImage.png'
 images: ['/static/images/blogs/<slug>/blogHeader.png']
 ```
 
-The optional `postImage.png` is a supporting social asset and does not replace `cardImage.png` or `blogHeader.png`.
+The square source image is the supporting social asset; do not create a redundant `postImage.png` copy.
 
 ## Validation checklist
 
 Before finalizing:
 
-- `source-artwork.png` is square and retains the intended painterly composition.
+- `source-artwork.png` (or the established `source-image.png`) is square, branded with the exact technology logo, and retains the intended painterly composition.
 - `cardImage.png` is exactly `1080x1920`.
 - `blogHeader.png` is exactly `1260x700`.
-- `postImage.png`, when requested, is exactly `1080x1080`.
 - The official logo is not distorted, hallucinated, clipped, or replaced by generated text.
 - The logo is legible at the final card/header display sizes.
-- The Ylang watermark has contrast and does not cover important content.
+- The Ylang watermark has contrast and does not cover important content on the branded source and its crops.
 - The source artwork contains no accidental text, signatures, or watermarks.
 - All referenced image files exist under `public/static/images/blogs/<slug>/`.
 - The MDX frontmatter points to the final files.
 - `git diff --check` passes.
 - Only task-owned assets, source-log entries, and frontmatter/components explicitly needed by the request are staged.
 
-Visually inspect the source, card, header, and optional post image with `view_image`. If any crop or logo placement feels accidental, adjust the crop or composite and inspect again before committing.
+Visually inspect the branded source, card, and header with `view_image`. If any crop or logo placement feels accidental, adjust the source composition or crop and inspect again before committing.
