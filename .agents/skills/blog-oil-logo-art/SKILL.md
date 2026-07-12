@@ -112,7 +112,7 @@ Then derive `cardImage.png` and `blogHeader.png` from the branded source, preser
 
 ## Provenance and frontmatter
 
-Add the official logo URL and a short note about the generated artwork to `refs/<slug>/README.md` when a source packet exists. Do not store private prompt transcripts or temporary generated-image paths in the public source log.
+Whenever an official logo is used, create and commit `refs/<slug>/README.md` as the source log, even if the slug did not already have a reference packet. Include the logo's exact source URL, repository/organization or publisher, access/review date, whether the asset is committed or temporary, and a short note about the generated artwork. This makes the provenance of the embedded mark auditable. Do not store private prompt transcripts or temporary generated-image paths in the public source log.
 
 The blog frontmatter should continue to reference:
 
@@ -136,6 +136,7 @@ Before finalizing:
 - The source artwork contains no accidental text, signatures, or watermarks.
 - All referenced image files exist under `public/static/images/blogs/<slug>/`.
 - The MDX frontmatter points to the final files.
+- `refs/<slug>/README.md` records provenance for every official logo used.
 - `git diff --check` passes.
 - Only task-owned assets, source-log entries, and frontmatter/components explicitly needed by the request are staged.
 
