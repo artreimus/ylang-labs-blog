@@ -307,24 +307,6 @@ We do not turn the paper's historical 2 to 4 times result into a modern comparis
 
 vLLM is not the automatic choice for every deployment. A managed API may be cheaper for low or uncertain load. Another runtime may better support a required model, accelerator, quantization format, or deterministic behavior. A single offline request gains little from multi-request batching, and small local models may fit a simpler runtime. Follow measured workload constraints, not project popularity.
 
-## FAQ
-
-### Does vLLM make an LLM more accurate?
-
-No. The model, prompt, decoding settings, quantization, and application logic determine quality. Serving changes can affect numerical or sampling behavior, so keep quality tests.
-
-### Is vLLM the same thing as PagedAttention?
-
-No. PagedAttention is its paged KV-cache mechanism. vLLM is the larger serving system, including APIs, scheduling, model execution, workers, and observability.
-
-### Does automatic prefix caching speed up token generation?
-
-It can reduce prefill and TTFT for matching prefixes. It does not reduce sequential decode work.
-
-### Is an OpenAI-compatible endpoint a drop-in replacement?
-
-It can reduce client integration work, but compatibility is not identity. Test the endpoints, parameters, chat templates, token counts, tool behavior, streaming events, and error cases your application relies on.
-
 The practical next step is to run the small server, capture TTFT and ITL for your real prompts, then add concurrency until the service misses its SLO. That curve will tell you more than a universal throughput claim. Use the [vLLM repository](https://github.com/vllm-project/vllm), [architecture overview](https://docs.vllm.ai/en/latest/design/arch_overview/), and [optimization guide](https://docs.vllm.ai/en/latest/configuration/optimization/) to explain each change you test.
 
 ## References
