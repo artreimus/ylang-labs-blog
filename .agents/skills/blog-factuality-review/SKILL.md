@@ -11,6 +11,7 @@ Use this skill to review Ylang Labs blog posts with a factuality-first standard.
 
 - Treat the live repo and cited sources as the source of truth. Do not rely on memory for current facts, library APIs, model names, dates, benchmark numbers, or vendor behavior.
 - Preserve unrelated work. Run `git status --short` before local edits, and do not modify files unless the user explicitly asks for fixes.
+- Review and fix the target branch in the repository's existing checkout. Do not create or use a separate worktree unless the user explicitly asks for one. If local changes prevent a safe branch switch, stop and ask how to proceed rather than moving the review automatically.
 - Be explicit about evidence. Separate source-backed findings from editorial judgment, inference, and unresolved uncertainty.
 - Never invent citations, quotes, author names, dates, benchmark results, product capabilities, source conclusions, or repo behavior.
 - Prefer primary sources for fact checks: official docs, release notes, papers, repositories, standards, or the project's own source files.

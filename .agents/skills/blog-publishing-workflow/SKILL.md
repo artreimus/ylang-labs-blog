@@ -82,6 +82,7 @@ Add other files only when the post or publishing request needs them:
 Before writing files:
 
 - Run `git status --short` and preserve unrelated changes.
+- Work in the repository's existing checkout. Create or switch to the task branch in that same checkout when needed. Do not create or use a separate worktree unless the user explicitly asks for one. If local changes make a safe branch switch impossible, stop and ask the user how to proceed.
 - Inspect `contentlayer.config.ts` for current blog schema fields if frontmatter needs are uncertain.
 - Inspect nearby posts in `data/blogs/` for style, frontmatter, tag, reference, and component patterns.
 - Read `DESIGN.md` before making visual or layout-sensitive choices.
@@ -230,7 +231,7 @@ When publishing is requested as part of the task:
 - Use `github:yeet` for the PR flow.
 - Check whether a PR already exists for the branch before creating a new one.
 - Commit only scoped files for the blog, `refs/<slug>` source packet, image assets, social post file, and any necessary references/components.
-- Do not include unrelated generated files, scratch files, plans, or dirty worktree changes.
+- Do not include unrelated generated files, scratch files, plans, or unrelated local changes.
 - Open the PR as a draft unless the user explicitly asks for ready-for-review.
 
 The PR description should include:
@@ -275,4 +276,4 @@ Before finalizing, confirm:
 - The article stays at 5 minutes or less unless the user explicitly approved a longer post.
 - `cardImage.png` and `blogHeader.png` exist with exact required dimensions.
 - Social posts are saved under `posts/` and are included in the PR description when requested or when a PR is opened for an end-to-end publishing package.
-- Unrelated worktree changes were not modified, staged, committed, or published.
+- Unrelated local changes were not modified, staged, committed, or published.
