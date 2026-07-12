@@ -10,10 +10,11 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { genPageMetadata } from 'app/seo'
 
 const publishedBlogs = allBlogs.filter((post) => !post.draft)
+const isStaticExport = Boolean(process.env.EXPORT)
 
 export const generateStaticParams = async () => {
   const totalPages = Math.ceil(publishedBlogs.length / BLOGS_PER_PAGE)
-  return getPaginatedStaticParams(totalPages)
+  return getPaginatedStaticParams(totalPages, { includeFirstPage: isStaticExport })
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ page: string }> }) {
@@ -21,7 +22,11 @@ export async function generateMetadata({ params }: { params: Promise<{ page: str
   const totalPages = Math.ceil(publishedBlogs.length / BLOGS_PER_PAGE)
 
   if (page === '1') {
-    return genPageMetadata({ title: 'Blog', url: '/blogs' })
+    return genPageMetadata({
+      title: 'Blog',
+      url: '/blogs',
+      robots: { index: false, follow: true },
+    })
   }
 
   const pageNumber = getValidPageNumber(page, totalPages)
@@ -37,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ page: str
 export default async function Page({ params }: { params: Promise<{ page: string }> }) {
   const resolvedParams = await params
 
-  if (resolvedParams.page === '1') {
+  if (resolvedParams.page === '1' && !isStaticExport) {
     permanentRedirect('/blogs')
   }
 

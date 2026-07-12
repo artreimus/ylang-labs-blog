@@ -21,4 +21,12 @@ describe('getValidPageNumber', () => {
     expect(getPaginatedStaticParams(1)).toEqual([])
     expect(getPaginatedStaticParams(3)).toEqual([{ page: '2' }, { page: '3' }])
   })
+
+  it('includes page one when a static export needs a concrete legacy path', () => {
+    expect(getPaginatedStaticParams(3, { includeFirstPage: true })).toEqual([
+      { page: '1' },
+      { page: '2' },
+      { page: '3' },
+    ])
+  })
 })

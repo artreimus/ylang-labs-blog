@@ -12,8 +12,12 @@ export function getValidPageNumber(page: string, totalPages: number) {
   return pageNumber
 }
 
-export function getPaginatedStaticParams(totalPages: number) {
-  return Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => ({
-    page: String(index + 2),
+export function getPaginatedStaticParams(
+  totalPages: number,
+  { includeFirstPage = false }: { includeFirstPage?: boolean } = {}
+) {
+  const firstPage = includeFirstPage ? 1 : 2
+  return Array.from({ length: Math.max(totalPages - firstPage + 1, 0) }, (_, index) => ({
+    page: String(index + firstPage),
   }))
 }
