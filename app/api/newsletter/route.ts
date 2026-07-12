@@ -1,9 +1,14 @@
-import { NewsletterAPI } from 'pliny/newsletter'
+import { NewsletterAPI, type NewsletterConfig } from 'pliny/newsletter'
 import siteMetadata from '@/data/siteMetadata'
 
+const provider = siteMetadata.newsletter?.provider
+
+if (!provider) {
+  throw new Error('Newsletter provider is not configured')
+}
+
 const handler = NewsletterAPI({
-  // @ts-ignore
-  provider: siteMetadata.newsletter.provider,
+  provider: provider as NewsletterConfig['provider'],
 })
 
-export { handler as GET, handler as POST }
+export { handler as POST }

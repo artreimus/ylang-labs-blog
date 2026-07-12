@@ -8,7 +8,8 @@ import { allAuthors } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import EmptyView from '@/components/EmptyView'
 import Image from '@/components/Image'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
+import { PROJECTS_PER_PAGE } from '@/components/lib/pagination'
 
 interface PaginationProps {
   totalPages: number
@@ -17,7 +18,6 @@ interface PaginationProps {
 interface ProjectListLayoutProps {
   projects: CoreContent<Project>[]
   title: string
-  initialDisplayProjects?: CoreContent<Project>[]
   pagination?: PaginationProps
 }
 
@@ -136,12 +136,7 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
   )
 }
 
-export default function ProjectListLayout({
-  projects,
-  title,
-  initialDisplayProjects = [],
-  pagination,
-}: ProjectListLayoutProps) {
+export default function ProjectListLayout({ projects, title, pagination }: ProjectListLayoutProps) {
   const [searchValue, setSearchValue] = useState('')
 
   const filteredProjects = projects.filter((project) => {
@@ -149,9 +144,11 @@ export default function ProjectListLayout({
     return searchContent.toLowerCase().includes(searchValue.toLowerCase())
   })
 
-  // If initialDisplayProjects exist, display it if no searchValue is specified
-  const displayProjects =
-    initialDisplayProjects.length > 0 && !searchValue ? initialDisplayProjects : filteredProjects
+  const currentPage = pagination?.currentPage ?? 1
+  const pageStart = PROJECTS_PER_PAGE * (currentPage - 1)
+  const displayProjects = searchValue
+    ? filteredProjects
+    : filteredProjects.slice(pageStart, pageStart + PROJECTS_PER_PAGE)
 
   // Function to get author name from slug
   const getAuthorName = (authorSlug: string) => {

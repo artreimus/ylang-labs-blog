@@ -80,6 +80,9 @@ const CountrySelect = ({
           variant="outline"
           className="flex gap-1 rounded-e-none rounded-s-lg border-r-0 px-3 focus:z-10"
           disabled={disabled}
+          aria-label={
+            selectedCountry ? `Change country, ${selectedCountry}` : 'Select phone country'
+          }
         >
           <FlagComponent country={selectedCountry} countryName={selectedCountry} />
           <ChevronsUpDown
@@ -87,7 +90,7 @@ const CountrySelect = ({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] bg-white p-0">
+      <PopoverContent className="w-[300px] bg-popover p-0 text-popover-foreground">
         <Command>
           <CommandInput placeholder="Search country..." />
           <CommandList>
@@ -126,7 +129,7 @@ const CountrySelectOption = ({
   onChange,
 }: CountrySelectOptionProps) => {
   return (
-    <CommandItem className="gap-2 bg-white" onSelect={() => onChange(country)}>
+    <CommandItem className="gap-2" onSelect={() => onChange(country)}>
       <FlagComponent country={country} countryName={countryName} />
       <span className="flex-1 text-sm">{countryName}</span>
       <span className="text-sm text-foreground/50">{`+${RPNInput.getCountryCallingCode(country)}`}</span>

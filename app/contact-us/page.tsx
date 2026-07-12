@@ -123,7 +123,7 @@ export default function ContactPage() {
               <div className="mt-12 space-y-6">
                 <div className="flex items-center gap-4 rounded-lg bg-white/10 p-4 backdrop-blur-sm">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-                    <MdEmail className="h-6 w-6" />
+                    <MdEmail className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white/70">Email us</p>
@@ -186,6 +186,7 @@ export default function ContactPage() {
                         </FormLabel>
                         <FormControl>
                           <Input
+                            autoComplete="given-name"
                             placeholder="What should we call you?"
                             {...field}
                             className={INPUT_STYLES}
@@ -205,6 +206,7 @@ export default function ContactPage() {
                         </FormLabel>
                         <FormControl>
                           <Input
+                            autoComplete="family-name"
                             placeholder="And your family name?"
                             {...field}
                             className={INPUT_STYLES}
@@ -229,6 +231,8 @@ export default function ContactPage() {
                         <FormControl>
                           <Input
                             type="email"
+                            autoComplete="email"
+                            spellCheck={false}
                             placeholder="your.email@example.com"
                             {...field}
                             className={INPUT_STYLES}
@@ -249,6 +253,7 @@ export default function ContactPage() {
                         <FormControl>
                           <PhoneInput
                             defaultCountry="PH"
+                            autoComplete="tel"
                             placeholder="Your phone number"
                             {...field}
                             className={INPUT_STYLES}
@@ -313,7 +318,8 @@ export default function ContactPage() {
                       </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Please tell us how we can help you..."
+                          autoComplete="off"
+                          placeholder="Please tell us how we can help you…"
                           {...field}
                           className="min-h-[120px] rounded-lg border-gray-200 bg-gray-50 transition-all duration-200 focus:border-primary-500 focus:bg-white focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-primary-400 dark:focus:bg-gray-900"
                         />
@@ -328,11 +334,12 @@ export default function ContactPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="h-11 w-full rounded-lg bg-primary-500 font-medium text-white shadow-lg transition-all duration-200 hover:bg-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    className="h-11 w-full rounded-lg bg-primary-500 font-medium text-gray-950 shadow-lg transition-[background-color,box-shadow] duration-200 hover:bg-primary-600 focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
                     disabled={form.formState.isSubmitting}
+                    aria-busy={form.formState.isSubmitting}
                   >
                     {form.formState.isSubmitting ? (
-                      <InlineLoader text="Sending your message..." size={20} />
+                      <InlineLoader text="Sending your message…" size={20} color="text-gray-950" />
                     ) : (
                       'Send Message'
                     )}

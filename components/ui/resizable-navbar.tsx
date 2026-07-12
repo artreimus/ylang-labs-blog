@@ -47,7 +47,7 @@ interface MobileNavMenuProps {
 }
 
 export const Navbar = ({ children, className }: NavbarProps) => {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLElement>(null)
   const { scrollY } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
@@ -73,25 +73,27 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   })
 
   return (
-    <motion.div
+    <motion.header
       ref={ref}
       // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
       className={cn('sticky inset-x-0 top-20 z-20 w-full', className)}
       animate={{ y: hidden ? '-120%' : '0%' }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      onFocusCapture={() => setHidden(false)}
     >
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
           ? React.cloneElement(child as React.ReactElement<{ visible?: boolean }>, { visible })
           : child
       )}
-    </motion.div>
+    </motion.header>
   )
 }
 
 export const NavBody = ({ children, className, visible }: NavBodyProps) => {
   return (
-    <motion.div
+    <motion.nav
+      aria-label="Primary navigation"
       animate={{
         backdropFilter: visible ? 'blur(10px)' : 'none',
         boxShadow: visible
@@ -115,7 +117,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
       )}
     >
       {children}
-    </motion.div>
+    </motion.nav>
   )
 }
 
@@ -153,7 +155,8 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
 
 export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
   return (
-    <motion.div
+    <motion.nav
+      aria-label="Primary navigation"
       animate={{
         backdropFilter: visible ? 'blur(10px)' : 'none',
         boxShadow: visible
@@ -177,7 +180,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
       )}
     >
       {children}
-    </motion.div>
+    </motion.nav>
   )
 }
 

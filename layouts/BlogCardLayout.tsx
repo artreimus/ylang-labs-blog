@@ -10,6 +10,7 @@ import siteMetadata from '@/data/siteMetadata'
 import EmptyView from '@/components/EmptyView'
 import BlogPagination from '@/layouts/components/BlogPagination'
 import CardTag from '@/components/CardTag'
+import { BLOGS_PER_PAGE } from '@/components/lib/pagination'
 
 interface PaginationProps {
   totalPages: number
@@ -19,7 +20,6 @@ interface PaginationProps {
 interface BlogCardLayoutProps {
   posts: CoreContent<Blog>[]
   title: string
-  initialDisplayPosts?: CoreContent<Blog>[]
   pagination?: PaginationProps
   description?: string
 }
@@ -39,7 +39,6 @@ function getDisplayImage(post: CoreContent<Blog>) {
 export default function BlogCardLayout({
   posts,
   title,
-  initialDisplayPosts = [],
   pagination,
   description = 'Latest Blogs from Ylang Labs',
 }: BlogCardLayoutProps) {
@@ -55,8 +54,11 @@ export default function BlogCardLayout({
     })
   }, [posts, searchValue])
 
-  const displayPosts =
-    initialDisplayPosts.length > 0 && !searchValue ? initialDisplayPosts : filteredBlogPosts
+  const currentPage = pagination?.currentPage ?? 1
+  const pageStart = BLOGS_PER_PAGE * (currentPage - 1)
+  const displayPosts = searchValue
+    ? filteredBlogPosts
+    : filteredBlogPosts.slice(pageStart, pageStart + BLOGS_PER_PAGE)
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-24 pt-12 sm:px-6 lg:px-0">

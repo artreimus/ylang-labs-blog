@@ -12,10 +12,12 @@ export default function NotFound() {
         <p className="mb-4 text-xl font-bold leading-normal md:text-2xl">
           Sorry we couldn't find this page.
         </p>
-        <p className="mb-8">But dont worry, you can find plenty of other things on our homepage.</p>
+        <p className="mb-8">
+          But don&apos;t worry, you can find plenty of other things on our homepage.
+        </p>
         <Link
           href="/"
-          className="focus:shadow-outline-blue inline rounded-lg border border-transparent bg-primary-500 px-4 py-2 text-sm font-medium leading-5 text-white shadow transition-colors duration-150 hover:bg-primary-700 focus:outline-none dark:hover:bg-primary-400"
+          className="inline rounded-lg border border-transparent bg-primary-500 px-4 py-2 text-sm font-medium leading-5 text-gray-950 shadow transition-colors duration-150 hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2 dark:hover:bg-primary-400"
         >
           Back to homepage
         </Link>

@@ -1,9 +1,8 @@
 import 'css/tailwind.css'
-import 'pliny/search/algolia.css'
 import 'remark-github-blockquote-alert/alert.css'
 
 import { Analytics, AnalyticsConfig } from 'pliny/analytics'
-import { SearchProvider, SearchConfig } from 'pliny/search'
+import { KBarSearchProvider } from 'pliny/search/KBar'
 import { Toaster } from '@/components/ui/toaster'
 import Header from '@/components/Header'
 import SectionContainer from '@/components/SectionContainer'
@@ -12,6 +11,16 @@ import siteMetadata from '@/data/siteMetadata'
 import { ThemeProviders } from './theme-providers'
 import { Metadata } from 'next'
 import type { CSSProperties } from 'react'
+
+function getKbarConfig() {
+  const search = siteMetadata.search
+  if (search?.provider !== 'kbar' || !search.kbarConfig) {
+    throw new Error('Ylang Labs requires the KBar search provider')
+  }
+  return search.kbarConfig
+}
+
+const kbarConfig = getKbarConfig()
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
@@ -57,7 +66,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const basePath = process.env.BASE_PATH || ''
 
   return (
-    <html lang={siteMetadata.language} className={'scroll-smooth'} suppressHydrationWarning>
+    <html
+      lang={siteMetadata.language}
+      className="scroll-smooth motion-reduce:scroll-auto"
+      suppressHydrationWarning
+    >
       <link
         rel="apple-touch-icon"
         sizes="180x180"
@@ -82,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProviders>
           <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
           <SectionContainer>
-            <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+            <KBarSearchProvider kbarConfig={kbarConfig}>
               <a
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary-500 focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-gray-950 focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2 dark:focus:ring-primary-300 dark:focus:ring-offset-gray-950"
@@ -94,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {children}
               </main>
               <Toaster />
-            </SearchProvider>
+            </KBarSearchProvider>
           </SectionContainer>
           <Footer />
         </ThemeProviders>
