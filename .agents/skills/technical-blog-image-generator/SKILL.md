@@ -15,7 +15,7 @@ Use OpenAI image generation as the production path.
 
 - Use OpenAI image generation through the `imagegen` skill with a strict prompt and then inspect the result.
 - Keep exact text out of the image when possible. Put exact labels, numbers, citations, and long captions in the MDX body or `DiagramSubtitle`.
-- When labels are necessary inside the image, keep them short, large, and redundant with the surrounding caption because image-generation models can still make text and layout mistakes.
+- Add a small set of structural labels when they materially improve orientation. Keep them short, large, and redundant with the surrounding caption because image-generation models can still make text and layout mistakes.
 - Repeatability comes from a normalized prompt recipe, fixed diagram mode, fixed palette, explicit canvas target, and a saved final prompt, not from generated SVG/vector sources.
 - For normal Ylang Labs blog cover/card/header assets, stop and use `oil-painting-image-generator` to create `source-artwork.png`, then use `blog-image-cropper` to produce `cardImage.png` and `blogHeader.png`.
 - Use this skill for `cardImage.png` or `blogHeader.png` only when the user explicitly asks for a technical-diagram cover instead of the default painterly cover workflow.
@@ -58,6 +58,21 @@ Typography:
 - Use a monospace face for callouts, figure IDs, dimensions, protocol labels, and small technical annotations.
 - Use uppercase sparingly for plate labels such as `FIG_001`, `SYSTEM MAP`, `MODULE 04`, or `TRACE ROUTE`.
 - Keep labels short. If a label needs a sentence, put it in a caption outside the image.
+
+## Minimal Label System
+
+Default inline technical diagrams to a small label budget when the image contains distinct stages, layers, pools, or components that a reader must identify quickly.
+
+- Use **3-5 structural labels** for most diagrams. Name the major concepts, not every box or arrow.
+- Keep each label to **1-3 words** whenever possible, such as `PROMPT`, `PREFILL`, `KV CACHE`, or `PHYSICAL PAGES`.
+- Place labels in existing negative space above a stage, inside the top of a component boundary, or next to the object they identify. Do not cover geometry or create extra visual clutter.
+- Prefer small uppercase Helvetica/Arial, medium weight, graphite ink, and generous letter spacing. Use muted ink for intentionally de-emphasized or rejected paths.
+- Align peer labels to a shared visual baseline or grid. Repeated components may use compact identifiers such as `ENGINE 01`, `ENGINE 02`, and `ENGINE 03`.
+- Keep explanations, benchmark values, formulas, qualifications, and citations in MDX text or `DiagramSubtitle`. The image labels should orient the reader, not carry the argument.
+- Quote every required label verbatim in the generation prompt and inspect spelling at original resolution and expected blog width.
+- If one label is missing or misspelled, run a targeted edit that adds or repairs only that label while preserving all accepted labels and diagram geometry.
+
+When adding labels to an existing approved image, preserve the original first. Store the exact unlabeled files in an `unlabeled-backups/` folder beside the live assets, then write the labeled variants to the original filenames so existing MDX references continue to work.
 
 Linework:
 
@@ -189,10 +204,12 @@ Use this pattern for each requested image so future runs can reproduce the same 
    - `public/static/images/blogs/[slug]/source-diagram.png` for a reusable technical source plate, or
    - a descriptive inline asset name such as `architecture-teardown.png`, `process-map.png`, or `failure-modes-guardrails.png`.
 4. For inline section visuals, save the final raster image under a descriptive filename and reference it from the MDX body.
-5. For the rare case where the user explicitly asks for a technical-diagram cover, use `blog-image-cropper` to create:
+5. Decide on a label budget before generation. For a multi-stage or layered diagram, default to 3-5 short structural labels and specify their exact text, placement, typography, and invariants in the prompt.
+6. When editing an existing approved image, back up the unlabeled original before replacing the live asset, then verify matching dimensions and distinct checksums.
+7. For the rare case where the user explicitly asks for a technical-diagram cover, use `blog-image-cropper` to create:
    - `public/static/images/blogs/[slug]/cardImage.png` at exactly `1080x1920`
    - `public/static/images/blogs/[slug]/blogHeader.png` at exactly `1260x700`
-6. Confirm the MDX frontmatter references:
+8. Confirm the MDX frontmatter references:
    - `cardImage: '/static/images/blogs/[slug]/cardImage.png'`
    - `images: ['/static/images/blogs/[slug]/blogHeader.png']`
 
@@ -205,6 +222,8 @@ Before finalizing, verify:
 - The image follows one selected diagram mode rather than mixing styles randomly.
 - The requested or default accent color is used consistently.
 - Text is readable at final size, and exact claims are repeated in nearby article text or captions.
+- Structural labels are limited to the concepts needed for orientation, spelled exactly, and aligned consistently.
+- Existing approved images have an unlabeled backup when labels were added as an edit.
 - Lines are crisp and intentional.
 - Important content is not near crop edges.
 - The design feels like an editorial technical plate, not a SaaS marketing illustration.
