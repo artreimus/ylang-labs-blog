@@ -61,75 +61,80 @@ export default function Footer() {
 
   return (
     <footer className="relative ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] mt-24 w-screen max-w-none">
-      <div className="w-full bg-white py-14 text-gray-700 shadow-lg shadow-gray-900/5 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:shadow-black/20 dark:ring-white/10 sm:py-16 md:py-20">
-        <div className="flex w-full max-w-none flex-col gap-12 px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20">
-          <div className="space-y-6">
-            <h2 className="font-serif text-3xl italic leading-tight text-gray-900 dark:text-white sm:text-4xl">
-              Applied AI,
-              <br className="hidden sm:block" /> engineered for impact.
-            </h2>
-            <p className="max-w-2xl text-base text-gray-600 dark:text-gray-400">
-              {siteMetadata.description}
-            </p>
+      <div className="w-full bg-white py-12 text-gray-700 shadow-lg shadow-gray-900/5 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-300 dark:shadow-black/20 dark:ring-white/10 sm:py-14 md:py-16">
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-10 px-6 sm:px-8 md:px-12 lg:px-16">
+          <div className="grid gap-10 lg:grid-cols-[minmax(18rem,1fr)_minmax(0,2fr)] lg:gap-16">
+            <div className="space-y-4">
+              <h2 className="font-serif text-3xl italic leading-tight text-gray-900 dark:text-white sm:text-4xl">
+                Applied AI,
+                <br className="hidden sm:block" /> engineered for impact.
+              </h2>
+              <p className="max-w-lg text-base text-gray-600 dark:text-gray-400">
+                {siteMetadata.description}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
+              {navigationGroups.map((group) => (
+                <div key={group.title} className="space-y-4">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    {group.title}
+                  </p>
+                  <ul className="space-y-2 text-base text-gray-700 dark:text-gray-300">
+                    {group.links.map((link) => (
+                      <li key={link.label}>
+                        {link.href.startsWith('mailto:') ? (
+                          <a
+                            href={link.href}
+                            className="transition duration-200 hover:text-gray-900 hover:underline dark:hover:text-white"
+                          >
+                            {link.label}
+                          </a>
+                        ) : (
+                          <Link
+                            href={link.href}
+                            className="transition duration-200 hover:text-gray-900 hover:underline dark:hover:text-white"
+                          >
+                            {link.label}
+                          </Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            {navigationGroups.map((group) => (
-              <div key={group.title} className="space-y-4">
-                <p className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  {group.title}
-                </p>
-                <ul className="space-y-2 text-base text-gray-700 dark:text-gray-300">
-                  {group.links.map((link) => (
-                    <li key={link.label}>
-                      {link.href.startsWith('mailto:') ? (
-                        <a
-                          href={link.href}
-                          className="transition duration-200 hover:text-gray-900 hover:underline dark:hover:text-white"
-                        >
-                          {link.label}
-                        </a>
-                      ) : (
-                        <Link
-                          href={link.href}
-                          className="transition duration-200 hover:text-gray-900 hover:underline dark:hover:text-white"
-                        >
-                          {link.label}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <section
-            aria-labelledby="site-disclaimer-title"
-            className="grid gap-3 border-y border-gray-200 py-6 text-sm leading-relaxed text-gray-600 dark:border-white/10 dark:text-gray-400 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-8"
+          <aside
+            aria-label="Personal publishing note"
+            className="rounded-xl bg-gray-50 px-5 py-4 ring-1 ring-inset ring-gray-200/80 dark:bg-gray-900/70 dark:ring-white/10 sm:px-6"
           >
-            <h2
-              id="site-disclaimer-title"
-              className="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-200"
-            >
-              Personal publishing note
-            </h2>
-            <p className="max-w-4xl">
-              Articles express their authors’ personal views and do not represent or imply
-              endorsement by any employer, client, or partner. We publish from public sources and
-              personal experience and do not knowingly include confidential, proprietary, or
-              employer-owned material. Original articles and site code are open source under the{' '}
-              <Link
-                href={`${siteMetadata.siteRepo}/blob/main/LICENSE`}
-                className="font-medium text-gray-900 underline decoration-gray-300 underline-offset-4 transition hover:decoration-primary-500 dark:text-gray-200 dark:decoration-gray-600 dark:hover:decoration-primary-400"
-              >
-                MIT License
-              </Link>{' '}
-              unless otherwise noted. Content is for educational purposes, not professional advice.
-            </p>
-          </section>
+            <div className="flex items-start gap-3">
+              <span
+                aria-hidden="true"
+                className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500 dark:bg-primary-400"
+              />
+              <p className="max-w-5xl text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                <span className="font-semibold text-gray-900 dark:text-gray-200">
+                  Independent publishing.
+                </span>{' '}
+                Views are the authors’ own, not those of employers, clients, or partners. We use
+                public sources and personal experience and do not knowingly publish confidential or
+                proprietary material. Content is educational, not professional advice. Original
+                articles and site code are available under the{' '}
+                <Link
+                  href={`${siteMetadata.siteRepo}/blob/main/LICENSE`}
+                  className="font-medium text-gray-900 underline decoration-primary-500/60 underline-offset-4 transition hover:decoration-primary-500 dark:text-gray-200 dark:decoration-primary-400/60 dark:hover:decoration-primary-400"
+                >
+                  MIT License
+                </Link>{' '}
+                unless noted.
+              </p>
+            </div>
+          </aside>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-4 text-sm text-gray-500 lg:justify-between">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-gray-200 pt-6 text-sm text-gray-500 dark:border-white/10 lg:justify-between">
             <div className="flex items-center text-gray-600 dark:text-gray-500">
               <DynamicLogo />
             </div>
