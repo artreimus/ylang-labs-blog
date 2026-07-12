@@ -1,4 +1,4 @@
-import { getValidPageNumber } from '@/components/lib/pagination'
+import { getPaginatedStaticParams, getValidPageNumber } from '@/components/lib/pagination'
 
 describe('getValidPageNumber', () => {
   it('accepts pages inside the available range', () => {
@@ -15,5 +15,10 @@ describe('getValidPageNumber', () => {
   it('rejects pages outside the available range', () => {
     expect(getValidPageNumber('0', 3)).toBeNull()
     expect(getValidPageNumber('4', 3)).toBeNull()
+  })
+
+  it('generates only canonical paginated routes after the index page', () => {
+    expect(getPaginatedStaticParams(1)).toEqual([])
+    expect(getPaginatedStaticParams(3)).toEqual([{ page: '2' }, { page: '3' }])
   })
 })

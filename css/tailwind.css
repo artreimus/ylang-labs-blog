@@ -96,7 +96,8 @@ input:-webkit-autofill:focus {
 }
 
 .content-header:hover .content-header-link,
-.content-header-link:hover {
+.content-header-link:hover,
+.content-header-link:focus-visible {
   opacity: 1;
 }
 
@@ -113,4 +114,10 @@ input:-webkit-autofill:focus {
 .flow-line {
   stroke-dasharray: 10, 10;
   animation: flow 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-line {
+    animation: none;
+  }
 }

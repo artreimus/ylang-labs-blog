@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
-import { Menu, RadioGroup, Transition } from '@headlessui/react'
+import { Menu, Transition } from '@headlessui/react'
 
 const Sun = () => (
   <svg
@@ -10,6 +10,7 @@ const Sun = () => (
     viewBox="0 0 20 20"
     fill="currentColor"
     className="group:hover:text-gray-100 h-6 w-6"
+    aria-hidden="true"
   >
     <path
       fillRule="evenodd"
@@ -24,6 +25,7 @@ const Moon = () => (
     viewBox="0 0 20 20"
     fill="currentColor"
     className="group:hover:text-gray-100 h-6 w-6"
+    aria-hidden="true"
   >
     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
   </svg>
@@ -38,6 +40,7 @@ const Monitor = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
     className="group:hover:text-gray-100 h-6 w-6"
+    aria-hidden="true"
   >
     <rect x="3" y="3" width="14" height="10" rx="2" ry="2"></rect>
     <line x1="7" y1="17" x2="13" y2="17"></line>
@@ -45,6 +48,12 @@ const Monitor = () => (
   </svg>
 )
 const Blank = () => <svg className="h-6 w-6" />
+
+const themeOptions = [
+  { value: 'light', label: 'Light', Icon: Sun },
+  { value: 'dark', label: 'Dark', Icon: Moon },
+  { value: 'system', label: 'System', Icon: Monitor },
+]
 
 const ThemeSwitch = ({ mobile = false }: { mobile?: boolean }) => {
   const [mounted, setMounted] = useState(false)
@@ -91,58 +100,29 @@ const ThemeSwitch = ({ mobile = false }: { mobile?: boolean }) => {
           leaveTo="transform opacity-0 scale-95"
         >
           <Menu.Items className={dropdownClasses}>
-            <RadioGroup value={theme} onChange={setTheme}>
-              <div className="p-1">
-                <RadioGroup.Option value="light">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        className={`${
-                          active ? 'bg-primary-600 text-white' : ''
-                        } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                      >
-                        <div className="mr-2">
-                          <Sun />
-                        </div>
-                        Light
-                      </button>
-                    )}
-                  </Menu.Item>
-                </RadioGroup.Option>
-                <RadioGroup.Option value="dark">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        className={`${
-                          active ? 'bg-primary-600 text-white' : ''
-                        } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                      >
-                        <div className="mr-2">
-                          <Moon />
-                        </div>
-                        Dark
-                      </button>
-                    )}
-                  </Menu.Item>
-                </RadioGroup.Option>
-                <RadioGroup.Option value="system">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        className={`${
-                          active ? 'bg-primary-600 text-white' : ''
-                        } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                      >
-                        <div className="mr-2">
-                          <Monitor />
-                        </div>
-                        System
-                      </button>
-                    )}
-                  </Menu.Item>
-                </RadioGroup.Option>
-              </div>
-            </RadioGroup>
+            <div className="p-1">
+              {themeOptions.map(({ value, label, Icon }) => (
+                <Menu.Item key={value}>
+                  {({ active }) => (
+                    <button
+                      type="button"
+                      onClick={() => setTheme(value)}
+                      aria-current={theme === value ? 'true' : undefined}
+                      className={`${
+                        active || theme === value
+                          ? 'bg-primary-600 text-white'
+                          : 'text-gray-900 dark:text-gray-100'
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                    >
+                      <span className="mr-2">
+                        <Icon />
+                      </span>
+                      {label}
+                    </button>
+                  )}
+                </Menu.Item>
+              ))}
+            </div>
           </Menu.Items>
         </Transition>
       </Menu>

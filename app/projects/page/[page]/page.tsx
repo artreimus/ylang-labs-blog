@@ -1,21 +1,46 @@
 import ProjectListLayout from '@/layouts/ProjectListLayout'
-import { getValidPageNumber } from '@/components/lib/pagination'
+import {
+  getPaginatedStaticParams,
+  getValidPageNumber,
+  PROJECTS_PER_PAGE,
+} from '@/components/lib/pagination'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allProjects } from 'contentlayer/generated'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { genPageMetadata } from 'app/seo'
 
-const PROJECTS_PER_PAGE = 6
 const publishedProjects = allProjects.filter((project) => !project.draft)
 
 export const generateStaticParams = async () => {
   const totalPages = Math.ceil(publishedProjects.length / PROJECTS_PER_PAGE)
-  const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
+  return getPaginatedStaticParams(totalPages)
+}
 
-  return paths
+export async function generateMetadata({ params }: { params: Promise<{ page: string }> }) {
+  const { page } = await params
+  const totalPages = Math.ceil(publishedProjects.length / PROJECTS_PER_PAGE)
+
+  if (page === '1') {
+    return genPageMetadata({ title: 'Projects', url: '/projects' })
+  }
+
+  const pageNumber = getValidPageNumber(page, totalPages)
+  if (!pageNumber) notFound()
+
+  return genPageMetadata({
+    title: `Projects - Page ${pageNumber}`,
+    description: `Page ${pageNumber} of Ylang Labs AI engineering projects.`,
+    url: `/projects/page/${pageNumber}`,
+  })
 }
 
 export default async function Page({ params }: { params: Promise<{ page: string }> }) {
   const resolvedParams = await params
+
+  if (resolvedParams.page === '1') {
+    permanentRedirect('/projects')
+  }
+
   const projects = allCoreContent(sortPosts(publishedProjects))
   const totalPages = Math.ceil(projects.length / PROJECTS_PER_PAGE)
   const pageNumber = getValidPageNumber(resolvedParams.page, totalPages)
@@ -24,21 +49,10 @@ export default async function Page({ params }: { params: Promise<{ page: string 
     notFound()
   }
 
-  const initialDisplayProjects = projects.slice(
-    PROJECTS_PER_PAGE * (pageNumber - 1),
-    PROJECTS_PER_PAGE * pageNumber
-  )
   const pagination = {
     currentPage: pageNumber,
     totalPages,
   }
 
-  return (
-    <ProjectListLayout
-      projects={projects}
-      initialDisplayProjects={initialDisplayProjects}
-      pagination={pagination}
-      title="All Projects"
-    />
-  )
+  return <ProjectListLayout projects={projects} pagination={pagination} title="All Projects" />
 }

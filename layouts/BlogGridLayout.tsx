@@ -5,7 +5,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
 import BlogCard from '@/components/BlogCard'
 import EmptyView from '@/components/EmptyView'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import BlogPagination from '@/layouts/components/BlogPagination'
 
 interface PaginationProps {

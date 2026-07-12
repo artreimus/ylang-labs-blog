@@ -24,14 +24,19 @@ const ProcessFlow = () => {
   const [step, setStep] = useState(0)
 
   useEffect(() => {
-    let timer: any
-    if (isRunning) {
-      timer = setInterval(() => {
-        setStep((prev) => (prev < 8 ? prev + 1 : prev))
-      }, 800)
+    if (!isRunning) return
+
+    if (step >= 8) {
+      setIsRunning(false)
+      return
     }
-    return () => clearInterval(timer)
-  }, [isRunning])
+
+    const timer = setTimeout(() => {
+      setStep((previousStep) => previousStep + 1)
+    }, 800)
+
+    return () => clearTimeout(timer)
+  }, [isRunning, step])
 
   const reset = () => {
     setIsRunning(false)
