@@ -45,6 +45,10 @@ Shell logos and `/static/images/social-banner.png` are deliberately `keep-local`
 banner is consumed directly by framework metadata, so it must remain in the deployment bundle until
 every metadata surface resolves manifest URLs explicitly.
 
+`data/asset-public-source-allowlist.json` temporarily keeps hash-pinned legacy source artwork local
+when published content still references it. These entries are expiring cleanup records, not upload
+instructions: they must never enter the public manifest or private publisher while still referenced.
+
 Publishing defaults to a dry run and requires one store plus one scope:
 
 ```sh

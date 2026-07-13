@@ -266,6 +266,7 @@ export default makeSource({
     'asset-budget-overrides.json',
     'asset-duplicate-allowlist.json',
     'asset-migration-allowlist.json',
+    'asset-public-source-allowlist.json',
     'assets-manifest.json',
     'private-assets-inventory.json',
   ],

@@ -1,9 +1,14 @@
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 const temporaryDirectories: string[] = []
+const png = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+  'base64'
+)
 
 afterEach(() => {
   for (const directory of temporaryDirectories.splice(0)) {
@@ -50,6 +55,7 @@ describe('asset validation command', () => {
     writeFileSync(path.join(rootDir, 'data/asset-budget-overrides.json'), '[]')
     writeFileSync(path.join(rootDir, 'data/asset-duplicate-allowlist.json'), '[]')
     writeFileSync(path.join(rootDir, 'data/asset-migration-allowlist.json'), '[]')
+    writeFileSync(path.join(rootDir, 'data/asset-public-source-allowlist.json'), '[]')
     writeFileSync(
       path.join(rootDir, 'data/blogs/example.mdx'),
       ["image: '/static/images/unsafe.bmp'", "other: '/static/images/blogs/../secret.png'"].join(
@@ -69,6 +75,46 @@ describe('asset validation command', () => {
     const errorCodes = JSON.parse(result.stdout).errors.map((error: { code: string }) => error.code)
     expect(errorCodes).toEqual(
       expect.arrayContaining(['gif-not-allowed', 'invalid-asset-reference', 'unsupported-mime'])
+    )
+  })
+
+  it('allows a hash-pinned legacy public source only until its cleanup expiry', () => {
+    const rootDir = mkdtempSync(path.join(os.tmpdir(), 'ylang-public-source-'))
+    temporaryDirectories.push(rootDir)
+
+    const assetId = '/static/images/blogs/example/source-artwork.png'
+    const assetPath = path.join(rootDir, 'public', assetId)
+    mkdirSync(path.dirname(assetPath), { recursive: true })
+    mkdirSync(path.join(rootDir, 'data/blogs'), { recursive: true })
+    writeFileSync(path.join(rootDir, 'data/blogs/example.mdx'), `image: '${assetId}'`)
+    writeFileSync(assetPath, png)
+    writeFileSync(path.join(rootDir, 'data/asset-budget-overrides.json'), '[]')
+    writeFileSync(path.join(rootDir, 'data/asset-duplicate-allowlist.json'), '[]')
+    writeFileSync(path.join(rootDir, 'data/asset-migration-allowlist.json'), '[]')
+    writeFileSync(
+      path.join(rootDir, 'data/asset-public-source-allowlist.json'),
+      JSON.stringify([
+        {
+          assetId,
+          sha256: createHash('sha256').update(png).digest('hex'),
+          reason: 'Legacy article cleanup is tracked separately.',
+          owner: 'Ylang Labs',
+          expiresAt: '2026-08-12',
+        },
+      ])
+    )
+
+    const allowed = runValidator(rootDir)
+    expect(allowed.status).toBe(0)
+    expect(JSON.parse(allowed.stdout).errors).toEqual([])
+
+    writeFileSync(assetPath, Buffer.concat([png, Buffer.from('changed')]))
+    const changed = runValidator(rootDir)
+    expect(changed.status).toBe(1)
+    expect(JSON.parse(changed.stdout).errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'public-source-hash-mismatch', assetId }),
+      ])
     )
   })
 })

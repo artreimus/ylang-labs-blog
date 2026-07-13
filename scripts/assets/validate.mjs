@@ -33,6 +33,7 @@ export const contentTypes = {
 const rasterExtensions = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.webp'])
 const referencePattern = /\/static\/images\/[^'"`,\s)<>{}\]]+/gi
 const assetIdPrefix = '/static/images/'
+const sourceArtworkPattern = /\/(?:source-artwork|source-image)\.[^/]+$/i
 
 function readJson(rootDir, relativePath) {
   return JSON.parse(readFileSync(path.join(rootDir, relativePath), 'utf8'))
@@ -213,9 +214,11 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
   }
 
   const migrationAllowlist = readConfigArray('data/asset-migration-allowlist.json')
+  const publicSourceAllowlist = readConfigArray('data/asset-public-source-allowlist.json')
   const budgetOverrides = readConfigArray('data/asset-budget-overrides.json')
   const duplicateAllowlist = readConfigArray('data/asset-duplicate-allowlist.json')
   const migrationById = new Map()
+  const publicSourceById = new Map()
   const overrideById = new Map()
   const allowedDuplicateGroups = []
   const references = collectReferences(rootDir)
@@ -280,6 +283,54 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
     if (expiry < now) {
       errors.push(
         issue('gif-allowance-expired', entry.assetId, 'GIF migration allowance has expired.')
+      )
+    }
+  }
+
+  for (const entry of publicSourceAllowlist) {
+    const assetId = entry?.assetId ?? '(missing assetId)'
+    const expiry = endOfUtcDay(entry?.expiresAt)
+    const isValid =
+      isNormalizedAssetId(entry?.assetId) &&
+      sourceArtworkPattern.test(entry.assetId) &&
+      typeof entry.sha256 === 'string' &&
+      /^[a-f0-9]{64}$/.test(entry.sha256) &&
+      typeof entry.reason === 'string' &&
+      entry.reason.trim().length > 0 &&
+      typeof entry.owner === 'string' &&
+      entry.owner.trim().length > 0 &&
+      expiry
+
+    if (!isValid) {
+      errors.push(
+        issue(
+          'invalid-public-source-allowance',
+          assetId,
+          'Public source allowances require a normalized source-artwork ID, SHA-256, reason, owner, and valid expiry.'
+        )
+      )
+      continue
+    }
+
+    if (publicSourceById.has(entry.assetId)) {
+      errors.push(
+        issue(
+          'duplicate-public-source-allowance',
+          entry.assetId,
+          'Public source allowance IDs must be unique.'
+        )
+      )
+      continue
+    }
+
+    publicSourceById.set(entry.assetId, entry)
+    if (expiry < now) {
+      errors.push(
+        issue(
+          'public-source-allowance-expired',
+          entry.assetId,
+          'Public source allowance has expired.'
+        )
       )
     }
   }
@@ -394,6 +445,16 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
       continue
     }
 
+    if (sourceArtworkPattern.test(assetId)) {
+      errors.push(
+        issue(
+          'source-in-public-manifest',
+          assetId,
+          'Reusable source artwork must not be published through the public delivery manifest.'
+        )
+      )
+    }
+
     if (!remoteUrl.pathname.includes(record.sha256.slice(0, 16))) {
       errors.push(
         issue(
@@ -431,6 +492,17 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
     const filePath = path.join(publicDir, assetId.replace(/^\//, ''))
     const hasLocalFile = existsSync(filePath) && statSync(filePath).isFile()
     const manifestRecord = assetManifest[assetId]
+    const publicSourceAllowance = publicSourceById.get(assetId)
+
+    if (sourceArtworkPattern.test(assetId) && !publicSourceAllowance) {
+      errors.push(
+        issue(
+          'source-in-public-delivery',
+          assetId,
+          'Reusable source artwork must not be referenced as public delivery media.'
+        )
+      )
+    }
 
     if (!hasLocalFile && !manifestRecord) {
       errors.push(
@@ -491,12 +563,12 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
       }
     }
 
-    if (/\/(?:source-artwork|source-image)\.[^/]+$/i.test(assetId)) {
+    if (publicSourceAllowance && publicSourceAllowance.sha256 !== hash) {
       errors.push(
         issue(
-          'source-in-public-delivery',
+          'public-source-hash-mismatch',
           assetId,
-          'Reusable source artwork must not be referenced as public delivery media.'
+          'Legacy public source hash differs from its allowance.'
         )
       )
     }

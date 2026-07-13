@@ -1,4 +1,4 @@
-import { mkdirSync, renameSync, statSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { imageSize } from 'image-size'
@@ -47,7 +47,27 @@ function metadataForFile(rootDir, filePath, declaredRoles) {
   return metadata
 }
 
-function initialDisposition(asset, referencedIds) {
+function publicSourceAllowanceIds(rootDir) {
+  try {
+    const entries = JSON.parse(
+      readFileSync(path.join(rootDir, 'data/asset-public-source-allowlist.json'), 'utf8')
+    )
+    return new Set(
+      Array.isArray(entries) ? entries.map((entry) => entry?.assetId).filter(Boolean) : []
+    )
+  } catch {
+    return new Set()
+  }
+}
+
+function initialDisposition(asset, referencedIds, allowedPublicSourceIds) {
+  if (allowedPublicSourceIds.has(asset.logicalId)) {
+    return {
+      disposition: 'keep-local',
+      reason: 'Legacy public source remains local until its content reference is replaced.',
+    }
+  }
+
   if (privateSourcePattern.test(asset.logicalId)) {
     return {
       disposition: 'private-blob',
@@ -77,10 +97,14 @@ function initialDisposition(asset, referencedIds) {
 
 export function buildAssetInventory({ rootDir = defaultRoot, now = new Date() } = {}) {
   const referencedIds = new Set(collectReferences(rootDir))
+  const allowedPublicSourceIds = publicSourceAllowanceIds(rootDir)
   const declaredRoles = collectDeclaredAssetRoles(rootDir)
   const assets = collectPublicFiles(rootDir)
     .map((filePath) => metadataForFile(rootDir, filePath, declaredRoles))
-    .map((asset) => ({ ...asset, ...initialDisposition(asset, referencedIds) }))
+    .map((asset) => ({
+      ...asset,
+      ...initialDisposition(asset, referencedIds, allowedPublicSourceIds),
+    }))
     .sort((left, right) => left.logicalId.localeCompare(right.logicalId))
 
   const byHash = new Map()

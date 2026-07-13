@@ -1,0 +1,9 @@
+[
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/source-artwork.png",
+    "sha256": "2820e7ce265317bb2e52a1f80a32418ebf0dfe127161fe9563f595d35832d067",
+    "reason": "The published Gemma article still references this legacy source image; keep it local until the article-specific replacement lands separately.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  }
+]

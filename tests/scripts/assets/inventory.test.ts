@@ -100,3 +100,35 @@ it('uses frontmatter roles for ambiguously named project card images', () => {
     disposition: 'public-blob',
   })
 })
+
+it('keeps an allowlisted public source local until its content reference is replaced', () => {
+  const rootDir = mkdtempSync(path.join(os.tmpdir(), 'ylang-inventory-public-source-'))
+  temporaryDirectories.push(rootDir)
+  const assetId = '/static/images/blogs/example/source-artwork.png'
+  const assetPath = path.join(rootDir, 'public', assetId)
+  mkdirSync(path.dirname(assetPath), { recursive: true })
+  mkdirSync(path.join(rootDir, 'data/blogs'), { recursive: true })
+  writeFileSync(path.join(rootDir, 'data/blogs/example.mdx'), `image: '${assetId}'`)
+  writeFileSync(
+    path.join(rootDir, 'data/asset-public-source-allowlist.json'),
+    JSON.stringify([{ assetId }])
+  )
+  writeFileSync(assetPath, png)
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      "import('./scripts/assets/inventory.mjs').then(({buildAssetInventory}) => process.stdout.write(JSON.stringify(buildAssetInventory({ rootDir: process.argv[1] }))))",
+      rootDir,
+    ],
+    { cwd: process.cwd(), encoding: 'utf8' }
+  )
+
+  expect(result.status).toBe(0)
+  expect(JSON.parse(result.stdout).assets[0]).toMatchObject({
+    logicalId: assetId,
+    disposition: 'keep-local',
+  })
+})

@@ -210,7 +210,7 @@
     "reviewDate": "2026-08-12"
   },
   {
-    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-deployment-ladder.png",
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/source-artwork.png",
     "maxBytes": 1873799,
     "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
     "reviewDate": "2026-08-12"
