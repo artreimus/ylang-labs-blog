@@ -84,7 +84,7 @@ export default function LegalPage() {
                     href={section.href}
                     className="group flex items-baseline gap-3 rounded-sm text-sm leading-5 text-gray-600 transition hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-4 dark:text-gray-400 dark:hover:text-white dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
                   >
-                    <span className="font-mono text-[10px] font-semibold tracking-wider text-gray-400 transition group-hover:text-primary-700 dark:text-gray-600 dark:group-hover:text-primary-400">
+                    <span className="font-mono text-[10px] font-semibold tracking-wider text-gray-600 transition group-hover:text-primary-700 dark:text-gray-400 dark:group-hover:text-primary-300">
                       {section.number}
                     </span>
                     <span>{section.label}</span>

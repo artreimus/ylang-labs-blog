@@ -1,8 +1,8 @@
 import 'css/tailwind.css'
 import 'remark-github-blockquote-alert/alert.css'
 
-import { Analytics, AnalyticsConfig } from 'pliny/analytics'
-import { KBarSearchProvider } from 'pliny/search/KBar'
+import { Analytics, AnalyticsConfig } from 'pliny/analytics/index.js'
+import { KBarSearchProvider } from 'pliny/search/KBar.js'
 import { Toaster } from '@/components/ui/toaster'
 import Header from '@/components/Header'
 import SectionContainer from '@/components/SectionContainer'
@@ -103,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Skip to main content
               </a>
               <Header />
-              <main id="main-content" className="mb-auto pt-[var(--header-height)]">
+              <main id="main-content" tabIndex={-1} className="mb-auto pt-[var(--header-height)]">
                 {children}
               </main>
               <Toaster />

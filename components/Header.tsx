@@ -20,7 +20,11 @@ import { useKBar, VisualState } from 'kbar'
 const CustomNavbarLogo = () => {
   return (
     <div className="relative z-50">
-      <Link href="/" aria-label={siteMetadata.headerTitle}>
+      <Link
+        href="/"
+        aria-label={siteMetadata.headerTitle}
+        className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
+      >
         <div className="flex h-20 items-center">
           <DynamicLogo />
         </div>
@@ -53,7 +57,7 @@ const Header = () => {
       }`}
     >
       <Navbar
-        className={`${navbarClass} transition-opacity duration-300 ${
+        className={`${navbarClass} transition-opacity duration-300 motion-reduce:transition-none ${
           visualState === VisualState.showing || visualState === VisualState.animatingIn
             ? 'pointer-events-none opacity-0'
             : 'opacity-100'
@@ -95,7 +99,7 @@ const Header = () => {
                   key={`mobile-link-${idx}`}
                   href={item.link}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full font-sans text-base font-medium leading-[64px] text-gray-900 transition-colors duration-200 hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300"
+                  className="block w-full rounded-lg px-2 font-sans text-base font-medium leading-[64px] text-gray-900 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:text-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 dark:focus-visible:ring-primary-400"
                 >
                   {item.name}
                 </Link>

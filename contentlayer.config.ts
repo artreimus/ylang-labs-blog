@@ -23,6 +23,8 @@ import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
+import { shouldWriteContentlayerArtifacts } from './lib/contentlayer/write-artifacts'
+import { BlogImageRolesSchema, ProjectHeroMediaSchema } from './lib/assets/types'
 
 const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
@@ -142,6 +144,20 @@ function createSearchIndex(allBlogs, allProjects) {
   }
 }
 
+function validateMediaContracts(allBlogs, allProjects) {
+  for (const blog of allBlogs) {
+    if (blog.imageRoles) {
+      BlogImageRolesSchema.parse(blog.imageRoles)
+    }
+  }
+
+  for (const project of allProjects) {
+    if (project.heroMedia) {
+      ProjectHeroMediaSchema.parse(project.heroMedia)
+    }
+  }
+}
+
 export const Blog = defineDocumentType(() => ({
   name: 'Blog',
   filePathPattern: 'blogs/**/*.mdx',
@@ -156,6 +172,7 @@ export const Blog = defineDocumentType(() => ({
     tldr: { type: 'string' },
     images: { type: 'json' },
     cardImage: { type: 'string' },
+    imageRoles: { type: 'json' },
     imageTheme: { type: 'string', default: 'white' },
     authors: { type: 'list', of: { type: 'string' } },
     layout: { type: 'string' },
@@ -166,16 +183,20 @@ export const Blog = defineDocumentType(() => ({
     ...computedFields,
     structuredData: {
       type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
-        description: doc.summary,
-        image: doc.images ? doc.images[0] : siteMetadata.socialBanner,
-        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
-      }),
+      resolve: (doc) => {
+        const imageRoles = (doc as typeof doc & { imageRoles?: { social?: string } }).imageRoles
+
+        return {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: doc.title,
+          datePublished: doc.date,
+          dateModified: doc.lastmod || doc.date,
+          description: doc.summary,
+          image: imageRoles?.social || doc.images?.[0] || siteMetadata.socialBanner,
+          url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+        }
+      },
     },
   },
 }))
@@ -193,6 +214,7 @@ export const Project = defineDocumentType(() => ({
     description: { type: 'string' },
     image: { type: 'string' },
     cardImage: { type: 'string', required: false },
+    heroMedia: { type: 'json' },
     imageTheme: { type: 'string', default: 'white' },
     authors: { type: 'list', of: { type: 'string' } },
     layout: { type: 'string' },
@@ -240,6 +262,13 @@ export const Company = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
+  contentDirExclude: [
+    'asset-budget-overrides.json',
+    'asset-duplicate-allowlist.json',
+    'asset-migration-allowlist.json',
+    'assets-manifest.json',
+    'private-assets-inventory.json',
+  ],
   documentTypes: [Blog, Authors, Company, Project],
   mdx: {
     cwd: process.cwd(),
@@ -271,6 +300,12 @@ export default makeSource({
   },
   onSuccess: async (importData) => {
     const { allBlogs, allProjects } = await importData()
+    validateMediaContracts(allBlogs, allProjects)
+
+    if (!shouldWriteContentlayerArtifacts()) {
+      return
+    }
+
     createTagCount(allBlogs)
     createProjectTagCount(allProjects)
     createSearchIndex(allBlogs, allProjects)

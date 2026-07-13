@@ -1,6 +1,6 @@
 import Image from '@/components/Image'
 import Link from '@/components/Link'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from 'pliny/utils/contentlayer.js'
 import { Authors } from 'contentlayer/generated'
 
 interface AuthorProps {
@@ -28,7 +28,7 @@ export default function Author({ author, className }: AuthorProps) {
           {author.twitter && (
             <Link
               href={author.twitter}
-              className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+              className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
             >
               {author.twitter.replace('https://twitter.com/', '@').replace('https://x.com/', '@')}
             </Link>

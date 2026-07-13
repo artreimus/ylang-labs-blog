@@ -4,8 +4,74 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
-// You might need to insert additional domains in script-src if you are using external services
-const ContentSecurityPolicy = `
+const blobOrigin = process.env.BLOB_PUBLIC_ORIGIN
+const blobPathPrefix = process.env.BLOB_PUBLIC_PATH_PREFIX
+
+function parseHttpsOrigin(value, variableName) {
+  if (!value) return undefined
+
+  const url = new URL(value)
+  if (url.protocol !== 'https:' || url.pathname !== '/' || url.search || url.hash) {
+    throw new Error(`${variableName} must be an HTTPS origin without a path, query, or fragment`)
+  }
+  return url.origin
+}
+
+const configuredBlobOrigin = parseHttpsOrigin(blobOrigin, 'BLOB_PUBLIC_ORIGIN')
+if (configuredBlobOrigin && !blobPathPrefix) {
+  throw new Error('BLOB_PUBLIC_PATH_PREFIX is required when BLOB_PUBLIC_ORIGIN is configured')
+}
+if (
+  blobPathPrefix &&
+  (!blobPathPrefix.startsWith('/') || !blobPathPrefix.endsWith('/**') || blobPathPrefix === '/**')
+) {
+  throw new Error('BLOB_PUBLIC_PATH_PREFIX must be a narrow absolute prefix ending in /**')
+}
+
+const cspDirectives = {
+  'default-src': ["'self'"],
+  'script-src': [
+    "'self'",
+    "'unsafe-eval'",
+    "'unsafe-inline'",
+    'https://www.googletagmanager.com',
+    'https://www.google-analytics.com',
+  ],
+  'style-src': ["'self'", "'unsafe-inline'"],
+  'img-src': [
+    "'self'",
+    'blob:',
+    'data:',
+    'https://www.google-analytics.com',
+    'https://www.googletagmanager.com',
+    ...(configuredBlobOrigin ? [configuredBlobOrigin] : []),
+  ],
+  'media-src': ["'self'", 'blob:', ...(configuredBlobOrigin ? [configuredBlobOrigin] : [])],
+  'connect-src': [
+    "'self'",
+    'https://www.google-analytics.com',
+    'https://analytics.google.com',
+    'https://region1.google-analytics.com',
+  ],
+  'font-src': ["'self'", 'data:'],
+  'frame-src': ['https://giscus.app'],
+  'worker-src': ["'self'", 'blob:'],
+  'object-src': ["'none'"],
+  'base-uri': ["'self'"],
+  'form-action': ["'self'"],
+  'frame-ancestors': ["'none'"],
+  'report-to': ['csp-endpoint'],
+  'report-uri': ['/api/csp-report'],
+}
+
+const contentSecurityPolicy = Object.entries(cspDirectives)
+  .map(([directive, values]) => `${directive} ${values.join(' ')}`)
+  .join('; ')
+
+// Keep the currently deployed policy enforced while the narrower candidate is
+// observed. Promote `contentSecurityPolicy` to this header only after the
+// report-only rollout gate in docs/operations/contact-form.md is complete.
+const enforcedContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline' www.googletagmanager.com www.google-analytics.com;
   style-src 'self' 'unsafe-inline';
@@ -14,13 +80,23 @@ const ContentSecurityPolicy = `
   connect-src *;
   font-src 'self';
   frame-src giscus.app
-`
+`.replace(/\n/g, '')
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   {
     key: 'Content-Security-Policy',
-    value: ContentSecurityPolicy.replace(/\n/g, ''),
+    value: enforcedContentSecurityPolicy,
+  },
+  {
+    key: 'Content-Security-Policy-Report-Only',
+    value: contentSecurityPolicy,
+  },
+  {
+    key: 'Reporting-Endpoints',
+    // A relative endpoint resolves against the response origin, so Preview and
+    // Development reports stay isolated from production reporting.
+    value: 'csp-endpoint="/api/csp-report"',
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
@@ -70,12 +146,16 @@ module.exports = () => {
     transpilePackages: ['github-slugger'],
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     images: {
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'picsum.photos',
-        },
-      ],
+      remotePatterns:
+        configuredBlobOrigin && blobPathPrefix
+          ? [
+              {
+                protocol: 'https',
+                hostname: new URL(configuredBlobOrigin).hostname,
+                pathname: blobPathPrefix,
+              },
+            ]
+          : [],
       unoptimized,
     },
     async headers() {
@@ -85,14 +165,6 @@ module.exports = () => {
           headers: securityHeaders,
         },
       ]
-    },
-    webpack: (config, options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ['@svgr/webpack'],
-      })
-
-      return config
     },
   })
 }

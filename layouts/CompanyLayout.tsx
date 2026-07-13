@@ -112,7 +112,7 @@ export default function CompanyLayout({ children, content }: Props) {
               <div className="relative overflow-hidden rounded-3xl bg-white/80 shadow-2xl ring-1 ring-gray-200 backdrop-blur-sm dark:bg-gray-800/80 dark:ring-gray-700">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-secondary-50/50 dark:from-primary-900/20 dark:to-secondary-900/20" />
                 <div className="relative p-8 sm:p-12 lg:p-16">
-                  <div className="prose prose-lg mx-auto max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-gray-900 prose-p:leading-relaxed prose-p:text-gray-700 prose-a:text-primary-600 prose-headings:dark:text-white prose-p:dark:text-gray-300 prose-a:dark:text-primary-400">
+                  <div className="prose prose-lg mx-auto max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-gray-900 prose-p:leading-relaxed prose-p:text-gray-700 prose-a:text-primary-700 prose-headings:dark:text-white prose-p:dark:text-gray-300 prose-a:dark:text-primary-300">
                     {children}
                   </div>
                 </div>

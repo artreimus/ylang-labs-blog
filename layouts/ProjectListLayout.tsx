@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from 'pliny/utils/contentlayer.js'
 import type { Project } from 'contentlayer/generated'
 import { allAuthors } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import EmptyView from '@/components/EmptyView'
 import Image from '@/components/Image'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion, type Variants } from 'motion/react'
 import { PROJECTS_PER_PAGE } from '@/components/lib/pagination'
+import { useListSearchQuery } from '@/components/hooks/use-list-search-query'
 
 interface PaginationProps {
   totalPages: number
@@ -33,26 +34,32 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
         {prevPage ? (
           <Link
             href={currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`}
-            className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 motion-reduce:transition-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
             rel="prev"
           >
             Previous
           </Link>
         ) : (
-          <span className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-300 dark:border-gray-600 dark:bg-gray-800">
+          <span
+            aria-disabled="true"
+            className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-500"
+          >
             Previous
           </span>
         )}
         {nextPage ? (
           <Link
             href={`/${basePath}/page/${currentPage + 1}`}
-            className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 motion-reduce:transition-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
             rel="next"
           >
             Next
           </Link>
         ) : (
-          <span className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-300 dark:border-gray-600 dark:bg-gray-800">
+          <span
+            aria-disabled="true"
+            className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-500"
+          >
             Next
           </span>
         )}
@@ -75,7 +82,7 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
                 href={
                   currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`
                 }
-                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-gray-600 dark:hover:bg-gray-700"
+                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 transition-colors duration-200 hover:bg-gray-50 focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400"
                 rel="prev"
               >
                 <span className="sr-only">Previous</span>
@@ -88,7 +95,10 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
                 </svg>
               </Link>
             ) : (
-              <span className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600">
+              <span
+                aria-disabled="true"
+                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:text-gray-500 dark:ring-gray-600"
+              >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fillRule="evenodd"
@@ -99,14 +109,17 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
               </span>
             )}
 
-            <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0 dark:text-gray-100 dark:ring-gray-600">
+            <span
+              aria-current="page"
+              className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 dark:text-gray-100 dark:ring-gray-600"
+            >
               {currentPage}
             </span>
 
             {nextPage ? (
               <Link
                 href={`/${basePath}/page/${currentPage + 1}`}
-                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-gray-600 dark:hover:bg-gray-700"
+                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 transition-colors duration-200 hover:bg-gray-50 focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400"
                 rel="next"
               >
                 <span className="sr-only">Next</span>
@@ -119,7 +132,10 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
                 </svg>
               </Link>
             ) : (
-              <span className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600">
+              <span
+                aria-disabled="true"
+                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:text-gray-500 dark:ring-gray-600"
+              >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fillRule="evenodd"
@@ -137,16 +153,24 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
 }
 
 export default function ProjectListLayout({ projects, title, pagination }: ProjectListLayoutProps) {
-  const [searchValue, setSearchValue] = useState('')
-
-  const filteredProjects = projects.filter((project) => {
-    const searchContent = project.title + project.description + project.tags?.join(' ')
-    return searchContent.toLowerCase().includes(searchValue.toLowerCase())
+  const shouldReduceMotion = useReducedMotion()
+  const { searchValue, normalizedSearchValue, setSearchValue } = useListSearchQuery({
+    rootPath: '/projects',
   })
+
+  const filteredProjects = useMemo(() => {
+    if (!normalizedSearchValue) return projects
+
+    const lowerSearch = normalizedSearchValue.toLowerCase()
+    return projects.filter((project) => {
+      const searchContent = project.title + project.description + project.tags?.join(' ')
+      return searchContent.toLowerCase().includes(lowerSearch)
+    })
+  }, [normalizedSearchValue, projects])
 
   const currentPage = pagination?.currentPage ?? 1
   const pageStart = PROJECTS_PER_PAGE * (currentPage - 1)
-  const displayProjects = searchValue
+  const displayProjects = normalizedSearchValue
     ? filteredProjects
     : filteredProjects.slice(pageStart, pageStart + PROJECTS_PER_PAGE)
 
@@ -156,24 +180,20 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
     return author?.name || authorSlug
   }
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: shouldReduceMotion ? { duration: 0 } : { staggerChildren: 0.1 },
     },
   }
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
+  const cardVariants: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
-        duration: 0.5,
-      },
+      transition: { duration: shouldReduceMotion ? 0 : 0.5 },
     },
   }
 
@@ -182,9 +202,9 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
       {/* Header */}
       <motion.div
         className="mb-12 text-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
       >
         <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl">
           {title}
@@ -197,20 +217,26 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
       {/* Search */}
       <motion.div
         className="mb-12 flex justify-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.1 }}
       >
         <div className="relative w-full max-w-lg">
           <input
             aria-label="Search projects"
-            type="text"
+            aria-describedby="project-search-results"
+            type="search"
+            value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search projects..."
-            className="w-full rounded-full border border-gray-200 bg-white px-6 py-3 text-gray-900 shadow-sm transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-25 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-400"
+            className="w-full rounded-full border border-gray-200 bg-white px-6 py-3 pr-12 text-gray-900 shadow-sm transition-[border-color,box-shadow] duration-200 focus-visible:border-primary-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus-visible:border-primary-400 dark:focus-visible:ring-primary-400"
           />
+          <span id="project-search-results" className="sr-only" aria-live="polite">
+            {displayProjects.length} {displayProjects.length === 1 ? 'project' : 'projects'} shown
+          </span>
           <svg
-            className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+            className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -228,15 +254,18 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
       {/* Projects Grid */}
       {!filteredProjects.length ? (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.6,
+            delay: shouldReduceMotion ? 0 : 0.2,
+          }}
         >
           <EmptyView
             title="No Projects Found"
             description={
-              searchValue
-                ? `No projects found matching "${searchValue}". Try adjusting your search terms.`
+              normalizedSearchValue
+                ? `No projects found matching "${normalizedSearchValue}". Try adjusting your search terms.`
                 : 'Our showcase of AI Engineering projects is coming soon. Check back for innovative solutions and technical deep-dives!'
             }
           />
@@ -245,7 +274,7 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
         <motion.div
           className="grid gap-8 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3"
           variants={containerVariants}
-          initial="hidden"
+          initial={shouldReduceMotion ? false : 'hidden'}
           animate="visible"
         >
           {displayProjects.map((project) => {
@@ -253,9 +282,12 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
             const displayImage = cardImage || image
             return (
               <motion.div key={path} variants={cardVariants}>
-                <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary-500/10 dark:border-gray-800 dark:bg-gray-950">
+                <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary-500/10 motion-reduce:transform-none motion-reduce:transition-none dark:border-gray-800 dark:bg-gray-950">
                   <div className="flex h-full flex-col">
-                    <Link href={`/${path}`} className="flex flex-1 flex-col">
+                    <Link
+                      href={`/${path}`}
+                      className="flex flex-1 flex-col rounded-t-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400"
+                    >
                       {displayImage && (
                         <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                           <Image
@@ -264,7 +296,7 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
                             width={800}
                             height={450}
                             sizes="(min-width: 1536px) 33vw, (min-width: 768px) 50vw, 100vw"
-                            className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                            className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
                           />
                         </div>
                       )}
@@ -292,7 +324,7 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
                           {github && (
                             <a
                               href={github}
-                              className="inline-flex items-center gap-1 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-sm text-primary-700 transition-colors duration-200 hover:bg-primary-50 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:text-primary-300 dark:hover:bg-gray-800 dark:hover:text-primary-200 dark:focus-visible:ring-primary-400"
                               target="_blank"
                               rel="noopener noreferrer"
                               aria-label={`View ${title} on GitHub`}
@@ -311,7 +343,7 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
                           {demo && (
                             <a
                               href={demo}
-                              className="inline-flex items-center gap-1 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-sm text-primary-700 transition-colors duration-200 hover:bg-primary-50 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:text-primary-300 dark:hover:bg-gray-800 dark:hover:text-primary-200 dark:focus-visible:ring-primary-400"
                               target="_blank"
                               rel="noopener noreferrer"
                               aria-label={`Open ${title} demo`}
@@ -344,11 +376,14 @@ export default function ProjectListLayout({ projects, title, pagination }: Proje
       )}
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && !searchValue && (
+      {pagination && pagination.totalPages > 1 && !normalizedSearchValue && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.6,
+            delay: shouldReduceMotion ? 0 : 0.4,
+          }}
         >
           <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} />
         </motion.div>

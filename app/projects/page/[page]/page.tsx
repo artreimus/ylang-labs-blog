@@ -4,10 +4,13 @@ import {
   getValidPageNumber,
   PROJECTS_PER_PAGE,
 } from '@/components/lib/pagination'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 import { allProjects } from 'contentlayer/generated'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { genPageMetadata } from 'app/seo'
+import { Suspense } from 'react'
+import ListLayoutFallback from '@/layouts/components/ListLayoutFallback'
+import { resolveProjectContentAssets } from '@/lib/assets/content.server'
 
 const publishedProjects = allProjects.filter((project) => !project.draft)
 const isStaticExport = Boolean(process.env.EXPORT)
@@ -46,7 +49,7 @@ export default async function Page({ params }: { params: Promise<{ page: string 
     permanentRedirect('/projects')
   }
 
-  const projects = allCoreContent(sortPosts(publishedProjects))
+  const projects = allCoreContent(sortPosts(publishedProjects).map(resolveProjectContentAssets))
   const totalPages = Math.ceil(projects.length / PROJECTS_PER_PAGE)
   const pageNumber = getValidPageNumber(resolvedParams.page, totalPages)
 
@@ -59,5 +62,9 @@ export default async function Page({ params }: { params: Promise<{ page: string 
     totalPages,
   }
 
-  return <ProjectListLayout projects={projects} pagination={pagination} title="All Projects" />
+  return (
+    <Suspense fallback={<ListLayoutFallback label="Loading projects..." />}>
+      <ProjectListLayout projects={projects} pagination={pagination} title="All Projects" />
+    </Suspense>
+  )
 }

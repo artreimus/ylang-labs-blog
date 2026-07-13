@@ -36,7 +36,7 @@ export default function AgentMemory({
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className={`rounded-lg p-2 transition-all duration-200 hover:scale-[1.02] sm:p-3 ${
+                    className={`rounded-lg p-2 transition-transform duration-200 hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none sm:p-3 ${
                       message.type === 'human'
                         ? 'border border-primary-200 bg-primary-50 text-primary-700'
                         : message.type === 'system'
@@ -70,8 +70,7 @@ export default function AgentMemory({
                   {Array.from({ length: storeBlocks }).map((_, index) => (
                     <div
                       key={index}
-                      className="h-6 rounded border border-secondary-200 bg-secondary-50 shadow-sm 
-                        transition-all duration-200 hover:scale-105 hover:shadow-md sm:h-8"
+                      className="h-6 rounded border border-secondary-200 bg-secondary-50 shadow-sm transition-[box-shadow,transform] duration-200 hover:scale-105 hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none sm:h-8"
                     />
                   ))}
                 </div>

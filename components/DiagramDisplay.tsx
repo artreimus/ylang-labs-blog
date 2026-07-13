@@ -1,5 +1,6 @@
 import React from 'react'
-import { DiagramImage, DiagramSubtitle } from './DiagramComponents'
+import { DiagramSubtitle } from './DiagramComponents'
+import AssetImage from './mdx/AssetImage'
 
 interface DiagramDisplayProps {
   src: string
@@ -20,7 +21,7 @@ const DiagramDisplay: React.FC<DiagramDisplayProps> = ({
 }) => {
   return (
     <figure>
-      <DiagramImage src={src} alt={alt} width={width} height={height} className={className} />
+      <AssetImage src={src} alt={alt} width={width} height={height} className={className} />
       <DiagramSubtitle>{caption}</DiagramSubtitle>
     </figure>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from 'pliny/utils/contentlayer.js'
 import type { Blog } from 'contentlayer/generated'
 import BlogCard from '@/components/BlogCard'
 import EmptyView from '@/components/EmptyView'

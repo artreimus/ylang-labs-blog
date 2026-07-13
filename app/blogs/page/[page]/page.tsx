@@ -4,10 +4,13 @@ import {
   getPaginatedStaticParams,
   getValidPageNumber,
 } from '@/components/lib/pagination'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 import { allBlogs } from 'contentlayer/generated'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { genPageMetadata } from 'app/seo'
+import { Suspense } from 'react'
+import ListLayoutFallback from '@/layouts/components/ListLayoutFallback'
+import { resolveBlogContentAssets } from '@/lib/assets/content.server'
 
 const publishedBlogs = allBlogs.filter((post) => !post.draft)
 const isStaticExport = Boolean(process.env.EXPORT)
@@ -46,7 +49,7 @@ export default async function Page({ params }: { params: Promise<{ page: string 
     permanentRedirect('/blogs')
   }
 
-  const posts = allCoreContent(sortPosts(publishedBlogs))
+  const posts = allCoreContent(sortPosts(publishedBlogs).map(resolveBlogContentAssets))
   const totalPages = Math.ceil(posts.length / BLOGS_PER_PAGE)
   const pageNumber = getValidPageNumber(resolvedParams.page, totalPages)
 
@@ -59,5 +62,9 @@ export default async function Page({ params }: { params: Promise<{ page: string 
     totalPages,
   }
 
-  return <BlogCardLayout posts={posts} pagination={pagination} title="All Posts" />
+  return (
+    <Suspense fallback={<ListLayoutFallback label="Loading articles..." />}>
+      <BlogCardLayout posts={posts} pagination={pagination} title="All Posts" />
+    </Suspense>
+  )
 }

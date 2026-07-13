@@ -2,24 +2,32 @@ import Link from '@/components/Link'
 import Tag from '@/components/CardTag'
 import Image from 'next/image'
 import React from 'react'
+import { getBlogImage } from '@/lib/content/blog-images'
 
 export default function BlogCard({ post, variant = 'default' }) {
-  const { slug, title, tags, cardImage, summary, readingTime, images } = post
-  const displayImage = (Array.isArray(images) && images.length > 0 && images[0]) || cardImage
+  const { slug, title, tags, summary, readingTime } = post
+  const displayImage = getBlogImage(post, variant === 'grid' ? 'grid-card' : 'home-rail')
 
   if (variant === 'grid') {
     return (
-      <Link href={`/blogs/${slug}`} className="group block h-full">
-        <article className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-gray-200 transition-all duration-300 group-hover:shadow-xl group-hover:ring-primary-200 dark:bg-gray-800 dark:ring-gray-600 dark:group-hover:ring-primary-600">
+      <Link
+        href={`/blogs/${slug}`}
+        className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
+      >
+        <article className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-gray-200 transition-[box-shadow] duration-300 group-hover:shadow-xl group-hover:ring-primary-200 motion-reduce:transition-none dark:bg-gray-800 dark:ring-gray-600 dark:group-hover:ring-primary-600">
           {/* Image Container */}
           <div className="relative aspect-[16/10] overflow-hidden">
-            <Image
-              src={displayImage}
-              alt={title}
-              fill
-              sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-            />
+            {displayImage ? (
+              <Image
+                src={displayImage}
+                alt={title}
+                fill
+                sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
+              />
+            ) : (
+              <div aria-hidden="true" className="h-full w-full bg-gray-100 dark:bg-gray-900" />
+            )}
           </div>
 
           {/* Content */}
@@ -46,7 +54,7 @@ export default function BlogCard({ post, variant = 'default' }) {
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {readingTime?.text || 'Quick read'}
               </span>
-              <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
+              <span className="text-xs font-medium text-primary-700 dark:text-primary-300">
                 Read more →
               </span>
             </div>
@@ -58,16 +66,23 @@ export default function BlogCard({ post, variant = 'default' }) {
 
   // Original horizontal scroll variant
   return (
-    <Link href={`/blogs/${slug}`} className="group block h-[320px] w-[240px]">
+    <Link
+      href={`/blogs/${slug}`}
+      className="group block h-[320px] w-[240px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
+    >
       <article className="relative h-full w-full overflow-hidden rounded-lg bg-gray-900">
         {/* Image */}
-        <Image
-          src={displayImage}
-          alt={title}
-          fill
-          sizes="240px"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {displayImage ? (
+          <Image
+            src={displayImage}
+            alt={title}
+            fill
+            sizes="240px"
+            className="object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+          />
+        ) : (
+          <div aria-hidden="true" className="h-full w-full bg-gray-800" />
+        )}
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
 

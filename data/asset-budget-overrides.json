@@ -1,0 +1,566 @@
+[
+  {
+    "assetId": "/static/images/avatars/arthur-reimus.jpeg",
+    "maxBytes": 1362174,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/avatars/christopher-caysido.jpg",
+    "maxBytes": 2264573,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/avatars/van-panugan.jpg",
+    "maxBytes": 2107059,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/blogHeader.png",
+    "maxBytes": 1505344,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/a-deep-dive-into-deepseek-r1-the-open-source-challenger-using-reinforcement-learning/cardImage.png",
+    "maxBytes": 2895302,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/agent-skills/blogHeader.png",
+    "maxBytes": 711909,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/agent-skills/cardImage.png",
+    "maxBytes": 1659561,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/bad-tool-design-token-tax/blogHeader.png",
+    "maxBytes": 1552007,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/bad-tool-design-token-tax/cardImage.png",
+    "maxBytes": 2629349,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/bad-tool-design-token-tax/payload-shaping-comparison.png",
+    "maxBytes": 1639851,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/bad-tool-design-token-tax/tool-loop-comparison.png",
+    "maxBytes": 1370634,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/building-reliable-llm-workflows-with-pydantic/blogHeader.png",
+    "maxBytes": 1330237,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/building-reliable-llm-workflows-with-pydantic/cardImage.png",
+    "maxBytes": 2500747,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-engineering-for-ai-agents/anthropic-multi-agent-system.png",
+    "maxBytes": 1250519,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-engineering-for-ai-agents/blogHeader.png",
+    "maxBytes": 2287277,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-engineering-for-ai-agents/cardImage.png",
+    "maxBytes": 4951363,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-engineering-production-claude-agents/blogHeader.png",
+    "maxBytes": 1644941,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-engineering-production-claude-agents/cardImage.png",
+    "maxBytes": 3525323,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-engineering-production-claude-agents/production-pattern.png",
+    "maxBytes": 1079102,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/blogHeader.png",
+    "maxBytes": 1652372,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/cardImage.png",
+    "maxBytes": 2490602,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/context-graph-decision-trace.png",
+    "maxBytes": 1459498,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/trace-memory-lifecycle.png",
+    "maxBytes": 1203745,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/design-md-the-design-contract-for-ai-agents/blogHeader.png",
+    "maxBytes": 1360257,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/design-md-the-design-contract-for-ai-agents/cardImage.png",
+    "maxBytes": 2414706,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/design-md-the-design-contract-for-ai-agents/design-md-hero.png",
+    "maxBytes": 1582854,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/dspy-programming-not-prompting-your-lms/blogHeader.png",
+    "maxBytes": 1790335,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/dspy-programming-not-prompting-your-lms/cardImage.png",
+    "maxBytes": 3076702,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/empowering-ai-systems-with-mcp/blogHeader.png",
+    "maxBytes": 1844430,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/empowering-ai-systems-with-mcp/cardImage.png",
+    "maxBytes": 3480921,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/cardImage.png",
+    "maxBytes": 706221,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-model-map.png",
+    "maxBytes": 1124201,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-moe-routing.png",
+    "maxBytes": 1230884,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-multimodal-token-budget.png",
+    "maxBytes": 1319817,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-ple-flash-memory.png",
+    "maxBytes": 1163733,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/gemma-4-deployment-ladder.png",
+    "maxBytes": 1873799,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/goal/blogHeader.png",
+    "maxBytes": 1738435,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/goal/cardImage.png",
+    "maxBytes": 5493164,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/blogHeader.png",
+    "maxBytes": 1613879,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/cardImage.png",
+    "maxBytes": 3404745,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-01-intake.png",
+    "maxBytes": 2938177,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-02-context.png",
+    "maxBytes": 2850213,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-03-plan.png",
+    "maxBytes": 2789070,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-04-build.png",
+    "maxBytes": 3020133,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-05-verify.png",
+    "maxBytes": 3143414,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-06-review.png",
+    "maxBytes": 3051229,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/stage-07-improve.png",
+    "maxBytes": 3142303,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/instruction-hierarchy-in-llms/blogHeader.png",
+    "maxBytes": 1745552,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/instruction-hierarchy-in-llms/cardImage.png",
+    "maxBytes": 3862806,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/key-elements-of-multi-agent-systems/blogHeader.png",
+    "maxBytes": 1817708,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/key-elements-of-multi-agent-systems/cardImage.png",
+    "maxBytes": 4098416,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-evaluation-methods/blogHeader.png",
+    "maxBytes": 1505330,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-evaluation-methods/cardImage.png",
+    "maxBytes": 3205938,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-wiki/blogHeader.png",
+    "maxBytes": 1499562,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-wiki/cardImage.png",
+    "maxBytes": 3408548,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-wiki/llm-wiki-architecture.png",
+    "maxBytes": 2448211,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-wiki/llm-wiki-failure-modes-guardrails.png",
+    "maxBytes": 2214908,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-wiki/llm-wiki-operating-contract.png",
+    "maxBytes": 1875242,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/llm-wiki/rag-vs-llm-wiki-writeback.png",
+    "maxBytes": 2247620,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/memgpt-llms-as-operating-systems/blogHeader.png",
+    "maxBytes": 1543807,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/memgpt-llms-as-operating-systems/cardImage.png",
+    "maxBytes": 2727795,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/openclaw-on-aws/blogHeader.png",
+    "maxBytes": 2179669,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/openclaw-on-aws/cardImage.png",
+    "maxBytes": 3337054,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/openclaw-the-lobster-that-hook-over-silicon-valley/blogHeader.png",
+    "maxBytes": 1635658,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/openclaw-the-lobster-that-hook-over-silicon-valley/cardImage.png",
+    "maxBytes": 3653541,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/rag-triad-building-trust-in-rag-through-systematic-evaluation/blogHeader.png",
+    "maxBytes": 1120512,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/rag-triad-building-trust-in-rag-through-systematic-evaluation/cardImage.png",
+    "maxBytes": 1983495,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/react-reasoning-and-acting-in-language-models/blogHeader.png",
+    "maxBytes": 1566910,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/react-reasoning-and-acting-in-language-models/cardImage.png",
+    "maxBytes": 3349878,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/blogHeader.png",
+    "maxBytes": 1820838,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/cardImage.png",
+    "maxBytes": 3146756,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/unlocking-enterprise-pdfs-with-docling/blogHeader.png",
+    "maxBytes": 1344906,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/unlocking-enterprise-pdfs-with-docling/cardImage.png",
+    "maxBytes": 2341164,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/unlocking-enterprise-pdfs-with-docling/doctags.png",
+    "maxBytes": 1011224,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/xllm-cluster-architecture-ai-inference/blogHeader.png",
+    "maxBytes": 1369398,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/xllm-cluster-architecture-ai-inference/cardImage.png",
+    "maxBytes": 2535866,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/xllm-cluster-architecture-ai-inference/graph-virtual-memory.png",
+    "maxBytes": 1815851,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/xllm-cluster-architecture-ai-inference/prefill-decode-kv-cache.png",
+    "maxBytes": 1689441,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/xllm-cluster-architecture-ai-inference/xllm-service-engine-plate.png",
+    "maxBytes": 1449682,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/logo-white.png",
+    "maxBytes": 4245771,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/logo-yellow-bg.jpeg",
+    "maxBytes": 1218470,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/auto-diagram/homescreen.png",
+    "maxBytes": 334323,
+    "reason": "Legacy project card retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/davincis-notebook/app.png",
+    "maxBytes": 4131990,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/davincis-notebook/ferrari-f1.png",
+    "maxBytes": 970477,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/davincis-notebook/iphone.png",
+    "maxBytes": 873847,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/davincis-notebook/taipei-101.png",
+    "maxBytes": 1009749,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/deep-agent-studio/file-preview.png",
+    "maxBytes": 861062,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/langgraph-supervisor-cookbook/header-image.png",
+    "maxBytes": 1368158,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/open-deep-research-ui/app-research-complete.png",
+    "maxBytes": 973019,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/open-deep-research-ui/app-research-interactive.png",
+    "maxBytes": 897215,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/open-deep-research-ui/app-settings.png",
+    "maxBytes": 1897267,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/textura/app-1.png",
+    "maxBytes": 981711,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/projects/textura/app-2.png",
+    "maxBytes": 1680093,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/social-banner.png",
+    "maxBytes": 1549646,
+    "reason": "Legacy delivery asset retained at its current size while the Blob optimization migration is in progress; any growth remains blocked.",
+    "reviewDate": "2026-08-12"
+  }
+]

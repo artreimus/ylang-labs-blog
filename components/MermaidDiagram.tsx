@@ -73,12 +73,20 @@ export default function MermaidDiagram({
       try {
         const mod = await loadMermaidModule()
         const mermaid = getMermaidApi(mod)
+        const diagramBackground = isDark ? '#030712' : '#ffffff'
+        const diagramText = isDark ? '#f3f4f6' : '#111827'
 
         mermaid.initialize({
           startOnLoad: false,
           securityLevel: 'strict',
-          theme: isDark ? 'dark' : 'default',
-          themeVariables: { background: 'transparent' },
+          theme: 'base',
+          themeCSS: `.edgeLabel, .labelBkg { background-color: ${diagramBackground} !important; } .edgeLabel p { color: ${diagramText} !important; }`,
+          themeVariables: {
+            background: 'transparent',
+            darkMode: isDark,
+            primaryTextColor: diagramText,
+            textColor: diagramText,
+          },
         })
 
         const { svg, bindFunctions } = await mermaid.render(renderId, diagramCode)
@@ -86,6 +94,16 @@ export default function MermaidDiagram({
         if (isCancelled || !containerRef.current) return
         containerRef.current.innerHTML = svg
         bindFunctions?.(containerRef.current)
+
+        // Mermaid's generated stylesheet gives edge-label paragraphs a theme
+        // accent background. Set the accessible label surface explicitly after
+        // render so dark-mode contrast is stable across Mermaid releases.
+        for (const element of containerRef.current.querySelectorAll<HTMLElement>(
+          '.edgeLabel, .edgeLabel p, .labelBkg'
+        )) {
+          element.style.setProperty('background-color', diagramBackground, 'important')
+          element.style.setProperty('color', diagramText, 'important')
+        }
 
         const svgEl = containerRef.current.querySelector('svg')
         if (svgEl) {

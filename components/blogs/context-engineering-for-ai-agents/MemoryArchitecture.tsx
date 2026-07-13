@@ -7,12 +7,12 @@ const MemoryArchitecture = () => {
   const [activeTab, setActiveTab] = useState<'stm' | 'ltm'>('stm')
 
   return (
-    <div className="not-prose mx-auto w-full max-w-6xl p-4 duration-700 animate-in fade-in md:p-8">
+    <div className="not-prose mx-auto w-full max-w-6xl p-4 duration-700 animate-in fade-in motion-reduce:animate-none md:p-8">
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           Neural Memory Architecture
         </h2>
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
           How LLMs leverage dual-memory systems for coherent reasoning.
         </p>
       </div>
@@ -20,7 +20,7 @@ const MemoryArchitecture = () => {
       <div className="relative grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
         {/* Short Term Memory (Checkpointer) */}
         <div
-          className={`rounded-3xl border-2 p-6 transition-all duration-500 ${activeTab === 'stm' ? 'border-primary-500 ring-4 ring-primary-500/10' : 'border-gray-200 dark:border-gray-700'}`}
+          className={`rounded-3xl border-2 p-6 transition-[border-color,box-shadow] duration-500 motion-reduce:transition-none ${activeTab === 'stm' ? 'border-primary-500 ring-4 ring-primary-500/10' : 'border-gray-200 dark:border-gray-700'}`}
         >
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-lg bg-primary-100 p-2 dark:bg-primary-500/20">
@@ -65,7 +65,7 @@ const MemoryArchitecture = () => {
 
         {/* Long Term Memory (Store) */}
         <div
-          className={`rounded-3xl border-2 p-6 transition-all duration-500 ${activeTab === 'ltm' ? 'border-secondary-500 ring-4 ring-secondary-500/10' : 'border-gray-200 dark:border-gray-700'}`}
+          className={`rounded-3xl border-2 p-6 transition-[border-color,box-shadow] duration-500 motion-reduce:transition-none ${activeTab === 'ltm' ? 'border-secondary-500 ring-4 ring-secondary-500/10' : 'border-gray-200 dark:border-gray-700'}`}
         >
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-lg bg-secondary-100 p-2 dark:bg-secondary-500/20">
@@ -81,7 +81,7 @@ const MemoryArchitecture = () => {
             {Array.from({ length: 16 }).map((_, i) => (
               <div
                 key={i}
-                className={`flex h-12 cursor-help items-center justify-center rounded-lg border transition-all hover:scale-105
+                className={`flex h-12 cursor-help items-center justify-center rounded-lg border transition-[border-color,background-color,color,transform] hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none
                   ${
                     i % 3 === 0
                       ? 'border-secondary-200 bg-secondary-50 text-secondary-600 dark:border-secondary-500/40 dark:bg-secondary-500/20 dark:text-secondary-300'
@@ -125,16 +125,16 @@ const MemoryArchitecture = () => {
 
           {/* LLM Node */}
           <div className="group relative">
-            <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-primary-500/20 to-secondary-500/20 opacity-0 blur-xl transition duration-700 group-hover:opacity-100"></div>
+            <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-primary-500/20 to-secondary-500/20 opacity-0 blur-xl transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none"></div>
             <div className="relative flex h-32 w-32 flex-col items-center justify-center rounded-full border-2 border-gray-200 bg-white shadow-lg shadow-primary-500/5 transition-shadow duration-500 group-hover:shadow-primary-500/10 dark:border-gray-700 dark:bg-gray-900 md:h-40 md:w-40">
               <Cpu className="mb-2 text-primary-500 dark:text-primary-400" size={40} />
               <span className="text-xl font-bold tracking-tighter text-gray-900 dark:text-primary-400">
                 LLM
               </span>
               <div className="mt-1 flex gap-1">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-500"></span>
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-500 delay-75"></span>
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-500 delay-150"></span>
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-500 motion-reduce:animate-none"></span>
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-500 delay-75 motion-reduce:animate-none"></span>
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-500 delay-150 motion-reduce:animate-none"></span>
               </div>
             </div>
           </div>

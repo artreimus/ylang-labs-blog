@@ -1,4 +1,4 @@
-import { NewsletterAPI, type NewsletterConfig } from 'pliny/newsletter'
+import { NewsletterAPI, type NewsletterConfig } from 'pliny/newsletter/index.js'
 import siteMetadata from '@/data/siteMetadata'
 
 const provider = siteMetadata.newsletter?.provider

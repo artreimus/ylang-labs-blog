@@ -1,16 +1,18 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import Image from 'next/image'
 import Link from '@/components/Link'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from 'pliny/utils/contentlayer.js'
 import type { Blog } from 'contentlayer/generated'
-import { formatDate } from 'pliny/utils/formatDate'
+import { formatDate } from 'pliny/utils/formatDate.js'
 import siteMetadata from '@/data/siteMetadata'
 import EmptyView from '@/components/EmptyView'
 import BlogPagination from '@/layouts/components/BlogPagination'
 import CardTag from '@/components/CardTag'
 import { BLOGS_PER_PAGE } from '@/components/lib/pagination'
+import { useListSearchQuery } from '@/components/hooks/use-list-search-query'
+import { getBlogImage } from '@/lib/content/blog-images'
 
 interface PaginationProps {
   totalPages: number
@@ -24,39 +26,29 @@ interface BlogCardLayoutProps {
   description?: string
 }
 
-function getDisplayImage(post: CoreContent<Blog>) {
-  if (Array.isArray(post.images) && post.images.length > 0) {
-    return post.images[0]
-  }
-
-  if (post.cardImage) {
-    return post.cardImage
-  }
-
-  return null
-}
-
 export default function BlogCardLayout({
   posts,
   title,
   pagination,
   description = 'Latest Blogs from Ylang Labs',
 }: BlogCardLayoutProps) {
-  const [searchValue, setSearchValue] = useState('')
+  const { searchValue, normalizedSearchValue, setSearchValue } = useListSearchQuery({
+    rootPath: '/blogs',
+  })
 
   const filteredBlogPosts = useMemo(() => {
-    if (!searchValue) return posts
+    if (!normalizedSearchValue) return posts
 
-    const lowerSearch = searchValue.toLowerCase()
+    const lowerSearch = normalizedSearchValue.toLowerCase()
     return posts.filter((post) => {
       const searchContent = post.title + post.summary + post.tags?.join(' ')
       return searchContent.toLowerCase().includes(lowerSearch)
     })
-  }, [posts, searchValue])
+  }, [posts, normalizedSearchValue])
 
   const currentPage = pagination?.currentPage ?? 1
   const pageStart = BLOGS_PER_PAGE * (currentPage - 1)
-  const displayPosts = searchValue
+  const displayPosts = normalizedSearchValue
     ? filteredBlogPosts
     : filteredBlogPosts.slice(pageStart, pageStart + BLOGS_PER_PAGE)
 
@@ -82,10 +74,15 @@ export default function BlogCardLayout({
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
             placeholder="Search blogs..."
-            className="w-full rounded-full border border-gray-200 bg-white px-5 py-3 text-sm text-gray-900 shadow-sm transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-primary-400"
+            aria-describedby="blog-search-results"
+            className="w-full rounded-full border border-gray-200 bg-white px-5 py-3 pr-12 text-sm text-gray-900 shadow-sm transition-[border-color,box-shadow] duration-200 focus-visible:border-primary-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus-visible:border-primary-400 dark:focus-visible:ring-primary-400"
           />
+          <span id="blog-search-results" className="sr-only" aria-live="polite">
+            {displayPosts.length} {displayPosts.length === 1 ? 'article' : 'articles'} shown
+          </span>
           <svg
             className="pointer-events-none absolute right-5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+            aria-hidden="true"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -107,8 +104,8 @@ export default function BlogCardLayout({
             <EmptyView
               title="No Posts Found"
               description={
-                searchValue
-                  ? `No articles found matching "${searchValue}". Try a different keyword.`
+                normalizedSearchValue
+                  ? `No articles found matching "${normalizedSearchValue}". Try a different keyword.`
                   : 'The Ylang Labs team is busy building the next update. Check back soon!'
               }
             />
@@ -117,13 +114,10 @@ export default function BlogCardLayout({
           displayPosts.map((post) => {
             const { slug, title: postTitle, summary, date, readingTime, tags = [] } = post
             const formattedDate = formatDate(date, siteMetadata.locale)
-            const displayImage = getDisplayImage(post)
+            const displayImage = getBlogImage(post, 'list-row')
 
             return (
-              <article
-                key={slug}
-                className="flex gap-8 py-10 transition-colors max-md:flex-col max-md:gap-4"
-              >
+              <article key={slug} className="flex gap-8 py-10 max-md:flex-col max-md:gap-4">
                 <div className="relative w-40 shrink-0 text-sm text-gray-500 dark:text-gray-400 max-md:w-full">
                   <div className="md:sticky md:top-24">
                     <time dateTime={date} className="font-medium">
@@ -135,26 +129,26 @@ export default function BlogCardLayout({
                   {displayImage && (
                     <Link
                       href={`/blogs/${slug}`}
-                      className="group relative block overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition hover:-translate-y-1 hover:border-gray-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+                      className="group relative block overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-gray-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
                     >
                       <div className="relative aspect-[16/9] w-full overflow-hidden">
                         <Image
                           src={displayImage}
                           alt={postTitle}
                           fill
-                          className="object-cover transition duration-500 group-hover:scale-105"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                           sizes="(min-width: 1024px) 640px, 100vw"
                           priority={false}
                         />
                       </div>
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none" />
                     </Link>
                   )}
 
                   <div className="flex flex-col gap-3">
                     <Link
                       href={`/blogs/${slug}`}
-                      className="text-2xl font-semibold leading-snug text-gray-900 transition hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300"
+                      className="rounded-sm text-2xl font-semibold leading-snug text-gray-900 transition-colors duration-200 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 motion-reduce:transition-none dark:text-gray-100 dark:hover:text-gray-300 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
                     >
                       {postTitle}
                     </Link>
@@ -174,7 +168,7 @@ export default function BlogCardLayout({
                     ))}
                     <Link
                       href={`/blogs/${slug}`}
-                      className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary-600 transition hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 max-md:ml-0"
+                      className="ml-auto inline-flex items-center gap-1 rounded-sm text-xs font-medium text-primary-700 transition-colors duration-200 hover:text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 motion-reduce:transition-none dark:text-primary-300 dark:hover:text-primary-200 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950 max-md:ml-0"
                     >
                       Read Blog
                       <svg
@@ -200,7 +194,7 @@ export default function BlogCardLayout({
         )}
       </section>
 
-      {pagination && pagination.totalPages > 1 && !searchValue && (
+      {pagination && pagination.totalPages > 1 && !normalizedSearchValue && (
         <div className="mt-12">
           <BlogPagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} />
         </div>

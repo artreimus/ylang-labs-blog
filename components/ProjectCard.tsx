@@ -9,7 +9,10 @@ export default function ProjectCard({ project }: { project: Project }) {
   const displayImage = cardImage || image
 
   return (
-    <Link href={`/projects/${slug}`} className="group block h-[320px] w-[240px]">
+    <Link
+      href={`/projects/${slug}`}
+      className="group block h-[320px] w-[240px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
+    >
       <article className="relative h-full w-full overflow-hidden rounded-lg bg-gray-900">
         {/* Image */}
         {displayImage && (
@@ -18,7 +21,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             alt={title}
             fill
             sizes="240px"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
           />
         )}
 

@@ -20,26 +20,32 @@ export default function BlogPagination({ totalPages, currentPage }: BlogPaginati
         {prevPage ? (
           <Link
             href={currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`}
-            className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 motion-reduce:transition-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
             rel="prev"
           >
             Previous
           </Link>
         ) : (
-          <span className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-300 dark:border-gray-600 dark:bg-gray-800">
+          <span
+            aria-disabled="true"
+            className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-500"
+          >
             Previous
           </span>
         )}
         {nextPage ? (
           <Link
             href={`/${basePath}/page/${currentPage + 1}`}
-            className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 motion-reduce:transition-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
             rel="next"
           >
             Next
           </Link>
         ) : (
-          <span className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-300 dark:border-gray-600 dark:bg-gray-800">
+          <span
+            aria-disabled="true"
+            className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-500"
+          >
             Next
           </span>
         )}
@@ -62,7 +68,7 @@ export default function BlogPagination({ totalPages, currentPage }: BlogPaginati
                 href={
                   currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`
                 }
-                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-gray-600 dark:hover:bg-gray-700"
+                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 transition-colors duration-200 hover:bg-gray-50 focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400"
                 rel="prev"
               >
                 <span className="sr-only">Previous</span>
@@ -75,7 +81,10 @@ export default function BlogPagination({ totalPages, currentPage }: BlogPaginati
                 </svg>
               </Link>
             ) : (
-              <span className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600">
+              <span
+                aria-disabled="true"
+                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:text-gray-500 dark:ring-gray-600"
+              >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fillRule="evenodd"
@@ -86,14 +95,17 @@ export default function BlogPagination({ totalPages, currentPage }: BlogPaginati
               </span>
             )}
 
-            <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0 dark:text-gray-100 dark:ring-gray-600">
+            <span
+              aria-current="page"
+              className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 dark:text-gray-100 dark:ring-gray-600"
+            >
               {currentPage}
             </span>
 
             {nextPage ? (
               <Link
                 href={`/${basePath}/page/${currentPage + 1}`}
-                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-gray-600 dark:hover:bg-gray-700"
+                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 transition-colors duration-200 hover:bg-gray-50 focus-visible:z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 motion-reduce:transition-none dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700 dark:focus-visible:ring-primary-400"
                 rel="next"
               >
                 <span className="sr-only">Next</span>
@@ -106,7 +118,10 @@ export default function BlogPagination({ totalPages, currentPage }: BlogPaginati
                 </svg>
               </Link>
             ) : (
-              <span className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600">
+              <span
+                aria-disabled="true"
+                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:text-gray-500 dark:ring-gray-600"
+              >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fillRule="evenodd"

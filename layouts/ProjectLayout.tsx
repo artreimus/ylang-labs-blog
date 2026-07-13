@@ -1,15 +1,15 @@
 import { ReactNode } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import { CoreContent } from 'pliny/utils/contentlayer.js'
 import type { Project, Authors } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import PageTitle from '@/components/PageTitle'
 import SectionContainer from '@/components/SectionContainer'
-import Image from '@/components/Image'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import Tags from '@/components/Tags'
 import Author from '@/components/Author'
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa'
+import ProjectHeroMedia from '@/components/ProjectHeroMedia'
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
   weekday: 'long',
@@ -34,6 +34,7 @@ export default function ProjectLayout({
   children,
 }: LayoutProps) {
   const { path, date, title, tags, description, image, github, demo } = content
+  const heroMedia = (content as CoreContent<Project> & { heroMedia?: unknown }).heroMedia
   const basePath = path.split('/')[0]
 
   return (
@@ -59,7 +60,7 @@ export default function ProjectLayout({
 
               {/* Project description for small screens - shown below title */}
               {description && (
-                <div className="text-dark-500 dark:text-white-500 mx-auto mb-2 mt-4 max-w-2xl text-center text-sm leading-6 xl:hidden">
+                <div className="mx-auto mb-2 mt-4 max-w-2xl text-center text-sm leading-6 text-gray-700 dark:text-gray-300 xl:hidden">
                   <p>{description}</p>
                 </div>
               )}
@@ -70,7 +71,7 @@ export default function ProjectLayout({
                   {github && (
                     <Link
                       href={github}
-                      className="inline-flex items-center gap-2 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                      className="inline-flex items-center gap-2 text-sm text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -81,7 +82,7 @@ export default function ProjectLayout({
                   {demo && (
                     <Link
                       href={demo}
-                      className="inline-flex items-center gap-2 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                      className="inline-flex items-center gap-2 text-sm text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -94,21 +95,23 @@ export default function ProjectLayout({
             </div>
           </header>
           <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-8 xl:divide-y-0">
-            <dl className="pb-8 pt-6 xl:border-b xl:border-gray-200 xl:dark:border-gray-700">
-              <dt className="sr-only">Authors</dt>
-              <dd>
-                <ul className="flex flex-wrap justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
-                  {authorDetails.map((author) => (
-                    <Author key={author.name} author={author} />
-                  ))}
-                </ul>
-              </dd>
+            <aside className="pb-8 pt-6 xl:border-b xl:border-gray-200 xl:dark:border-gray-700">
+              <dl>
+                <dt className="sr-only">Authors</dt>
+                <dd>
+                  <ul className="flex flex-wrap justify-center gap-4 sm:space-x-12 xl:block xl:space-x-0 xl:space-y-8">
+                    {authorDetails.map((author) => (
+                      <Author key={author.name} author={author} />
+                    ))}
+                  </ul>
+                </dd>
+              </dl>
 
               {/* Project description for large screens */}
               <div className="mt-8 hidden xl:block">
                 {description && (
                   <div>
-                    <p className="dark:text-white-500 light:text-gray-700 text-sm leading-6">
+                    <p className="text-sm leading-6 text-gray-700 dark:text-gray-300">
                       {description}
                     </p>
                   </div>
@@ -122,7 +125,7 @@ export default function ProjectLayout({
                     {github && (
                       <Link
                         href={github}
-                        className="grid grid-cols-[20px_1fr] items-center gap-2 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                        className="grid grid-cols-[20px_1fr] items-center gap-2 text-sm text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -133,7 +136,7 @@ export default function ProjectLayout({
                     {demo && (
                       <Link
                         href={demo}
-                        className="grid grid-cols-[20px_1fr] items-center gap-2 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                        className="grid grid-cols-[20px_1fr] items-center gap-2 text-sm text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -144,20 +147,10 @@ export default function ProjectLayout({
                   </div>
                 </div>
               )}
-            </dl>
+            </aside>
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pb-8 dark:prose-invert">
-                {image && (
-                  <div className="mb-8">
-                    <Image
-                      src={image}
-                      alt={title}
-                      className="rounded-lg"
-                      width={1200}
-                      height={630}
-                    />
-                  </div>
-                )}
+                <ProjectHeroMedia media={heroMedia} fallbackImage={image} title={title} />
                 {children}
               </div>
             </div>
@@ -171,7 +164,7 @@ export default function ProjectLayout({
                         <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                           Previous Project
                         </h2>
-                        <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <div className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200">
                           <Link href={`/${prev.path}`}>{prev.title}</Link>
                         </div>
                       </div>
@@ -181,7 +174,7 @@ export default function ProjectLayout({
                         <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                           Next Project
                         </h2>
-                        <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <div className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200">
                           <Link href={`/${next.path}`}>{next.title}</Link>
                         </div>
                       </div>
@@ -192,7 +185,7 @@ export default function ProjectLayout({
               <div className="pt-4 xl:pt-8">
                 <Link
                   href={`/${basePath}`}
-                  className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                  className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
                   aria-label="Back to projects"
                 >
                   &larr; Back to projects

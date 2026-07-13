@@ -17,6 +17,7 @@ const config: Config = {
     '<rootDir>/.next/',
     '<rootDir>/.contentlayer/',
     '<rootDir>/node_modules/',
+    '<rootDir>/tests/e2e/',
   ],
   transformIgnorePatterns: [
     '<rootDir>/node_modules/.pnpm/(?!(github-slugger)@)',

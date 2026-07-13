@@ -110,11 +110,11 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-gray-200 pt-6 text-sm text-gray-500 dark:border-white/10 lg:justify-between">
-            <div className="flex items-center text-gray-600 dark:text-gray-500">
+            <div className="flex items-center text-gray-600 dark:text-gray-400">
               <DynamicLogo />
             </div>
-            <div className="text-gray-600 dark:text-gray-500">{`© ${currentYear} ${siteMetadata.title}.`}</div>
-            <div className="flex flex-wrap items-center gap-3 text-gray-600 dark:text-gray-500">
+            <div className="text-gray-600 dark:text-gray-400">{`© ${currentYear} ${siteMetadata.title}.`}</div>
+            <div className="flex flex-wrap items-center gap-3 text-gray-600 dark:text-gray-400">
               {socialIconLinks.map(({ kind, href }) => (
                 <SocialIcon
                   key={kind}
