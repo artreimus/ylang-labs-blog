@@ -4,7 +4,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const severityGate = new Set(['critical', 'high'])
-const auditSeverities = new Set(['info', 'low', 'moderate', 'high', 'critical'])
+const auditSeverities = ['info', 'low', 'moderate', 'high', 'critical']
+const auditSeveritySet = new Set(auditSeverities)
 const exceptionsPath = new URL(
   '../../config/security/dependency-audit-exceptions.json',
   import.meta.url
@@ -51,7 +52,7 @@ export function parseAuditReport(audit) {
   for (const [advisoryId, advisory] of Object.entries(report.advisories)) {
     if (
       !isRecord(advisory) ||
-      !auditSeverities.has(advisory.severity) ||
+      !auditSeveritySet.has(advisory.severity) ||
       typeof advisory.module_name !== 'string' ||
       !Array.isArray(advisory.findings) ||
       advisory.findings.length === 0 ||
@@ -67,38 +68,37 @@ export function parseAuditReport(audit) {
     }
   }
 
-  const vulnerabilityCounts = Object.values(report.metadata.vulnerabilities)
-  if (vulnerabilityCounts.some((count) => !Number.isInteger(count) || count < 0)) {
+  const counts = report.metadata.vulnerabilities
+  if (auditSeverities.some((severity) => !Object.hasOwn(counts, severity))) {
+    throw new Error('pnpm audit vulnerability counts must include every known severity.')
+  }
+  if (Object.values(counts).some((count) => !Number.isInteger(count) || count < 0)) {
     throw new Error('pnpm audit returned invalid vulnerability counts.')
   }
-  const reportedSeverities = Object.entries(report.metadata.vulnerabilities)
-    .filter(([severity, count]) => auditSeverities.has(severity) && count > 0)
-    .map(([severity]) => severity)
-  const advisorySeverities = new Set(
-    Object.values(report.advisories).map((advisory) => advisory.severity)
+
+  const advisoryCounts = Object.fromEntries(auditSeverities.map((severity) => [severity, 0]))
+  for (const advisory of Object.values(report.advisories)) {
+    advisoryCounts[advisory.severity] += 1
+  }
+  const mismatchedSeverities = auditSeverities.filter(
+    (severity) => counts[severity] !== advisoryCounts[severity]
+  )
+  if (mismatchedSeverities.length > 0) {
+    throw new Error(
+      `pnpm audit vulnerability counts do not match advisory records for: ${mismatchedSeverities.join(', ')}.`
+    )
+  }
+
+  const totalVulnerabilities = auditSeverities.reduce(
+    (total, severity) => total + counts[severity],
+    0
   )
 
-  if (audit.status === 0 && reportedSeverities.length > 0) {
+  if (audit.status === 0 && totalVulnerabilities > 0) {
     throw new Error('pnpm audit exited successfully while reporting vulnerabilities.')
   }
-  if (audit.status !== 0 && reportedSeverities.length === 0) {
+  if (audit.status !== 0 && totalVulnerabilities === 0) {
     throw new Error(`pnpm audit exited with status ${audit.status} without reporting findings.`)
-  }
-  const missingAdvisorySeverities = reportedSeverities.filter(
-    (severity) => !advisorySeverities.has(severity)
-  )
-  if (missingAdvisorySeverities.length > 0) {
-    throw new Error(
-      `pnpm audit vulnerability counts lack matching advisories for: ${missingAdvisorySeverities.join(', ')}.`
-    )
-  }
-  const unreportedAdvisorySeverities = [...advisorySeverities].filter(
-    (severity) => !reportedSeverities.includes(severity)
-  )
-  if (unreportedAdvisorySeverities.length > 0) {
-    throw new Error(
-      `pnpm audit advisories lack matching vulnerability counts for: ${unreportedAdvisorySeverities.join(', ')}.`
-    )
   }
 
   return report

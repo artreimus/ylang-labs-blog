@@ -92,7 +92,7 @@ describe('production dependency audit gate', () => {
           },
         })
       )},stderr:''}`,
-      'lack matching advisories for: high',
+      'do not match advisory records for: high',
     ],
     [
       'a successful exit that still reports vulnerabilities',
@@ -131,6 +131,32 @@ describe('production dependency audit gate', () => {
         })
       )},stderr:''}`,
       'malformed advisory 123',
+    ],
+    [
+      'an empty vulnerability count map',
+      `{status:0,signal:null,stdout:${JSON.stringify(
+        JSON.stringify({ advisories: {}, metadata: { vulnerabilities: {} } })
+      )},stderr:''}`,
+      'must include every known severity',
+    ],
+    [
+      'two counted high vulnerabilities with only one advisory record',
+      `{status:1,signal:null,stdout:${JSON.stringify(
+        JSON.stringify({
+          advisories: {
+            123: {
+              id: 123,
+              module_name: 'example-package',
+              severity: 'high',
+              findings: [{ paths: ['example-package'] }],
+            },
+          },
+          metadata: {
+            vulnerabilities: { critical: 0, high: 2, moderate: 0, low: 0, info: 0 },
+          },
+        })
+      )},stderr:''}`,
+      'do not match advisory records for: high',
     ],
   ])('fails closed for %s', (_name, auditResult, expectedMessage) => {
     const result = runAuditModule(`parseAuditReport(${auditResult})`)
