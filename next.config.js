@@ -71,12 +71,18 @@ const contentSecurityPolicy = Object.entries(cspDirectives)
 // Keep the currently deployed policy enforced while the narrower candidate is
 // observed. Promote `contentSecurityPolicy` to this header only after the
 // report-only rollout gate in docs/operations/contact-form.md is complete.
+const enforcedMediaSources = [
+  "'self'",
+  'blob:',
+  '*.s3.amazonaws.com',
+  ...(configuredBlobOrigin ? [configuredBlobOrigin] : []),
+]
 const enforcedContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline' www.googletagmanager.com www.google-analytics.com;
   style-src 'self' 'unsafe-inline';
   img-src * blob: data:;
-  media-src *.s3.amazonaws.com;
+  media-src ${enforcedMediaSources.join(' ')};
   connect-src *;
   font-src 'self';
   frame-src giscus.app

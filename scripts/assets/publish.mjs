@@ -297,14 +297,24 @@ async function reconcileOrUpload({ client, configuration, entry, journal }) {
       journalEntry.bytes === entry.bytes &&
       journalEntry.contentType === entry.contentType
     if (!matchesPlan) throw new Error(`Crash journal conflicts with ${entry.logicalId}.`)
+  }
 
-    try {
-      const metadata = await client.head(entry.pathname, { token: configuration.token })
-      assertBlobMetadata(metadata, entry, configuration)
-      return { ...metadata, uploadedAt: journalEntry.uploadedAt, resumed: true }
-    } catch (error) {
-      if (!client.isNotFound?.(error)) throw error
+  try {
+    const metadata = await client.head(entry.pathname, { token: configuration.token })
+    assertBlobMetadata(metadata, entry, configuration)
+    const uploadedAt =
+      journalEntry?.uploadedAt ??
+      (metadata.uploadedAt instanceof Date
+        ? metadata.uploadedAt.toISOString()
+        : (metadata.uploadedAt ?? new Date().toISOString()))
+    return {
+      ...metadata,
+      uploadedAt,
+      resumed: true,
+      journaled: Boolean(journalEntry),
     }
+  } catch (error) {
+    if (!client.isNotFound?.(error)) throw error
   }
 
   const result = await client.put(entry.pathname, readFileSync(entry.sourcePath), {
@@ -316,7 +326,12 @@ async function reconcileOrUpload({ client, configuration, entry, journal }) {
     token: configuration.token,
   })
   assertBlobMetadata(result, entry, configuration)
-  return { ...result, uploadedAt: new Date().toISOString(), resumed: false }
+  return {
+    ...result,
+    uploadedAt: new Date().toISOString(),
+    resumed: false,
+    journaled: false,
+  }
 }
 
 function sortedObject(value) {
@@ -350,7 +365,7 @@ export async function applyPublishPlan({
 
   for (const entry of plan.entries) {
     const result = await reconcileOrUpload({ client, configuration, entry, journal })
-    if (!result.resumed) {
+    if (!result.journaled) {
       const journalRecord = {
         logicalId: entry.logicalId,
         storeId: configuration.storeId,

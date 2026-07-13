@@ -26,6 +26,7 @@ describe('Next security and asset configuration', () => {
 
     expect(enforcedCsp?.value).toContain('img-src *')
     expect(enforcedCsp?.value).toContain('connect-src *')
+    expect(enforcedCsp?.value).toContain("media-src 'self' blob: *.s3.amazonaws.com")
     expect(csp?.value).not.toContain('img-src *')
     expect(csp?.value).not.toContain('connect-src *')
     expect(csp?.value).toContain("object-src 'none'")
@@ -42,13 +43,20 @@ describe('Next security and asset configuration', () => {
     })
 
     expect(result.status).toBe(0)
-    expect(JSON.parse(result.stdout).images.remotePatterns).toEqual([
+    const config = JSON.parse(result.stdout)
+    expect(config.images.remotePatterns).toEqual([
       {
         protocol: 'https',
         hostname: 'example.public.blob.vercel-storage.com',
         pathname: '/ylang-blog-public/**',
       },
     ])
+    const headers = config.headers[0].headers as { key: string; value: string }[]
+    const enforcedCsp = headers.find((header) => header.key === 'Content-Security-Policy')
+    expect(enforcedCsp?.value).toContain(
+      "media-src 'self' blob: *.s3.amazonaws.com https://example.public.blob.vercel-storage.com"
+    )
+    expect(enforcedCsp?.value).not.toContain('*.blob.vercel-storage.com')
   })
 
   it('rejects a broad Blob wildcard', () => {

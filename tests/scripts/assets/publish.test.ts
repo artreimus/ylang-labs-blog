@@ -106,8 +106,10 @@ it('uses exact write options, journals success, updates the manifest, and resume
       const args=parsePublishArgs(['--path','public/static/images/blogs/example/cardImage.png','--store','public','--apply']);
       const plan=buildPublishPlan({rootDir:process.argv[1],args,now:new Date('2026-07-13T00:00:00.000Z')});
       const calls=[];
+      const missing=new Error('missing');
+      let remoteExists=false;
       const metadata=(entry)=>({url:'https://store123.public.blob.vercel-storage.com/'+entry.pathname,pathname:entry.pathname,contentType:entry.contentType,etag:'etag',size:entry.bytes});
-      const client={put:async(pathname,body,options)=>{calls.push({pathname,bytes:body.length,options});return metadata(plan.entries[0])},head:async()=>metadata(plan.entries[0])};
+      const client={put:async(pathname,body,options)=>{calls.push({pathname,bytes:body.length,options});remoteExists=true;return metadata(plan.entries[0])},head:async()=>{if(!remoteExists)throw missing;return metadata(plan.entries[0])},isNotFound:(error)=>error===missing};
       const environment={BLOB_PUBLIC_STORE_ID:'store123',BLOB_PUBLIC_READ_WRITE_TOKEN:'vercel_blob_rw_store123_secret'};
       const first=await applyPublishPlan({rootDir:process.argv[1],plan,environment,client});
       client.put=async()=>{throw new Error('put must not run during resume')};
@@ -136,6 +138,32 @@ it('uses exact write options, journals success, updates the manifest, and resume
   expect(readFileSync(output.journal, 'utf8')).not.toContain('vercel_blob_rw')
 })
 
+it('recovers a deterministic remote object when a crash happened before journaling', () => {
+  const rootDir = fixture()
+  const result = runModule(
+    `import('./scripts/assets/publish.mjs').then(async ({parsePublishArgs,buildPublishPlan,applyPublishPlan}) => {
+      const args=parsePublishArgs(['--path','public/static/images/blogs/example/cardImage.png','--store','public','--apply']);
+      const plan=buildPublishPlan({rootDir:process.argv[1],args,now:new Date('2026-07-13T00:00:00.000Z')});
+      const entry=plan.entries[0];
+      let putCalls=0;
+      const metadata={url:'https://store123.public.blob.vercel-storage.com/'+entry.pathname,pathname:entry.pathname,contentType:entry.contentType,etag:'etag',size:entry.bytes,uploadedAt:new Date('2026-07-13T01:00:00.000Z')};
+      const client={put:async()=>{putCalls+=1;throw new Error('put must not overwrite recovered object')},head:async()=>metadata,isNotFound:()=>false};
+      const outcome=await applyPublishPlan({rootDir:process.argv[1],plan,environment:{BLOB_PUBLIC_STORE_ID:'store123',BLOB_PUBLIC_READ_WRITE_TOKEN:'vercel_blob_rw_store123_secret'},client});
+      const {readFileSync}=await import('node:fs');
+      process.stdout.write(JSON.stringify({putCalls,resumed:outcome.results[0].result.resumed,journal:readFileSync(outcome.journalPath,'utf8'),manifest:JSON.parse(readFileSync(process.argv[1]+'/data/assets-manifest.json','utf8'))}));
+    })`,
+    rootDir
+  )
+
+  expect(result.stderr).toBe('')
+  expect(result.status).toBe(0)
+  const output = JSON.parse(result.stdout)
+  expect(output.putCalls).toBe(0)
+  expect(output.resumed).toBe(true)
+  expect(output.journal).toContain('2026-07-13T01:00:00.000Z')
+  expect(Object.values(output.manifest)).toHaveLength(1)
+})
+
 it('keeps private upload recovery metadata free of URLs and credentials', () => {
   const rootDir = fixture()
   const result = runModule(
@@ -143,7 +171,8 @@ it('keeps private upload recovery metadata free of URLs and credentials', () => 
       const args=parsePublishArgs(['--path','public/static/images/blogs/example/source-artwork.png','--store','private','--apply']);
       const plan=buildPublishPlan({rootDir:process.argv[1],args,now:new Date('2026-07-13T00:00:00.000Z')});
       const entry=plan.entries[0];
-      const client={put:async()=>({url:'https://source456.private.blob.vercel-storage.com/'+entry.pathname,pathname:entry.pathname,contentType:entry.contentType,etag:'etag'}),head:async()=>{throw new Error('unused')}};
+      const missing=new Error('missing');
+      const client={put:async()=>({url:'https://source456.private.blob.vercel-storage.com/'+entry.pathname,pathname:entry.pathname,contentType:entry.contentType,etag:'etag'}),head:async()=>{throw missing},isNotFound:(error)=>error===missing};
       await applyPublishPlan({rootDir:process.argv[1],plan,environment:{BLOB_SOURCES_STORE_ID:'source456',BLOB_SOURCES_READ_WRITE_TOKEN:'vercel_blob_rw_source456_secret'},client});
       const {readFileSync}=await import('node:fs');
       process.stdout.write(readFileSync(process.argv[1]+'/data/private-assets-inventory.json','utf8'));
