@@ -33,7 +33,7 @@ export const contentTypes = {
 const rasterExtensions = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.webp'])
 const referencePattern = /\/static\/images\/[^'"`,\s)<>{}\]]+/gi
 const assetIdPrefix = '/static/images/'
-const sourceArtworkPattern = /\/(?:source-artwork|source-image)\.[^/]+$/i
+const privateSourcePattern = /\/(?:source(?:-artwork|-image|-card[^/]*)?)\.[^/]+$/i
 
 function readJson(rootDir, relativePath) {
   return JSON.parse(readFileSync(path.join(rootDir, relativePath), 'utf8'))
@@ -77,6 +77,10 @@ export function isNormalizedAssetId(value) {
         segment !== '..' &&
         /^[A-Za-z0-9_.-]+$/.test(segment)
     )
+}
+
+export function isPrivateSourceAssetId(value) {
+  return typeof value === 'string' && privateSourcePattern.test(value)
 }
 
 function endOfUtcDay(value) {
@@ -292,7 +296,7 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
     const expiry = endOfUtcDay(entry?.expiresAt)
     const isValid =
       isNormalizedAssetId(entry?.assetId) &&
-      sourceArtworkPattern.test(entry.assetId) &&
+      isPrivateSourceAssetId(entry.assetId) &&
       typeof entry.sha256 === 'string' &&
       /^[a-f0-9]{64}$/.test(entry.sha256) &&
       typeof entry.reason === 'string' &&
@@ -306,7 +310,7 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
         issue(
           'invalid-public-source-allowance',
           assetId,
-          'Public source allowances require a normalized source-artwork ID, SHA-256, reason, owner, and valid expiry.'
+          'Public source allowances require a normalized source asset ID, SHA-256, reason, owner, and valid expiry.'
         )
       )
       continue
@@ -445,7 +449,7 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
       continue
     }
 
-    if (sourceArtworkPattern.test(assetId)) {
+    if (isPrivateSourceAssetId(assetId)) {
       errors.push(
         issue(
           'source-in-public-manifest',
@@ -494,7 +498,7 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
     const manifestRecord = assetManifest[assetId]
     const publicSourceAllowance = publicSourceById.get(assetId)
 
-    if (sourceArtworkPattern.test(assetId) && !publicSourceAllowance) {
+    if (isPrivateSourceAssetId(assetId) && !publicSourceAllowance) {
       errors.push(
         issue(
           'source-in-public-delivery',
@@ -563,16 +567,6 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
       }
     }
 
-    if (publicSourceAllowance && publicSourceAllowance.sha256 !== hash) {
-      errors.push(
-        issue(
-          'public-source-hash-mismatch',
-          assetId,
-          'Legacy public source hash differs from its allowance.'
-        )
-      )
-    }
-
     const allowance = migrationById.get(assetId)
     const override = overrideById.get(assetId)
     const maxBytes = override?.maxBytes ?? budgetByRole[role]
@@ -590,6 +584,50 @@ export function validateAssets({ now = new Date(), rootDir = defaultRoot } = {})
     sameHash.push(assetId)
     hashes.set(hash, sameHash)
     assets.push(record)
+  }
+
+  const publicSourceFiles = collectPublicFiles(rootDir).filter((file) =>
+    isPrivateSourceAssetId(assetIdForPublicFile(rootDir, file))
+  )
+  const publicSourceIds = new Set(
+    publicSourceFiles.map((file) => assetIdForPublicFile(rootDir, file))
+  )
+
+  for (const file of publicSourceFiles) {
+    const assetId = assetIdForPublicFile(rootDir, file)
+    const allowance = publicSourceById.get(assetId)
+    if (!allowance) {
+      errors.push(
+        issue(
+          'public-source-not-allowed',
+          assetId,
+          'Reusable source artwork in public/ requires a hash-pinned, expiring migration allowance.'
+        )
+      )
+      continue
+    }
+
+    if (allowance.sha256 !== sha256(file)) {
+      errors.push(
+        issue(
+          'public-source-hash-mismatch',
+          assetId,
+          'Public source hash differs from its migration allowance.'
+        )
+      )
+    }
+  }
+
+  for (const allowance of publicSourceById.values()) {
+    if (!publicSourceIds.has(allowance.assetId)) {
+      errors.push(
+        issue(
+          'stale-public-source-allowance',
+          allowance.assetId,
+          'Public source allowance does not match a reusable source file in public/.'
+        )
+      )
+    }
   }
 
   const publicGifFiles = collectPublicFiles(rootDir).filter(

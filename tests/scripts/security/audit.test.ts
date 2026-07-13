@@ -82,6 +82,56 @@ describe('production dependency audit gate', () => {
       `{status:1,signal:null,stdout:${JSON.stringify(JSON.stringify(cleanReport))},stderr:''}`,
       'without reporting findings',
     ],
+    [
+      'high vulnerability counts without advisory records',
+      `{status:1,signal:null,stdout:${JSON.stringify(
+        JSON.stringify({
+          advisories: {},
+          metadata: {
+            vulnerabilities: { critical: 0, high: 1, moderate: 0, low: 0, info: 0 },
+          },
+        })
+      )},stderr:''}`,
+      'lack matching advisories for: high',
+    ],
+    [
+      'a successful exit that still reports vulnerabilities',
+      `{status:0,signal:null,stdout:${JSON.stringify(
+        JSON.stringify({
+          advisories: {
+            123: {
+              id: 123,
+              module_name: 'example-package',
+              severity: 'high',
+              findings: [{ paths: ['example-package'] }],
+            },
+          },
+          metadata: {
+            vulnerabilities: { critical: 0, high: 1, moderate: 0, low: 0, info: 0 },
+          },
+        })
+      )},stderr:''}`,
+      'exited successfully while reporting vulnerabilities',
+    ],
+    [
+      'a counted advisory without affected dependency paths',
+      `{status:1,signal:null,stdout:${JSON.stringify(
+        JSON.stringify({
+          advisories: {
+            123: {
+              id: 123,
+              module_name: 'example-package',
+              severity: 'high',
+              findings: [],
+            },
+          },
+          metadata: {
+            vulnerabilities: { critical: 0, high: 1, moderate: 0, low: 0, info: 0 },
+          },
+        })
+      )},stderr:''}`,
+      'malformed advisory 123',
+    ],
   ])('fails closed for %s', (_name, auditResult, expectedMessage) => {
     const result = runAuditModule(`parseAuditReport(${auditResult})`)
     const output = JSON.parse(result.stdout)

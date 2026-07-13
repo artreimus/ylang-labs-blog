@@ -8,6 +8,7 @@ import {
   collectPublicFiles,
   collectReferences,
   contentTypes,
+  isPrivateSourceAssetId,
   roleFor,
   sha256,
 } from './validate.mjs'
@@ -15,8 +16,6 @@ import {
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const defaultRoot = path.resolve(scriptDir, '../..')
 const rasterExtensions = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.webp'])
-const privateSourcePattern = /\/(?:source(?:-artwork|-image|-card[^/]*)?)\.[^/]+$/i
-
 const bootCriticalAssetIds = new Set([
   '/static/images/logo-dark.svg',
   '/static/images/logo-light.svg',
@@ -61,14 +60,18 @@ function publicSourceAllowanceIds(rootDir) {
 }
 
 function initialDisposition(asset, referencedIds, allowedPublicSourceIds) {
-  if (allowedPublicSourceIds.has(asset.logicalId)) {
+  if (
+    isPrivateSourceAssetId(asset.logicalId) &&
+    allowedPublicSourceIds.has(asset.logicalId) &&
+    referencedIds.has(asset.logicalId)
+  ) {
     return {
       disposition: 'keep-local',
       reason: 'Legacy public source remains local until its content reference is replaced.',
     }
   }
 
-  if (privateSourcePattern.test(asset.logicalId)) {
+  if (isPrivateSourceAssetId(asset.logicalId)) {
     return {
       disposition: 'private-blob',
       reason: 'Reusable source artwork belongs in the private source store.',

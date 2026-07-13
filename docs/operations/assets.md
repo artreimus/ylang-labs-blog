@@ -45,9 +45,12 @@ Shell logos and `/static/images/social-banner.png` are deliberately `keep-local`
 banner is consumed directly by framework metadata, so it must remain in the deployment bundle until
 every metadata surface resolves manifest URLs explicitly.
 
-`data/asset-public-source-allowlist.json` temporarily keeps hash-pinned legacy source artwork local
-when published content still references it. These entries are expiring cleanup records, not upload
-instructions: they must never enter the public manifest or private publisher while still referenced.
+`data/asset-public-source-allowlist.json` is the temporary boundary for every reusable source master
+that still exists below `public/`. Each entry is hash-pinned, owned, and expiring; validation scans
+all public files rather than only content references. Unreferenced masters remain `private-blob`
+candidates and can be moved with the private publisher. A source that published content still
+references remains `keep-local` until that reference is replaced. No source allowance is permission
+to add an object to the public delivery manifest.
 
 Publishing defaults to a dry run and requires one store plus one scope:
 

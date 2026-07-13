@@ -117,4 +117,45 @@ describe('asset validation command', () => {
       ])
     )
   })
+
+  it('rejects unreferenced source masters in public without an expiring allowance', () => {
+    const rootDir = mkdtempSync(path.join(os.tmpdir(), 'ylang-unreferenced-source-'))
+    temporaryDirectories.push(rootDir)
+
+    const assetId = '/static/images/blogs/example/source-card-master.png'
+    const assetPath = path.join(rootDir, 'public', assetId)
+    mkdirSync(path.dirname(assetPath), { recursive: true })
+    mkdirSync(path.join(rootDir, 'data/blogs'), { recursive: true })
+    writeFileSync(path.join(rootDir, 'data/blogs/example.mdx'), '---\ntitle: Example\n---')
+    writeFileSync(assetPath, png)
+    writeFileSync(path.join(rootDir, 'data/asset-budget-overrides.json'), '[]')
+    writeFileSync(path.join(rootDir, 'data/asset-duplicate-allowlist.json'), '[]')
+    writeFileSync(path.join(rootDir, 'data/asset-migration-allowlist.json'), '[]')
+    writeFileSync(path.join(rootDir, 'data/asset-public-source-allowlist.json'), '[]')
+
+    const rejected = runValidator(rootDir)
+    expect(rejected.status).toBe(1)
+    expect(JSON.parse(rejected.stdout).errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'public-source-not-allowed', assetId }),
+      ])
+    )
+
+    writeFileSync(
+      path.join(rootDir, 'data/asset-public-source-allowlist.json'),
+      JSON.stringify([
+        {
+          assetId,
+          sha256: createHash('sha256').update(png).digest('hex'),
+          reason: 'Private source migration is scheduled.',
+          owner: 'Ylang Labs',
+          expiresAt: '2026-08-12',
+        },
+      ])
+    )
+
+    const allowed = runValidator(rootDir)
+    expect(allowed.status).toBe(0)
+    expect(JSON.parse(allowed.stdout).errors).toEqual([])
+  })
 })
