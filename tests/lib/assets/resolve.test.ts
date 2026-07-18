@@ -21,10 +21,13 @@ const manifest = {
 
 describe('asset resolution', () => {
   const originalBlobOrigin = process.env.BLOB_PUBLIC_ORIGIN
+  const originalBlobStoreId = process.env.BLOB_PUBLIC_STORE_ID
 
   afterEach(() => {
     if (originalBlobOrigin === undefined) delete process.env.BLOB_PUBLIC_ORIGIN
     else process.env.BLOB_PUBLIC_ORIGIN = originalBlobOrigin
+    if (originalBlobStoreId === undefined) delete process.env.BLOB_PUBLIC_STORE_ID
+    else process.env.BLOB_PUBLIC_STORE_ID = originalBlobStoreId
   })
 
   it('recognizes normalized logical asset IDs', () => {
@@ -59,6 +62,17 @@ describe('asset resolution', () => {
         manifest,
       })
     ).toBe(manifest['/static/images/blogs/example/header.webp'].url)
+  })
+
+  it('does not use the publisher store ID to approve application asset URLs', () => {
+    delete process.env.BLOB_PUBLIC_ORIGIN
+    process.env.BLOB_PUBLIC_STORE_ID = 'store123'
+
+    expect(() =>
+      resolveAssetUrl('/static/images/blogs/example/header.webp', {
+        manifest,
+      })
+    ).toThrow('unapproved remote host')
   })
 
   it('uses an explicit local fallback during migration and fails closed afterward', () => {

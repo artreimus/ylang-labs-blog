@@ -117,15 +117,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.12.2+sha512.22721b3a11f81661ae1ec68ce1a7b879425a1ca5b991c975b074ac220b187ce56c708fe5db69f4c962c989452eee76c82877f4ee80f474cebd61ee13461b6228",
-  "pnpm": {
-    "overrides": {
-      "@grpc/grpc-js@>=1.13.0 <1.14.4": "1.14.4",
-      "form-data@<2.5.6": "2.5.6",
-      "minimatch@<3.1.4": "3.1.4",
-      "next-themes": "0.4.6",
-      "picomatch@<2.3.2": "2.3.2",
-      "protobufjs@<=7.6.2": "7.6.5"
-    }
-  }
+  "packageManager": "pnpm@11.11.0+sha512.4463f65fd80ed80d69bc1d4bf163ee94f605c7380fc318bb5b2ebe15f8cd12d49c51a4d59e951b401e764d3b6ca751cbf51bc50ed7001a6bcb4935e684c34882"
 }

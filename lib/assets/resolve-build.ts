@@ -32,30 +32,26 @@ function isSafeImageDataUrl(value: string): boolean {
 
 function configuredBlobHost(): string | undefined {
   const origin = process.env.BLOB_PUBLIC_ORIGIN?.trim()
-  if (origin) {
-    try {
-      const url = new URL(origin)
-      if (
-        url.protocol === 'https:' &&
-        url.pathname === '/' &&
-        !url.username &&
-        !url.password &&
-        !url.search &&
-        !url.hash
-      ) {
-        return url.hostname
-      }
-    } catch {
-      // next.config.js owns the deployment-time configuration error. The
-      // resolver simply declines to approve an invalid origin.
+  if (!origin) return undefined
+
+  try {
+    const url = new URL(origin)
+    if (
+      url.protocol === 'https:' &&
+      url.pathname === '/' &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash
+    ) {
+      return url.hostname
     }
+  } catch {
+    // next.config.js owns the deployment-time configuration error. The
+    // resolver simply declines to approve an invalid origin.
   }
 
-  // Keep the store-ID fallback for local publisher workflows, where the
-  // operator has store credentials but may not be running an application build.
-  const storeId = process.env.BLOB_PUBLIC_STORE_ID?.trim()
-  if (!storeId || !/^[A-Za-z0-9]+$/.test(storeId)) return undefined
-  return `${storeId}.public.blob.vercel-storage.com`
+  return undefined
 }
 
 function approvedHosts(options: AssetResolutionOptions): Set<string> {

@@ -5,6 +5,7 @@ import Callout from '../Callout'
 import DiagramDisplay from '../DiagramDisplay'
 import DiagramSubtitle from '../DiagramSubtitle'
 import AssetImage from './AssetImage'
+import AssetHtmlImage from './AssetHtmlImage'
 import CustomLink from '../Link'
 import MdxPre from '../MdxPre'
 import TableWrapper from '../TableWrapper'
@@ -19,6 +20,7 @@ export { coreMDXComponentNames } from './core-component-names'
  */
 export const coreMDXComponents: MDXComponents = {
   Image: AssetImage,
+  img: AssetHtmlImage,
   TOCInline,
   a: CustomLink,
   pre: MdxPre,

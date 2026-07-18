@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import packageJson from '../../../package.json'
 
 function runAuditModule(expression: string) {
   return spawnSync(
@@ -20,6 +21,10 @@ const cleanReport = {
 }
 
 describe('production dependency audit gate', () => {
+  it('uses a pnpm release that supports the registry bulk advisory endpoint', () => {
+    expect(packageJson.packageManager).toMatch(/^pnpm@11\./)
+  })
+
   it('accepts a recognized clean report', () => {
     const result = runAuditModule(
       `evaluateAuditReport(parseAuditReport({status:0,signal:null,stdout:${JSON.stringify(

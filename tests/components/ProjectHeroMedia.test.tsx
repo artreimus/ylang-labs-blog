@@ -42,9 +42,9 @@ describe('ProjectHeroMedia', () => {
 
   it('prefixes local video sources for base-path deployments', () => {
     const previousBasePath = process.env.BASE_PATH
-    const previousStoreId = process.env.BLOB_PUBLIC_STORE_ID
+    const previousBlobOrigin = process.env.BLOB_PUBLIC_ORIGIN
     process.env.BASE_PATH = '/blog'
-    process.env.BLOB_PUBLIC_STORE_ID = 'store123'
+    process.env.BLOB_PUBLIC_ORIGIN = 'https://store123.public.blob.vercel-storage.com'
 
     try {
       const { container } = render(
@@ -80,8 +80,8 @@ describe('ProjectHeroMedia', () => {
     } finally {
       if (previousBasePath === undefined) delete process.env.BASE_PATH
       else process.env.BASE_PATH = previousBasePath
-      if (previousStoreId === undefined) delete process.env.BLOB_PUBLIC_STORE_ID
-      else process.env.BLOB_PUBLIC_STORE_ID = previousStoreId
+      if (previousBlobOrigin === undefined) delete process.env.BLOB_PUBLIC_ORIGIN
+      else process.env.BLOB_PUBLIC_ORIGIN = previousBlobOrigin
     }
   })
 })
