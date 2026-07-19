@@ -68,6 +68,20 @@ Inference engines divide that loop into two phases with different performance pr
 
 Consider an illustrative internal policy assistant, not a Ylang Labs production system. Twelve employees share a system prompt and handbook, but ask different questions and receive uneven answer lengths. The common prefix makes prefill substantial. The uneven outputs make fixed batching awkward.
 
+<Image
+  alt="A conceptual inference workload showing prompt tokens processed together through several parallel prefill lanes, followed by a first-token boundary and a sequential autoregressive decode chain"
+  src="/static/images/blogs/vllm-inference-engine-explained/prefill-decode-workload.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Prefill can process many prompt positions together. Decode remains autoregressive: each accepted
+  output token becomes part of the context for the next step. Conceptual illustration; not a
+  performance trace.
+</DiagramSubtitle>
+
 <MermaidDiagram
   label="Prefill and decode latency timeline"
   description="TTFT ends at the first output token. ITL or TPOT measures the gaps between later decode tokens."
@@ -111,6 +125,20 @@ KV bytes ≈ live tokens × 2 × layers × KV heads × head dimension × bytes p
 
 The factor of two represents keys and values. This is proportional sizing, not a universal byte count. Grouped-query attention, quantization, and parallel layout change the terms. Multi-head latent attention and hybrid models use different layouts. Metadata, activations, and workspaces sit outside the formula.
 
+<Image
+  alt="A conceptual KV-cache diagram showing prompt prefill writing paired key and value state for earlier tokens, while decode reads the stored history and appends one complete new key-value pair"
+  src="/static/images/blogs/vllm-inference-engine-explained/kv-cache-function.png"
+  width={1774}
+  height={887}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Prefill creates key and value state for the prompt. Each ordinary decode step reads the existing
+  history, computes the new token state, and appends one new pair. The geometry is conceptual; real
+  cache layouts depend on the model and serving configuration.
+</DiagramSubtitle>
+
 Model weights are mostly fixed after loading, but KV memory grows with live tokens. An accelerator that fits the weights can still run out of capacity under concurrency.
 
 ## Fixed batches and contiguous reservations leave expensive holes
@@ -131,39 +159,18 @@ PagedAttention borrows an idea from operating systems. A process sees a contiguo
 
 The request still sees token positions in order. The attention kernel follows its block table to find the corresponding keys and values. Physical blocks can be allocated as the sequence grows, so a request does not need one maximum-length contiguous reservation. When the request finishes, its blocks become available for reuse. Prefix-cached blocks may remain indexed until they are reused or evicted.
 
-<MermaidDiagram
-  label="PagedAttention logical blocks mapped to a physical KV pool"
-  description="A request's ordered logical KV blocks map to scattered blocks in a shared physical pool."
->
-  {`
-    flowchart TD
-      subgraph Logical["Request A logical KV blocks"]
-        L0["Logical 0"] --> L1["Logical 1"] --> L2["Logical 2"] --> L3["Logical 3"]
-      end
-      subgraph Table["Request A block table"]
-        M0["0 maps to 7"]
-        M1["1 maps to 2"]
-        M2["2 maps to 11"]
-        M3["3 maps to 5"]
-      end
-      subgraph Pool["Shared physical KV pool"]
-        P2["Physical 2"]
-        P5["Physical 5"]
-        P7["Physical 7"]
-        P11["Physical 11"]
-        Other["Other blocks<br/>used or free"]
-      end
-      L0 --> M0 --> P7
-      L1 --> M1 --> P2
-      L2 --> M2 --> P11
-      L3 --> M3 --> P5
-      Other ~~~ P11
-  `}
-</MermaidDiagram>
+<Image
+  alt="A PagedAttention mapping plate showing four ordered logical KV-cache blocks routed through a block table to four scattered fixed-size blocks in a shared physical memory pool"
+  src="/static/images/blogs/vllm-inference-engine-explained/pagedattention-block-mapping.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
 
 <DiagramSubtitle>
-  Logical order stays contiguous for the request. Physical KV blocks do not need to sit next to one
-  another in accelerator memory.
+  Each table entry maps one ordered logical block to a physical block. Yellow blocks belong to the
+  illustrated request, green blocks belong to other requests, and unfilled blocks remain available.
+  Conceptual illustration; not a literal memory dump.
 </DiagramSubtitle>
 
 Paging still leaves a partial final block and needs block-table metadata. In return, it avoids maximum-length reservations and enables prefix sharing.
@@ -182,24 +189,18 @@ A long prefill can consume a large iteration and delay active decodes. **Chunked
 
 For the policy assistant, a handbook-heavy question may require substantial prefill while other users still expect tokens to stream. Chunking serves those decode steps, then spends the remaining budget on the prompt.
 
-<MermaidDiagram
-  label="Chunked prefill sharing an iteration with decode"
-  description="Each iteration schedules active decode tokens, then uses remaining capacity for part of a long prefill."
->
-  {`
-    flowchart LR
-      Prompt["Long prompt"] --> C1["Prefill chunk A"] --> C2["Prefill chunk B"] --> C3["Prefill chunk C"]
-      D1["Iteration 1<br/>active decodes + chunk A"] --> D2["Iteration 2<br/>active decodes + chunk B"]
-      D2 --> D3["Iteration 3<br/>active decodes + chunk C"]
-      C1 -.-> D1
-      C2 -.-> D2
-      C3 -.-> D3
-  `}
-</MermaidDiagram>
+<Image
+  alt="A token-budget scheduler plate showing three consecutive engine iterations that prioritize active decode slots, use remaining capacity for bounded prefill chunks, and admit or retire requests between iterations"
+  src="/static/images/blogs/vllm-inference-engine-explained/continuous-batching-scheduler.png"
+  width={1774}
+  height={887}
+  className="mx-auto rounded-md bg-white"
+/>
 
 <DiagramSubtitle>
-  This is a scheduling illustration, not a benchmark or a claim about a fixed number of tokens per
-  iteration.
+  Each green cell represents one ordinary decode token for one active request. The yellow cells
+  collectively spend the remaining iteration budget on a bounded prefill chunk. Requests can join or
+  leave between iterations. Conceptual illustration; not fixed token counts or benchmark data.
 </DiagramSubtitle>
 
 Smaller prefill allowances can protect ITL. Larger allowances can improve waiting prompts' TTFT and may raise throughput. Tune the budget against the prompt and output distribution you serve.
@@ -209,6 +210,20 @@ Smaller prefill allowances can protect ITL. Larger allowances can improve waitin
 Paged KV blocks can be reused when requests begin with the same token prefix. vLLM's [automatic prefix caching](https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/) identifies completed KV blocks by their token content and prefix context. A later request with matching blocks can reuse that cached state instead of recomputing the shared part of prefill.
 
 The illustrative assistant shares a system message and handbook. After one request computes full prefix blocks, matching requests can reuse them.
+
+<Image
+  alt="A first request populating completed shared-prefix KV blocks, followed by an exact-match request reusing those cached blocks while computing its unique tail and new decode tokens"
+  src="/static/images/blogs/vllm-inference-engine-explained/prefix-cache-reuse.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A later request can reuse completed KV blocks only when its token prefix matches exactly. Its
+  unique tail and every new output token still require model execution. Conceptual illustration;
+  eviction and cache-key details are omitted.
+</DiagramSubtitle>
 
 The limits matter:
 
@@ -224,25 +239,17 @@ The [vLLM architecture overview](https://docs.vllm.ai/en/latest/design/arch_over
 
 The **API server process** accepts HTTP requests, tokenizes inputs, loads multimodal data, and streams responses to clients. It communicates with the **engine core process** over ZMQ. The engine core owns scheduling and KV coordination. One **GPU worker process** per GPU loads weights, manages device memory, and runs forward passes.
 
-<MermaidDiagram
-  label="vLLM V1 online serving process architecture"
-  description="The API process handles clients, the engine core schedules work and KV state, and GPU workers run forward passes."
->
-  {`
-    flowchart TD
-      Client["Clients"] --> API["API server process<br/>HTTP, tokenization, streaming"]
-      API <-->|"ZMQ"| Core["Engine core process<br/>scheduler and KV cache"]
-      Core --> W1["GPU worker 1<br/>weights and forward pass"]
-      Core --> W2["GPU worker 2<br/>weights and forward pass"]
-      Core --> WN["GPU worker N<br/>when configured"]
-      W1 --> Core
-      W2 --> Core
-      WN --> Core
-  `}
-</MermaidDiagram>
+<Image
+  alt="A vLLM V1 process architecture plate showing clients communicating with an API server, a separate engine core coordinating scheduling and KV state, and multiple GPU worker processes executing the model"
+  src="/static/images/blogs/vllm-inference-engine-explained/vllm-v1-architecture.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
 
 <DiagramSubtitle>
-  The diagram shows the main V1 responsibilities. Data-parallel deployments add engine cores and
+  The API server handles request-facing work, the engine core schedules tokens and coordinates KV
+  state, and GPU workers execute model operations. Data-parallel deployments add engine cores and
   conditional coordination, so process counts depend on the parallel configuration.
 </DiagramSubtitle>
 
