@@ -104,11 +104,11 @@ After the technology logo is composited, use `.agents/skills/blog-logo-watermark
 node .agents/skills/blog-logo-watermark/scripts/apply-logo-watermark.mjs \
   --input public/static/images/blogs/<slug>/source-artwork.png \
   --output public/static/images/blogs/<slug>/source-artwork.png \
-  --corner lower-right \
+  --corner lower-left \
   --logo auto
 ```
 
-Then derive `cardImage.png` and `blogHeader.png` from the branded source, preserving the logo and Ylang mark. Do not add another Ylang watermark pass to the crops unless the crop removes the source watermark or the user explicitly requests per-format watermark placement. Keep the Ylang mark subordinate to the technology logo and the painting.
+Then derive `cardImage.png` and `blogHeader.png` from the branded source. Because edge-aligned watermarks are often excluded by portrait or wide crops, inspect each derivative and add one lower-left watermark pass only when its crop removes the source mark or the user explicitly requests per-format placement. Never leave duplicate Ylang marks. Keep the Ylang mark subordinate to the technology logo and the painting.
 
 ## Provenance and frontmatter
 

@@ -30,6 +30,7 @@ public/sitemap.xml
 
 # misc
 .DS_Store
+/public/static/images/blogs/*/*-no-watermark.png
 
 # debug
 *.log

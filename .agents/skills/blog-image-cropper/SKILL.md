@@ -76,7 +76,7 @@ Choose a wide crop that:
 
 - Keeps the main subject centered or slightly left of center.
 - Preserves horizontal context and scene depth.
-- Leaves the bottom-right reasonably clean when possible for brand mark visibility.
+- Leaves the bottom-left reasonably clean when possible for brand mark visibility.
 - Avoids cropping important text or diagrams at the top and bottom.
 - Keeps the result useful as a responsive blog banner.
 

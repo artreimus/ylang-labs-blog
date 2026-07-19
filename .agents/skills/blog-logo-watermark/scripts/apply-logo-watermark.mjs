@@ -27,11 +27,11 @@ function usage() {
 Options:
   --input <path>       Image to watermark.
   --output <path>      Output image. May equal --input for in-place replacement.
-  --corner <corner>    lower-left, lower-right, upper-left, or upper-right. Default: lower-right.
+  --corner <corner>    lower-left, lower-right, upper-left, or upper-right. Default: lower-left.
   --logo <choice>      auto, black, or white. Default: auto.
   --logo-dir <path>    Directory containing logo-black.png and logo-white.png.
   --scale <number>     Logo width as a fraction of image width. Default: 0.065.
-  --margin <number>    Margin as a fraction of image width. Default: 0.042.
+  --margin <number>    Margin as a fraction of image width. Default: 0.02.
   --opacity <number>   Logo opacity from 0 to 1. Default: 0.95.
   --json               Print machine-readable JSON.
   --help               Show this help text.
@@ -40,11 +40,11 @@ Options:
 
 function parseArgs(argv) {
   const options = {
-    corner: 'lower-right',
+    corner: 'lower-left',
     logo: 'auto',
     logoDir: defaultLogoDir,
     scale: 0.065,
-    margin: 0.042,
+    margin: 0.02,
     opacity: 0.95,
     json: false,
   }
@@ -253,7 +253,9 @@ async function main() {
   await fs.mkdir(path.dirname(output), { recursive: true })
 
   const samePath = input === output
-  const tempOutput = samePath ? path.join(path.dirname(output), `.${path.basename(output)}.${process.pid}.tmp.png`) : output
+  const tempOutput = samePath
+    ? path.join(path.dirname(output), `.${path.basename(output)}.${process.pid}.tmp.png`)
+    : output
 
   await sharp(input)
     .composite([{ input: logo.buffer, left: position.left, top: position.top }])
