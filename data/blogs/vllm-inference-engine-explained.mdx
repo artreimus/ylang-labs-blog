@@ -35,6 +35,20 @@ For a decoder-only Transformer, one generation step looks like this:
 
 That last dependency is fundamental. The model cannot accept token 20 until tokens 1 through 19 are part of the accepted sequence. Speculative decoding may draft several candidates together, but it still verifies them against that autoregressive dependency.
 
+<Image
+  alt="A conceptual next-token prediction pipeline showing prompt tokenization, vector embeddings, fixed Transformer layers, logits, one selected token, and the selected token appended to the context for the next pass"
+  src="/static/images/blogs/vllm-inference-engine-explained/prompt-to-next-token.png"
+  width={1774}
+  height={887}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A decoder-only Transformer converts the current context into logits, selects one next token, and
+  appends that token before repeating the forward pass. Model weights stay fixed during inference.
+  Conceptual illustration; exact layer and sampling details vary by model and configuration.
+</DiagramSubtitle>
+
 <MermaidDiagram
   label="Autoregressive LLM token generation loop"
   description="The model scores one next token, appends the selection to its context, and repeats until a stop condition."
