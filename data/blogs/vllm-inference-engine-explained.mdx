@@ -16,7 +16,7 @@ imageTheme: 'black'
 layout: 'PostBanner'
 ---
 
-Serving a large language model takes more than fast math. Once weights fit, memory determines concurrency, and scheduling determines whether the accelerator does useful work.
+Serving a large language model takes more than fast math. Once the weights fit, KV-cache memory often sets the capacity ceiling for concurrent sequences, while scheduling determines how efficiently the accelerator stays busy.
 
 [vLLM](https://github.com/vllm-project/vllm) is built around that observation. Its best-known idea, PagedAttention, makes the attention cache behave more like paged virtual memory. Its scheduler then mixes work from requests that arrive, grow, and finish at different times. To understand why those choices matter, we first need to follow one token through ordinary LLM inference.
 
@@ -29,7 +29,7 @@ For a decoder-only Transformer, one generation step looks like this:
 1. **Tokenization converts text into token IDs.** A token may be a word, word part, or punctuation. `Where is the leave policy?` becomes integers from the model's vocabulary.
 2. **Embeddings turn IDs into vectors.** Positional information records where each token appears.
 3. **Transformer layers process the vectors.** Self-attention uses relevant earlier positions, then feed-forward networks transform the result. The [Transformer paper](https://arxiv.org/abs/1706.03762) explains this architecture.
-4. **The final layer produces logits**, which score possible next tokens.
+4. **An output projection, often called the language-model head, turns the final hidden state into logits**, one score for each vocabulary token.
 5. **A decoding rule selects one token.** Greedy decoding takes the highest score. Sampling controls such as temperature and top-p trade determinism for variety.
 6. **The token joins the context.** The model runs again until an end token, length limit, or other stop condition.
 
@@ -98,7 +98,7 @@ Consider an illustrative internal policy assistant, not a Ylang Labs production 
 
 <MermaidDiagram
   label="Prefill and decode latency timeline"
-  description="TTFT ends at the first output token. ITL or TPOT measures the gaps between later decode tokens."
+  description="TTFT ends at the first output token. ITL measures gaps between successive streamed outputs, while TPOT averages post-first-token generation time per output token for each request."
 >
   {`
     flowchart LR
@@ -109,23 +109,25 @@ Consider an illustrative internal policy assistant, not a Ylang Labs production 
       T2 --> T3["Decode token 3"]
       T3 --> More["More decode steps"]
       Arrive -. "TTFT" .-> T1
-      T1 -. "ITL / TPOT" .-> T2
-      T2 -. "ITL / TPOT" .-> T3
+      T1 -. "ITL" .-> T2
+      T2 -. "ITL" .-> T3
   `}
 </MermaidDiagram>
 
 <DiagramSubtitle>
-  A service can have a good TTFT and poor streaming speed, or the reverse. Measure both phases.
+  A service can have a good TTFT and poor streaming speed, or the reverse. Measure TTFT separately
+  from ITL and TPOT.
 </DiagramSubtitle>
 
-The core serving metrics describe different user experiences:
+The core serving metrics describe different user experiences. vLLM's [benchmark CLI](https://docs.vllm.ai/en/latest/benchmarking/cli/) reports ITL and TPOT separately:
 
-| Metric         | What it measures                                    | What commonly changes it                                        |
-| -------------- | --------------------------------------------------- | --------------------------------------------------------------- |
-| **TTFT**       | Time from request arrival to the first output token | Queueing, prompt length, prefix reuse, prefill scheduling       |
-| **ITL / TPOT** | Delay between output tokens after the first         | Decode batch, interference from prefill, kernels, communication |
-| **Throughput** | Requests or tokens completed per unit of time       | Concurrency, batching, model and hardware, input/output mix     |
-| **Goodput**    | Work completed while meeting chosen latency SLOs    | Admission policy, scheduling, tail latency, workload shape      |
+| Metric         | What it measures                                               | What commonly changes it                                    |
+| -------------- | -------------------------------------------------------------- | ----------------------------------------------------------- |
+| **TTFT**       | Time from request arrival to the first output token            | Queueing, prompt length, prefix reuse, prefill scheduling   |
+| **ITL**        | Gap between successive streamed output events, often one token | Decode scheduling, batching, prefill interference, kernels  |
+| **TPOT**       | Per-request average time per output token after the first      | Decode batch, model and hardware, kernels, communication    |
+| **Throughput** | Requests or tokens completed per unit of time                  | Concurrency, batching, model and hardware, input/output mix |
+| **Goodput**    | Work completed while meeting chosen latency SLOs               | Admission policy, scheduling, tail latency, workload shape  |
 
 ## The KV cache trades repeated compute for growing memory
 
@@ -343,3 +345,4 @@ The practical next step is to run the small server, capture TTFT and ITL for you
 8. vLLM Project, [Scheduler Configuration API](https://docs.vllm.ai/en/stable/api/vllm/config/scheduler/).
 9. vLLM Project, [Parallelism and Scaling](https://docs.vllm.ai/en/latest/serving/parallelism_scaling/).
 10. vLLM Project, [CUDA Graphs](https://docs.vllm.ai/en/latest/design/cuda_graphs/).
+11. vLLM Project, [Benchmark CLI](https://docs.vllm.ai/en/latest/benchmarking/cli/).

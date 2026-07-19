@@ -76,6 +76,14 @@ This log records the external sources used by `data/blogs/vllm-inference-engine-
 - Page date: 2026-06-23
 - Supports: V1 full and piecewise CUDA Graph modes, runtime dispatch by batch shape, attention-backend compatibility, capture/replay, warmup, compilation-time, and memory tradeoffs.
 
+### 11. Benchmark CLI
+
+- Exact URL: https://docs.vllm.ai/en/latest/benchmarking/cli/
+- Publisher/author: vLLM Project contributors
+- Publication date: continuously updated documentation; no single publication date stated
+- Access date: 2026-07-19
+- Supports: vLLM reporting TTFT, TPOT, and ITL as separate serving-benchmark metrics rather than treating ITL and TPOT as interchangeable.
+
 ## Cover artwork and logo provenance
 
 ### Official vLLM compact logo
