@@ -19,9 +19,12 @@ const createFooterLink = (label: string, href?: string | null) => {
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
-  const exploreLinks: FooterLink[] = headerNavLinks
-    .filter((link) => link.href !== '/contact-us')
-    .map((link) => ({ label: link.title, href: link.href }))
+  const exploreLinks: FooterLink[] = [
+    ...headerNavLinks
+      .filter((link) => link.href !== '/contact-us')
+      .map((link) => ({ label: link.title, href: link.href })),
+    { label: 'Legal', href: '/legal' },
+  ]
 
   const contactNavItem = headerNavLinks.find((link) => link.href === '/contact-us')
 
@@ -105,34 +108,6 @@ export default function Footer() {
               ))}
             </div>
           </div>
-
-          <aside
-            aria-label="Personal publishing note"
-            className="rounded-xl bg-gray-50 px-5 py-4 ring-1 ring-inset ring-gray-200/80 dark:bg-gray-900/70 dark:ring-white/10 sm:px-6"
-          >
-            <div className="flex items-start gap-3">
-              <span
-                aria-hidden="true"
-                className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500 dark:bg-primary-400"
-              />
-              <p className="max-w-5xl text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                <span className="font-semibold text-gray-900 dark:text-gray-200">
-                  Independent publishing.
-                </span>{' '}
-                Views are the authors’ own, not those of employers, clients, or partners. We use
-                public sources and personal experience and do not knowingly publish confidential or
-                proprietary material. Content is educational, not professional advice. Original
-                articles and site code are available under the{' '}
-                <Link
-                  href={`${siteMetadata.siteRepo}/blob/main/LICENSE`}
-                  className="font-medium text-gray-900 underline decoration-primary-500/60 underline-offset-4 transition hover:decoration-primary-500 dark:text-gray-200 dark:decoration-primary-400/60 dark:hover:decoration-primary-400"
-                >
-                  MIT License
-                </Link>{' '}
-                unless noted.
-              </p>
-            </div>
-          </aside>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-gray-200 pt-6 text-sm text-gray-500 dark:border-white/10 lg:justify-between">
             <div className="flex items-center text-gray-600 dark:text-gray-500">

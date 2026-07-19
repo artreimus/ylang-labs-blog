@@ -1,23 +1,19 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 
 import Footer from '@/components/Footer'
 
 describe('Footer', () => {
-  it('shows the site-wide personal publishing disclaimer and open-source license', () => {
+  it('links to the legal page without rendering the full notice inline', () => {
     render(<Footer />)
 
+    const exploreGroup = screen.getByText('Explore').closest('div')
+
+    expect(exploreGroup).not.toBeNull()
     expect(
-      screen.getByRole('complementary', { name: 'Personal publishing note' })
-    ).toBeInTheDocument()
-    expect(screen.getByText('Independent publishing.')).toBeInTheDocument()
-    expect(screen.getByText(/views are the authors’ own/i)).toBeInTheDocument()
-    expect(
-      screen.getByText(/do not knowingly publish confidential or proprietary/i)
-    ).toBeInTheDocument()
-    expect(screen.getByText(/content is educational, not professional advice/i)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'MIT License' })).toHaveAttribute(
-      'href',
-      'https://github.com/artreimus/ylang-labs-blog/blob/main/LICENSE'
-    )
+      within(exploreGroup as HTMLElement).getByRole('link', { name: 'Legal' })
+    ).toHaveAttribute('href', '/legal')
+    expect(screen.getAllByRole('link', { name: 'Legal' })).toHaveLength(1)
+    expect(screen.queryByText('Independent publishing.')).not.toBeInTheDocument()
+    expect(screen.queryByRole('complementary', { name: 'Personal publishing note' })).toBeNull()
   })
 })
