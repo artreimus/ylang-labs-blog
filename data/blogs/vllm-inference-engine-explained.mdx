@@ -49,29 +49,6 @@ That last dependency is fundamental. The model cannot accept token 20 until toke
   Conceptual illustration; exact layer and sampling details vary by model and configuration.
 </DiagramSubtitle>
 
-<MermaidDiagram
-  label="Autoregressive LLM token generation loop"
-  description="The model scores one next token, appends the selection to its context, and repeats until a stop condition."
-  className="mx-auto max-w-xl"
->
-  {`
-    flowchart TD
-      Text["Prompt text"] --> Tokens["Tokenizer<br/>token IDs"]
-      Tokens --> Embed["Embeddings and positions"]
-      Embed --> Model["Transformer forward pass<br/>fixed weights"]
-      Model --> Logits["Next-token logits"]
-      Logits --> Sample["Select or sample one token"]
-      Sample --> Stop{"Stop condition?"}
-      Stop -->|"No"| Append["Append token to context"]
-      Append --> Embed
-      Stop -->|"Yes"| Output["Return completed output"]
-  `}
-</MermaidDiagram>
-
-<DiagramSubtitle>
-  Text generation is autoregressive. Each selected token changes the input to the next forward pass.
-</DiagramSubtitle>
-
 ## Prefill starts the answer; decode controls the stream
 
 Inference engines divide that loop into two phases with different performance profiles.
@@ -94,29 +71,6 @@ Consider an illustrative internal policy assistant, not a Ylang Labs production 
   Prefill can process many prompt positions together. Decode remains autoregressive: each accepted
   output token becomes part of the context for the next step. Conceptual illustration; not a
   performance trace.
-</DiagramSubtitle>
-
-<MermaidDiagram
-  label="Prefill and decode latency timeline"
-  description="TTFT ends at the first output token. ITL measures gaps between successive streamed outputs, while TPOT averages post-first-token generation time per output token for each request."
->
-  {`
-    flowchart LR
-      Arrive["Request arrives"] --> Queue["Queueing"]
-      Queue --> Prefill["Prefill and first-token work<br/>process prompt, select token"]
-      Prefill --> T1["First output token"]
-      T1 --> T2["Decode token 2"]
-      T2 --> T3["Decode token 3"]
-      T3 --> More["More decode steps"]
-      Arrive -. "TTFT" .-> T1
-      T1 -. "ITL" .-> T2
-      T2 -. "ITL" .-> T3
-  `}
-</MermaidDiagram>
-
-<DiagramSubtitle>
-  A service can have a good TTFT and poor streaming speed, or the reverse. Measure TTFT separately
-  from ITL and TPOT.
 </DiagramSubtitle>
 
 The core serving metrics describe different user experiences. vLLM's [benchmark CLI](https://docs.vllm.ai/en/latest/benchmarking/cli/) reports ITL and TPOT separately:
