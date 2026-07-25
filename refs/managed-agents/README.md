@@ -36,17 +36,19 @@ Access date for all web sources: 2026-07-25.
 ## Claim Boundaries
 
 - The post treats "managed agent" as a responsibility boundary, not a standardized cross-vendor category.
+- "Managed model endpoint" refers only to managed inference. Products described as APIs are classified by the broader capabilities the provider actually operates.
 - "Managed agent harness" is presented as a useful layer label supported by AWS terminology, not a universal standard.
 - The vendor examples show that different managed layers exist. They are not used to claim exact feature parity.
 - Managed identity, isolation, tracing, and evaluation do not replace application authorization, testing, rollback, recovery, or human escalation.
 - The post makes no exact cost-savings, performance, safety, or reliability claims.
 - The managed, self-built, and local decision guidance is an engineering recommendation derived from the ownership boundaries explained in the article. It is not presented as a vendor-defined taxonomy.
+- "Local" refers to where the agent loop and tool execution run, not necessarily where model inference runs or whether data leaves the workstation.
 
 ## Visual Assets
 
 1. **`managed-agent-responsibility-stack.png`**
 
-   - Purpose: Show the model API, managed runtime, and managed harness as increasingly broad provider responsibility boundaries.
+   - Purpose: Show the model endpoint, managed runtime, and managed harness as increasingly broad provider responsibility boundaries.
    - Accuracy boundary: A conceptual comparison model, not a diagram of one vendor's architecture or a claim of feature parity.
 
 2. **`managed-agent-production-lifecycle.png`**
