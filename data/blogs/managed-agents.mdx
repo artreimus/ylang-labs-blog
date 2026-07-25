@@ -1,0 +1,165 @@
+---
+title: 'Managed Agents Remove Infrastructure Work, Not Accountability'
+date: '2026-07-25'
+tags: ['AI/ML', 'Agents', 'Cloud']
+draft: false
+summary: 'Managed agents can remove production plumbing, but every layer trades operational work for provider coupling. Here is when to use one, build your own, or keep the agent local.'
+tldr: |
+  - "Managed agent" names a responsibility boundary, not one standard product. A provider may run the model API, the execution runtime, or the agent loop itself.
+  - Use a managed agent for multi-user production workloads when speed, isolation, scaling, and standard operations matter more than custom runtime control.
+  - Keep an agent local for interactive, single-user work near local files and tools. Build the cloud platform yourself only when its behavior is a product advantage or a hard requirement.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/managed-agents/cardImage.png'
+images: ['/static/images/blogs/managed-agents/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+A managed agent platform can run code, scale workers, isolate sessions, store memory, connect tools, and trace execution. It cannot take responsibility for what the agent does with those capabilities.
+
+The real decision is not whether an agent is "managed." It is where the provider's responsibility ends, where your product begins, and whether the workload needs a cloud service at all.
+
+## What is a managed agent?
+
+In this article, "managed agent" describes which parts of an agent system a provider operates for you. This is a comparison model, not a universal vendor category.
+
+A **managed model or API** serves model requests. Your team runs the agent loop, tools, state, and infrastructure.
+
+A **managed runtime** runs and scales your agent code. It may also isolate sessions and provide identity and traces, while your team controls the loop.
+
+A **managed harness** runs the runtime and agent loop from the model, instructions, tools, memory rules, and limits you supply. Your team still owns permissions and outcomes.
+
+| Managed layer | Provider typically operates                             | Your team still owns                                   |
+| ------------- | ------------------------------------------------------- | ------------------------------------------------------ |
+| Model or API  | Model serving                                           | Agent loop, runtime, state, tools, and operations      |
+| Agent runtime | Execution and scaling; often sessions, identity, traces | Agent loop, tool behavior, and product logic           |
+| Agent harness | Runtime plus a configured agent loop                    | Permissions, evaluation, escalation, and user outcomes |
+
+AWS calls the highest layer in this model a "managed agent harness," but the term is not an industry standard.
+
+<Image
+  alt="Responsibility stack showing a managed model API, runtime, and harness beneath the controls the product team continues to own"
+  src="/static/images/blogs/managed-agents/managed-agent-responsibility-stack.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Providers expose different slices of this stack. This is a responsibility model, not a claim of
+  feature parity.
+</DiagramSubtitle>
+
+Vendor documentation makes the spectrum visible. AWS distinguishes AgentCore Runtime, where the customer owns the loop, from AgentCore harness, where the service runs a configured loop. Microsoft separates prompt agents from Hosted agents, where customer code runs behind a managed endpoint. Google's Agent Platform groups a managed runtime with session, memory, evaluation, observability, and sandbox services. These examples show how far the boundary can move, not product parity.
+
+## A production run crosses more than the model endpoint
+
+A chat demo can look like a single model request. A production agent run is a longer chain.
+
+The application authenticates the caller, whether a user, service, or trusted event source, then creates or resumes a session. The runtime loads the agent version and state. The loop decides whether to call the model, a tool, or memory. Each tool call still needs authorization appropriate to the action. A payment and a web search should not inherit one undifferentiated permission.
+
+The run may pause for a tool or approval, retry after a timeout, or resume on another worker. Traces connect these steps to one task. Recovery must account for actions that already happened before retrying.
+
+<Image
+  alt="Production agent lifecycle from an application request through a managed session, model, tools, memory, traces, and human approval"
+  src="/static/images/blogs/managed-agents/managed-agent-production-lifecycle.png"
+  width={1774}
+  height={887}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A conceptual production lifecycle. Approval is conditional. Authentication, authorization,
+  evaluation, and escalation remain product decisions even when the provider runs the runtime.
+</DiagramSubtitle>
+
+A managed runtime can supply the execution substrate for this lifecycle. A managed harness can also supply the loop. Neither knows whether refunding an order, merging a pull request, or sending an email is correct for your user. That policy belongs in the application around the agent.
+
+This is why agent infrastructure is not only a scaling problem. It is also a state, identity, and recovery problem.
+
+## The upside: less infrastructure before production
+
+A well-matched managed layer can remove work that many production teams would otherwise have to build and operate.
+
+- **Less platform work:** You may avoid building schedulers, session isolation, identity plumbing, tracing, and deployment controls.
+- **Shared operating conventions:** Common paths for versions, sessions, and traces can make incidents easier to investigate.
+- **Elastic execution:** A managed runtime can add and retire capacity without your team operating a scheduler.
+- **Earlier behavior feedback:** Built-in logs and lifecycle controls let engineers start measuring agent behavior sooner.
+
+These are possible benefits, not guarantees. A platform only saves time when its defaults match the workload and the team can use its operating conventions without extensive workarounds.
+
+## The downside: coupling reaches beyond the SDK
+
+- **State is hard to move:** Replacing an API call may be straightforward. Reproducing how a provider resumes sessions, stores memory, or versions a running agent may not be.
+- **Control narrows as management expands:** Custom orchestration, hooks, protocols, networking, or resource shapes may not fit the supported path.
+- **Limits can become product limits:** Quotas, regional availability, and preview features can constrain what your agent can offer.
+- **Cost has several meters:** A completed task can consume tokens, tool calls, stored state, and active compute across concurrent sessions. Microsoft, for example, documents active CPU and memory billing for Hosted agent sessions.
+- **Infrastructure controls are not product authorization:** Managed identity and session isolation help, but your team still decides who may invoke a tool, what it may read, and when a person must approve an action.
+
+Measure cost per completed task, including retries and failed runs, rather than cost per request. Test how the platform behaves when a tool times out, state cannot be resumed, or the wrong action succeeds.
+
+## When to use managed, self-built, or local agents
+
+The right operating model depends on where the work happens and who must rely on it.
+
+### Use a local agent when the workstation is the product boundary
+
+A local agent fits interactive work by one person: editing a repository, searching notes, transforming files, or operating workstation tools. It stays close to the files and credentials it needs and can avoid sending every step to a hosted runtime.
+
+Local does not mean safe. The agent inherits the workstation's permissions and availability. A sleeping laptop is a poor scheduler, and a developer shell is a poor multi-tenant sandbox.
+
+Move beyond local execution when the agent must serve many users, run unattended, accept external events, or provide central audit controls.
+
+### Use a managed agent when the workload needs a service
+
+A managed runtime or harness is a practical default for a multi-user product when the loop is not the main technical advantage.
+
+It fits bursty workloads, long sessions, background jobs, and tools that need a stable cloud identity. The team gets an endpoint and lifecycle controls without first building a scheduler, sandbox fleet, session store, and trace pipeline.
+
+The fit weakens when a critical requirement falls outside the supported path, such as a custom sandbox, unusual hardware, private networking, or hard portability. One workaround is manageable. A product made mostly of workarounds has the wrong boundary.
+
+### Build the platform when runtime behavior is part of the advantage
+
+Self-building means more than writing a loop. It means owning packaging, scheduling, isolation, identity, observability, retries, upgrades, and rollback.
+
+That investment can make sense when orchestration is core intellectual property, required controls are unavailable, the workload needs unusual hardware or networking, or stable scale rewards custom resource management. It also requires a platform team that will not starve the product.
+
+Do not self-build to avoid the appearance of lock-in. A portability layer over models and tool schemas may be cheaper. Build because a measured requirement demands control.
+
+<Image
+  alt="Comparison of local agents, managed agents, and self-built agent platforms by workload, ownership, and operating burden"
+  src="/static/images/blogs/managed-agents/managed-vs-built-vs-local.png"
+  width={1774}
+  height={887}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The operating models overlap. Start with the simplest one that meets the workload's availability,
+  control, and governance requirements.
+</DiagramSubtitle>
+
+| Operating model | Best fit                                             | Main strength                             | Main limit                                      |
+| --------------- | ---------------------------------------------------- | ----------------------------------------- | ----------------------------------------------- |
+| Local agent     | One user, local files and tools, interactive work    | Proximity and fast iteration              | Weak fit for shared, always-on production       |
+| Managed agent   | Multi-user services, bursty or long-running sessions | Production infrastructure without a fleet | Provider constraints and deeper state coupling  |
+| Self-built      | Differentiated runtime or hard control requirements  | Maximum control over execution            | Platform staffing and continuous operating cost |
+
+## Choose the narrowest layer that removes work you do not want
+
+Before committing to a managed layer or a self-built alternative, run three drills with a representative workload:
+
+1. **Operational fit:** Exercise scaling, timeout, retry, state recovery, and incident tracing. Record completion rate, recovery time, and cost per completed task.
+2. **Control fit:** Prove the required tool permissions, custom protocols, network paths, hooks, and rollback procedure. If one critical control needs a side channel, price that complexity now.
+3. **Change and exit fit:** Change a model, tool schema, memory policy, and runtime version. Then export the state and traces needed to reproduce one task elsewhere.
+
+If the agent does not need to be a service, keep it local. Otherwise, pick the narrowest managed layer that passes the drills. Build only when you can name the gap, measure it, and fund the team that will own it.
+
+The provider can run the infrastructure. Your team still owns permissions, evaluation, recovery, and the decision to involve a person.
+
+## References
+
+1. AWS, [AgentCore harness vs. Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness-vs-runtime.html).
+2. Google Cloud, [Scale your agents](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale).
+3. Microsoft, [What is Microsoft Foundry Agent Service?](https://learn.microsoft.com/en-my/Azure/foundry/agents/overview).
+4. Microsoft, [Hosted agents in Foundry Agent Service](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents).
