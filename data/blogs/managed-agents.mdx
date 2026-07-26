@@ -149,22 +149,6 @@ The agent did not become more advanced. Its operating requirements changed.
 | Managed agent   | Multi-user services, bursty or long-running sessions | Production infrastructure without a fleet | Provider constraints and deeper state coupling  |
 | Self-built      | Differentiated runtime or hard control requirements  | Maximum control over execution            | Platform staffing and continuous operating cost |
 
-## Test the boundary before committing
-
-Set pass/fail targets before a pilot. An option passes only after clearing every product requirement.
-
-| Check        | Pass target set before pilot                                | Observed result | Pass?  |
-| ------------ | ----------------------------------------------------------- | --------------- | ------ |
-| Completion   | At least \_\_\_% accepted outcomes on the task set          | \_\_\_          | \_\_\_ |
-| Side effects | Zero duplicate or partial destructive actions after retries | \_\_\_          | \_\_\_ |
-| Recovery     | At most \_\_\_ minutes and \_\_\_ operator steps            | \_\_\_          | \_\_\_ |
-| Cost         | At most USD \_\_\_ per completed task, including retries    | \_\_\_          | \_\_\_ |
-| Exit         | Export and replay \_\_\_% of required state and history     | \_\_\_          | \_\_\_ |
-
-Run the same workload against the narrowest plausible option. If the agent does not need to be a service, keep it local. If a managed layer meets the targets, stop there. Build only when you can name the gap, measure it, and fund the team that will own it.
-
-The provider can run the infrastructure. Your team still owns permissions, evaluation, recovery, and the decision to involve a person.
-
 ## References
 
 1. AWS, [AgentCore harness vs. Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness-vs-runtime.html).
