@@ -1,0 +1,208 @@
+---
+title: 'Harness Engineering Explained: How a Model Call Becomes an Agent'
+date: '2026-08-15'
+tags: ['AI/ML', 'Agents']
+draft: false
+summary: 'See how an agent harness turns model responses into controlled work through context selection, tool execution, permissions, checkpoints, verification, traces, and explicit stop states.'
+tldr: |
+  - The model proposes the next response or action. The harness supplies context, validates tools, enforces permissions, records state, and checks whether work is finished.
+  - Clear task and stop conditions matter as much as the prompt because the agent needs executable evidence of completion, not just a plausible final message.
+  - Context compaction keeps a run within the model's active window, while checkpoints preserve recoverable state outside that window. They solve different problems.
+  - Tests and other deterministic checks should decide objective outcomes. Traces explain individual runs, while evals compare behavior across repeated tasks and changes.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/harness-engineering-explained/cardImage.png'
+images: ['/static/images/blogs/harness-engineering-explained/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+A model call accepts context and returns a response. An agent must also inspect an environment, use tools, learn from their results, and continue until the work reaches a defined stopping point.
+
+The software that manages those steps is the **agent harness**. This article builds one around an illustrative coding task: upgrade a dependency, update affected code, run the required checks, and stop only when the acceptance criteria pass. It is a teaching example, not a Ylang Labs production system.
+
+## A harness separates model judgment from software controls
+
+The model interprets the task and proposes a likely next step. The harness supplies the model's context, validates proposed actions, executes allowed tools, records results, and decides whether the run may finish.
+
+OpenAI describes the Codex harness as an agent loop with persisted threads, sandboxed execution, configuration, and extensions. Its Agents SDK places tools, guardrails, sessions, human input, and tracing around model calls. Microsoft documents a similar application-level harness concept. Exact component boundaries differ between systems.
+
+| Model responsibility            | Harness responsibility                      |
+| ------------------------------- | ------------------------------------------- |
+| Choose a likely next action     | Store task rules and select context         |
+| Propose a tool call             | Validate, authorize, and execute it         |
+| Interpret a tool result         | Return a bounded observation and save state |
+| Claim that the task is finished | Run checks and choose the terminal state    |
+
+Harness engineering does not guarantee reliability. It places model behavior inside software controls that can be inspected and tested.
+
+<Image
+  alt="A conceptual accumulation of agent capabilities labeled MODEL, TOOLS, POLICY, STATE, and VERIFY"
+  src="/static/images/blogs/harness-engineering-explained/from-model-call-to-harness.png"
+  width={1774}
+  height={887}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  The nested layers show capabilities accumulating around MODEL: TOOLS, POLICY, STATE, then VERIFY.
+  This is a conceptual build sequence, not a universal harness hierarchy.
+</DiagramSubtitle>
+
+## The task and stop contract turns a request into executable work
+
+“Upgrade the HTTP client” is not enough. The harness needs rules it can enforce without asking the model to reinterpret the request every turn.
+
+For our example, the task contract records the target version, allowed files, behavior that must not change, and these required checks: dependency consistency, type checking, unit tests, production build, and an approved final diff. It also says that network access requires approval.
+
+The stop contract defines `completed`, `failed`, `blocked`, `cancelled`, and `timed_out`. Only passed acceptance checks produce `completed`. Missing required input, permission, or external state produces `blocked`. Turn and time limits prevent endless runs.
+
+Keep these rules in persisted task state, not only in the opening prompt. The context builder can include the relevant rules on each turn, while the verifier reads the same contract when it decides the final status.
+
+## The agent loop feeds every action back into the next model turn
+
+The loop has two routes. An action proposal goes through validation, policy, execution, and observation. A completion proposal goes through acceptance checks.
+
+```text
+state = start(task, acceptance_checks, limits)
+
+while state.status == "running":
+    if turn_or_time_limit_reached(state):
+        state.status = "timed_out"
+        break
+
+    context = select_context(task, state)
+    proposal = call_model(context)
+
+    if proposal.type == "action":
+        if not valid_tool_call(proposal):
+            state.record("invalid_tool_call", proposal)
+            continue
+
+        decision = evaluate_policy(proposal, state)
+        if decision == "approval_required":
+            checkpoint(state)
+            decision = wait_for_human_decision(proposal)
+
+        if decision == "denied":
+            state.record("denied", proposal)
+            if task_requires(proposal):
+                state.status = "blocked"
+            continue
+
+        observation = execute_bounded_in_sandbox(proposal)
+        state.record(proposal, observation)
+        if non_recoverable(observation) or repeated_failure_limit_reached(state):
+            state.status = "failed"
+        continue
+
+    if proposal.type == "completion":
+        results = run_acceptance_checks(state.workspace)
+        state.record("verification", results)
+        if results.all_required_checks_passed:
+            state.status = "completed"
+        else if missing_required_input_or_external_state(results):
+            state.status = "blocked"
+        else if can_retry(results, state):
+            state.record("verification_failed", results)
+        else:
+            state.status = "failed"
+
+return state
+```
+
+The model emits structured intent rather than calling the operating system directly. A controller may also set `cancelled` outside this loop. Keep the action and completion routes separate in code so a completion claim can never bypass acceptance checks.
+
+## Context selection and checkpoints solve different problems
+
+The model can only reason over its current context. At the start, that may include repository instructions, the manifest, and the lockfile. After a type-check error, the next turn needs the error and affected file, not every earlier command.
+
+A practical context builder separates stable inputs, such as the task, repository rules, and tool definitions, from changing inputs, such as files, diffs, and recent observations. It selects from both for each decision.
+
+Compaction shortens old turns when context grows. It is not durable memory because a summary can omit a flag or unresolved failure. A checkpoint stores recoverable facts outside the model window: workspace revision, changed files, check results, approvals, and remaining work. Anthropic describes progress files and Git history serving this role for long-running agents.
+
+After interruption, the harness rebuilds context from the checkpoint and the actual environment. Repository state remains the source of truth.
+
+<Image
+  alt="Two-layer diagram separating a limited active context window with compacted conversation history from durable checkpoints connected to repository state, test results, and resumable task progress"
+  src="/static/images/blogs/harness-engineering-explained/context-and-checkpoint.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A compacted summary is only one input. A resumed run rebuilds context from checkpoints and fresh
+  environment inspection; it does not losslessly decompress the old conversation.
+</DiagramSubtitle>
+
+## Tool schemas, policy, approval, and sandboxing control side effects
+
+A tool is an API offered to the model. A file reader can require a path and line range; a command tool can require an argument list, working directory, timeout, and output limit. The harness rejects invalid calls before execution.
+
+Results also need bounds. Instead of returning a 50,000-line build log, the harness can return the exit code, focused error, truncation notice, and a reference to the full log.
+
+Define that result as an output schema. A command observation can include status, exit code, duration, truncation flag, and log reference. Saving the observation before the next call makes the state transition reproducible.
+
+Policy decides whether an action is allowed, denied, or needs approval. Approval answers one decision; it does not replace policy. The sandbox separately limits which files, processes, network connections, and credentials an allowed action can reach.
+
+OpenAI's Codex App Server describes approval as a bidirectional pause. In this example, the harness records the pending action, waits for allow or deny, then either executes inside the sandbox or returns a denial observation.
+
+<Image
+  alt="A tool proposal moving through schema and policy; approval pauses for a human allow or deny decision, with allow continuing to sandbox and tool execution and deny returning an observation"
+  src="/static/images/blogs/harness-engineering-explained/tool-policy-boundary.png"
+  width={1774}
+  height={887}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Approval pauses the run after its pending action has been recorded. A human allow decision routes
+  to the sandbox and tool; deny returns an observation so the model can choose another action or
+  stop blocked.
+</DiagramSubtitle>
+
+## Acceptance checks decide when the task is actually complete
+
+The model may claim the upgrade is finished, but the harness decides. It checks the requested version and lockfile, runs types, tests, and the build, then confirms that the diff stays inside approved paths. Any required failure keeps the run out of `completed`.
+
+Use deterministic checks for objective outcomes. A model grader can assess clarity or compare acceptable implementations, but it should not override a failing executable check.
+
+## Traces explain one run; evals compare many runs
+
+A trace records the context, model proposals, tool calls, approvals, observations, checks, and terminal state for one run. An eval repeats defined tasks and grades their outcomes. Anthropic recommends code-based graders where possible, with model or human judgment for subjective criteria.
+
+One trace can explain a failure. Repeated evals show whether a harness change helps across the task set rather than one example.
+
+Start each eval trial from the same repository revision and task contract. Grade the resulting files and checks, not how confident the final message sounds.
+
+<Image
+  alt="A verification diagram showing an agent change passing through dependency validation, type checking, unit tests, and build checks, with trace events recorded along the path and repeated trials feeding an evaluation summary"
+  src="/static/images/blogs/harness-engineering-explained/verification-and-trace.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  NEXT TURN represents retryable verification failures only. Non-recoverable cases end failed or
+  blocked, although those terminal branches are omitted from this simplified figure.
+</DiagramSubtitle>
+
+## A failure-path checklist for a first harness
+
+Three failure cases need extra care:
+
+- **Interrupted side effect:** Inspect the environment before retrying because the earlier action may have completed.
+- **Repeated non-recoverable failure:** Stop as `failed` after the bounded limit.
+- **Unavailable required verifier:** Stop as `blocked`, never `completed`.
+
+Start with one task type, a few narrow tools, explicit permissions, checkpoints, traces, and executable checks. Then test interruption, denial, oversized output, and failed verification before allowing longer runs.
+
+## References
+
+1. Ryan Lopopolo, [“Harness engineering: leveraging Codex in an agent-first world”](https://openai.com/index/harness-engineering/), OpenAI, February 11, 2026.
+2. Celia Chen, [“Unlocking the Codex harness: how we built the App Server”](https://openai.com/index/unlocking-the-codex-harness/), OpenAI, February 4, 2026.
+3. Justin Young, [“Effective harnesses for long-running agents”](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents), Anthropic, November 26, 2025.
+4. OpenAI, [“OpenAI Agents SDK”](https://openai.github.io/openai-agents-python/), current documentation.
+5. Mikaela Grace, Jeremy Hadfield, Rodrigo Olivares, and Jiri De Jonghe, [“Demystifying evals for AI agents”](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents), Anthropic, January 9, 2026.
+6. Microsoft, [“Agent Harness”](https://learn.microsoft.com/en-us/agent-framework/concepts/harness), Microsoft Learn, current documentation.
