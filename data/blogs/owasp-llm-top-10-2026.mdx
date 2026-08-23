@@ -174,25 +174,19 @@ LLM Supply Chain risk affects the integrity of training data, models, adapters, 
 
 OWASP’s Figure 3 illustrates why the attack surface crosses the lifecycle. An artifact can be tampered with in a repository, during a merge or conversion step, in a build pipeline, in a serving environment, or on an edge device.
 
-```mermaid
-flowchart LR
-  D["External data"] --> B["Training and build"]
-  M["Model and package repositories"] --> B
-  B --> R["Approved artifact registry"]
-  R --> I["Inference platform"]
-  I --> A["LLM application"]
-  A --> E["Devices and downstream systems"]
-  T1["Poisoned data"] -.-> D
-  T2["Tampered model or package"] -.-> M
-  T3["Unsafe merge or conversion"] -.-> B
-  T4["Runtime drift"] -.-> I
-  T5["Output misuse"] -.-> A
-  V["Provenance, digest, signature, behavior checks"] --> R
-  V --> I
-  V --> A
-```
+<Image
+  alt="An original LLM supply-chain threat model showing data and model sources flowing through training, model repositories, conversion, development, inference, application, and optional on-device deployment, with red threat tags and a threat legend"
+  src="/static/images/blogs/owasp-llm-top-10-2026/supply-chain-threat-model.png"
+  width={1672}
+  height={941}
+  className="mx-auto rounded-md bg-white"
+/>
 
-This is an original Mermaid reinterpretation of OWASP Figure 3, not a reproduction. It keeps the supply-chain stages readable and omits the source figure’s detailed labels.
+<DiagramSubtitle>
+  Original editorial reinterpretation of OWASP Figure 3. The diagram preserves the source’s
+  lifecycle and attack-surface idea while using new artwork, labels, and composition; it is not an
+  official OWASP reproduction.
+</DiagramSubtitle>
 
 ### How it appears in the support assistant
 
