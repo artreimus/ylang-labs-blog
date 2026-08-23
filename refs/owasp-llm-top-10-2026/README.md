@@ -7,15 +7,15 @@ Research packet for `data/blogs/owasp-llm-top-10-2026.mdx`.
 1. **OWASP GenAI LLM Top 10 2026**
    URL: https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/
    Publisher: OWASP Gen AI Security Project
-   Accessed: 2026-08-22
+   Accessed: 2026-08-23
    Publication date: 2026-08-03
    Supports: official title, scope, publication metadata, and the ten-risk overview.
 
 2. **OWASP Top 10 for LLM Applications 2026 PDF**
    URL: https://genai.owasp.org/download/56857/?tmstv=1785822482
    Publisher: OWASP Gen AI Security Project
-   Accessed: 2026-08-22
-   Supports: the ten entry names, methodology claims, category movement, scope changes, model-as-component boundary, and supply-chain threat-model context.
+   Accessed: 2026-08-23
+   Supports: the ten entry names, detailed definitions and controls, methodology claims, category movement, scope changes, model-as-component boundary, and supply-chain threat-model context.
 
 ## Editorial notes
 
