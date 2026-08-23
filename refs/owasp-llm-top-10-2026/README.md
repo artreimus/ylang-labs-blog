@@ -20,5 +20,5 @@ Research packet for `data/blogs/owasp-llm-top-10-2026.mdx`.
 ## Editorial notes
 
 - The article’s support-assistant example is fictional and illustrative.
-- The Mermaid overview and generated supply-chain raster diagram are original editorial simplifications inspired by the supplied reference images and OWASP’s PDF figures. They are not official OWASP diagrams or exhaustive mappings.
+- The Mermaid overview is an original editorial simplification. The supply-chain raster diagram is the user-provided OWASP Figure 3 image, attributed in the article and used under the source PDF’s CC BY-SA 4.0 license.
 - OWASP’s incident corpus and weighting method are reported as OWASP’s methodology claims, not presented as independent validation or a prevalence study.
