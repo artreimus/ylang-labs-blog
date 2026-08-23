@@ -17,7 +17,7 @@ The bundled script uses:
 
 - Target images: watermark the square source master (`source-artwork.png` when present, otherwise `source-image.png`) and each requested derived cover asset. For a complete cover package, verify `blogHeader.png` and `cardImage.png` each contain exactly one mark after cropping.
 - Local backup: before overwriting a source master, create an unwatermarked sibling backup named `<source-stem>-no-watermark.png` when one does not already exist. This backup is for local recovery only; never stage or commit it unless the user explicitly asks.
-- Placement: lower-left.
+- Placement: lower-right.
 - Logo choice: `auto`, based on contrast sampled from the image area where the logo will land.
 - Logo width: `6.5%` of the image width, clamped for blog artwork.
 - Margin: `2%` of the image width, with the script's minimum edge-safe padding.
@@ -35,7 +35,7 @@ Use black logos on light local backgrounds and white logos on dark local backgro
    - `public/static/images/blogs/<slug>/blogHeader.png`
    - `public/static/images/blogs/<slug>/cardImage.png` when preparing a complete cover package
 
-   When the user asks to watermark a blog, a blog slug, blog artwork, or a provided blog source image, apply the watermark to the source master and requested derivatives. A crop near the edge can remove the source watermark, so inspect each derivative and add one lower-left watermark pass only when needed. Never leave duplicate marks.
+   When the user asks to watermark a blog, a blog slug, blog artwork, or a provided blog source image, apply the watermark to the source master and requested derivatives. A crop near the edge can remove the source watermark, so inspect each derivative and add one lower-right watermark pass only when needed. Never leave duplicate marks.
 
    Source images are uncropped. Blog headers are already cropped. Do not crop, resize, or reframe either one when applying the watermark.
 
@@ -52,7 +52,7 @@ Use black logos on light local backgrounds and white logos on dark local backgro
 
 3. Inspect the target image when composition matters.
 
-   Prefer a clean corner where the logo does not cover a face, diagram label, important object, or dense text. Use the lower-left edge by default unless the user or existing art direction calls for a different corner.
+   Prefer a clean corner where the logo does not cover a face, diagram label, important object, or dense text. Use the lower-right edge by default unless the user or existing art direction calls for a different corner.
 
    If the image already has a Ylang Labs logo, do not add a duplicate mark unless the user explicitly asks for a second placement or replacement.
 
@@ -62,7 +62,7 @@ Use black logos on light local backgrounds and white logos on dark local backgro
    node .agents/skills/blog-logo-watermark/scripts/apply-logo-watermark.mjs \
      --input public/static/images/blogs/<slug>/source-artwork.png \
      --output public/static/images/blogs/<slug>/source-artwork.png \
-     --corner lower-left \
+     --corner lower-right \
      --logo auto
    ```
 
@@ -74,7 +74,7 @@ Use black logos on light local backgrounds and white logos on dark local backgro
    node .agents/skills/blog-logo-watermark/scripts/apply-logo-watermark.mjs \
      --input public/static/images/blogs/<slug>/blogHeader.png \
      --output public/static/images/blogs/<slug>/blogHeader.png \
-     --corner lower-left \
+     --corner lower-right \
      --logo auto
    ```
 
@@ -109,7 +109,7 @@ Important options:
 Before finalizing:
 
 - The image dimensions are exactly the same before and after watermarking.
-- The logo is in the requested corner, lower-left by default.
+- The logo is in the requested corner, lower-right by default.
 - The logo does not cover important subject matter or readable text.
 - The selected logo color is visibly legible against the local background.
 - Only the intended blog image files are changed.
