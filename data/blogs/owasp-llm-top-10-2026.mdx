@@ -31,7 +31,7 @@ The 2026 entries are Prompt Injection, Sensitive Information Disclosure, Excessi
 
 OWASP reports that Excessive Agency rose to third, Unbounded Consumption rose four places, and Improper Output Handling fell from fifth to tenth. The project also broadened System Prompt Leakage into Hidden Context Exposure, added cross-modal inputs to Prompt Injection, expanded Supply Chain to model-artifact trust failures, and included fine-tuning subversion under Data and Model Poisoning.
 
-The [official 2026 PDF](https://genai.owasp.org/download/56857/?tmstv=1785822482) describes a corpus of 7,714 public incidents, with 6,639 containing enough detail to classify. OWASP says the community vote carries three-quarters of the final weight and incident evidence carries one-quarter. Those are OWASP’s methodology claims, not an independent prevalence study. Treat the list as a prioritization signal, then measure your own exposure.
+The official 2026 PDF describes a corpus of 7,714 public incidents, with 6,639 containing enough detail to classify. OWASP says the community vote carries three-quarters of the final weight and incident evidence carries one-quarter. Those are OWASP’s methodology claims, not an independent prevalence study. Treat the list as a prioritization signal, then measure your own exposure.
 
 The source’s bullseye groups entry vectors, amplifying machinery, and impacts. The diagram below is an editorial simplification of that idea. It shows why the same risk can be harmless in a text-only assistant and severe in a system with tools, private data, and durable state.
 
@@ -65,7 +65,7 @@ flowchart TB
 
 This is not an OWASP taxonomy. It is a way to follow an attack through a real application. OWASP also notes that not every Supply Chain attack flows inward through the model. A tampered artifact can deliver impact directly.
 
-## [LLM01: Prompt Injection](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM01: Prompt Injection
 
 ### What it is
 
@@ -98,7 +98,7 @@ Do not promise that prompt filtering will prevent prompt injection. Instead, lim
 
 Prompt Injection is an input-side failure. The next two entries describe what can leak and what can happen after the model is influenced.
 
-## [LLM02: Sensitive Information Disclosure](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM02: Sensitive Information Disclosure
 
 ### What it is
 
@@ -130,7 +130,7 @@ A second example is logging. The application logs the full prompt and tool argum
 
 Sensitive Information Disclosure is about unauthorized data exposure. It is different from Hidden Context Exposure, which focuses on the application’s hidden instructions and operational context.
 
-## [LLM03: Excessive Agency](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM03: Excessive Agency
 
 ### What it is
 
@@ -162,7 +162,7 @@ Now an indirect injection does not need to defeat the model. It only needs to in
 
 The model should propose an action. A trusted executor should decide whether that action is allowed.
 
-## [LLM04: Supply Chain](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM04: Supply Chain
 
 ### What it is
 
@@ -208,7 +208,7 @@ The same failure can happen when a LoRA adapter is merged, a model is converted 
 
 Supply Chain and Data and Model Poisoning overlap, but the distinction is useful: Supply Chain asks whether the path and artifact were compromised; Poisoning asks whether data or a model learned harmful behavior.
 
-## [LLM05: Data and Model Poisoning](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM05: Data and Model Poisoning
 
 ### What it is
 
@@ -234,7 +234,7 @@ A training-time version could add a small number of examples that cause a fine-t
 
 Poisoning creates durable corruption. Prompt Injection changes behavior at runtime. A poisoned RAG document can also carry a prompt injection, so incident analysis should record both data lineage and the runtime input path.
 
-## [LLM06: Unbounded Consumption](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM06: Unbounded Consumption
 
 ### What it is
 
@@ -260,7 +260,7 @@ No individual request exceeds the API rate limit. The session still consumes the
 
 The source describes an example where context growth increases per-turn cost from roughly $0.001 to about $0.50 by turn 100. The exact economics depend on the model and provider, but the mechanism is general: aggregate cost can evade per-request limits.
 
-## [LLM07: Misinformation](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM07: Misinformation
 
 ### What it is
 
@@ -286,7 +286,7 @@ In an agentic workflow, the same misinformation could become a false verificatio
 
 Misinformation is the failure mode of a wrong answer becoming trusted. It is not the same as Improper Output Handling, where unsafe output is passed into a downstream interpreter or sink.
 
-## [LLM08: Hidden Context Exposure](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM08: Hidden Context Exposure
 
 ### What it is
 
@@ -309,7 +309,7 @@ The assistant’s hidden instructions contain the internal refund threshold and 
 
 Hidden Context Exposure often amplifies Prompt Injection and Excessive Agency. Leaked rules help an attacker craft better inputs; leaked tool schemas reveal what the application can do.
 
-## [LLM09: Vector and Embedding Weaknesses](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM09: Vector and Embedding Weaknesses
 
 ### What it is
 
@@ -336,7 +336,7 @@ Another failure is embedding inversion. A leaked vector backup is treated as har
 
 Vector retrieval can be vulnerable even when every document contains benign text. That is why better prompt instructions do not fix this category.
 
-## [LLM10: Improper Output Handling](https://genai.owasp.org/download/56857/?tmstv=1785822482)
+## LLM10: Improper Output Handling
 
 ### What it is
 
