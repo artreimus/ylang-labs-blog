@@ -1,0 +1,125 @@
+---
+title: 'The Next API Must Work for Agents, Not Just Humans'
+date: '2026-07-12'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'A tool can accept valid JSON and still leave an agent guessing. Better agent-facing APIs say what changes, make retries safe, return what the next call needs, and explain how to recover from errors.'
+tldr: |
+  - A schema can reject malformed calls, but the tool name, result, and errors still need to guide the next action.
+  - Tools that change data should say exactly what changes, prevent stale updates, and make retries safe.
+  - Results should return the identifiers and next actions the agent needs, not the full backend response.
+  - Judge an interface by whether agents make fewer wrong calls and recover with less help, not by whether the schema looks cleaner.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/next-api-for-agents-not-humans/cardImage.png'
+images: ['/static/images/blogs/next-api-for-agents-not-humans/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Most APIs assume a developer will read the documentation and fill in any missing steps. An agent-facing API gives that job to an AI model. The model has to choose and chain calls from the tool name, its description and accepted inputs, and the previous result.
+
+When those clues are vague, the agent has to guess. It may repeat a call, use more tokens, add latency, or fail the task.
+
+That is why the next API fight is not REST versus GraphQL. It is whether the interface makes the next safe action obvious to a model.
+
+## A valid call can still be the wrong operation
+
+Imagine an agent deploying a new image for `checkout-api`. The available tool is `update_service(service_id, data)`, and the model sends a payload that matches the schema:
+
+```json
+{
+  "service_id": "checkout-api",
+  "data": {
+    "image": "registry.example/checkout@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  }
+}
+```
+
+The call is valid, but the interface has left the dangerous decisions implicit. Does `data` patch the service or replace it? If the request times out, can the agent retry without creating a second deployment? If another release changed the service first, will this call overwrite it?
+
+The model chose a reasonable payload. The API did not give it enough information to act safely.
+
+<MermaidDiagram>
+  {`
+    flowchart LR
+      subgraph H["Generic update surface"]
+        H1["update_service(id, data)"] --> H2["Guess what data means"]
+        H2 --> H3["Search a large response"]
+        H3 --> H4["Work out the next action"]
+      end
+
+      subgraph A["Deployment operation"]
+        A1["deploy_release(...)"] --> A2["Reject a stale version"]
+        A2 --> A3["Return deployment ID and status"]
+        A3 --> A4["Poll or cancel"]
+      end
+
+      H4 -. "move hidden decisions into fields" .-> A1
+
+`}
+
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  A task-specific tool states what changes, rejects stale updates, and returns the next actions.
+</DiagramSubtitle>
+
+Humans repair awkward interfaces by reading documentation, interpreting prose, and copying the right identifier. An agent has to repeat those judgments at every step. A good agent-facing API removes as much of that guesswork as it can.
+
+## A schema can reject mistakes without teaching the next move
+
+Across OpenAI, Anthropic, and MCP, tool definitions include a name, a description for the model, and a typed input schema.
+
+A JSON Schema describes valid arguments, but non-strict tool calling can still produce arguments that do not match it. OpenAI's strict mode enforces schema adherence. It requires `additionalProperties: false` on every object and every property to be marked as required. Optional fields use a nullable type.
+
+Descriptions help the model choose between tools. MCP's `inputSchema` and optional `outputSchema` make the input and structured result explicit.
+
+But validity only solves the shape of the call.
+
+For the deployment example, replace the generic update with `deploy_release(service_id, image_digest, expected_version, idempotency_key)`. The operation name says what it does. `expected_version` rejects the call if another release has already changed the service. `idempotency_key` lets a retry refer to the same deployment instead of starting a second one.
+
+Errors should also tell the agent what to do next. If the service version has changed, return the current version and tell the caller to read the service before retrying. If the request times out, say whether the same idempotency key can be reused. "Request failed" does neither.
+
+## The result payload is part of the API
+
+Input schemas get more attention than output shape, but multi-step work depends on what the model can do after a tool returns.
+
+After `deploy_release`, return the fields the next call needs: `deployment_id`, `service_id`, `status`, `observed_version`, and the allowed next actions. `observed_version` tells the caller which version of the service the deployment actually used. The agent can now call `deployment(action, deployment_id)` with `status` or `cancel` instead of searching a large cloud response for identifiers.
+
+Keep the default result focused. Return the deployment identifier, current state, and possible next actions. Make build logs, image metadata, service configuration, and provider diagnostics available through a separate inspection call when the deployment fails.
+
+The same rule applies to CLIs. A `deployctl release --help` page should explain the required image digest, how `expected_version` prevents stale updates, when an `idempotency_key` can be reused, the JSON output mode, and the exit codes. The command should carry enough information for an agent to construct a safe call without searching a separate guide.
+
+## Put safety rules in the tool, not the prompt
+
+The best agent-facing interfaces make the next safe move obvious. Before exposing a tool, ask five questions:
+
+1. Can the model choose the operation from its name and description?
+2. Does the tool validate its arguments and reject unsupported fields or values?
+3. Does the operation say exactly what changes and whether a retry is safe?
+4. Does the result return the identifiers and evidence needed for the next call?
+5. Does each expected failure explain the next move or when to stop?
+
+Do not decide by endpoint count alone. Split an operation when combining it would hide different inputs, side effects, or retry rules. Starting a release deserves `deploy_release(...)` because it creates a deployment and needs a current-version check and a safe-retry key.
+
+Related follow-up actions can share `deployment(action, deployment_id)` only when each action's behavior and safeguards remain explicit. For example, `status` can be read-only, while `cancel` must be marked as destructive and may require confirmation or an expected state. If one tool cannot make that distinction obvious, split the actions into separate tools.
+
+Keep a generic request tool for uncommon cases, but do not make it the easiest way to perform a destructive change.
+
+## If the agent still guesses, the interface did not improve
+
+Treat the redesign as an evaluation, not a cleanup. Give the old and new interfaces the same deployment scenarios: a normal release, a retry after a timeout, a stale-version conflict, a failed deployment, and a cancellation.
+
+Keep the model, system prompt, agent loop, and inference settings fixed. Run each scenario several times and change only the tool interface.
+
+Then inspect the call trace. Did the agent choose the correct operation first? Did it reuse the same idempotency key after the timeout? Did it recover from the version conflict without a human hint? Could it find the deployment ID and next allowed action directly in the result?
+
+Measure completion rate, wrong-tool calls, repair calls, latency, token cost, and human intervention. The goal is not to prove that the schema looks cleaner. It is to show that the agent makes fewer guesses between the user's request and a successful deployment.
+
+Compare the traces, then revise every step where the agent still has to guess what changed, whether a retry is safe, or what to call next.
+
+## References
+
+1. OpenAI Docs, ["Function calling"](https://developers.openai.com/api/docs/guides/function-calling).
+2. Anthropic Docs, ["Define tools"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools).
+3. Model Context Protocol, ["Tools"](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
