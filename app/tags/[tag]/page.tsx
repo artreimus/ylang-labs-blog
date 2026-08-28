@@ -1,5 +1,5 @@
 import { slug } from 'github-slugger'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 import siteMetadata from '@/data/siteMetadata'
 import ListLayout from '@/layouts/ListLayoutWithTags'
 import { allBlogs } from 'contentlayer/generated'
@@ -7,6 +7,7 @@ import tagData from 'app/blog-tag-data.json'
 import { genPageMetadata } from 'app/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { resolveBlogContentAssets } from '@/lib/assets/content.server'
 
 export async function generateMetadata({
   params,
@@ -43,9 +44,9 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
   const title = tag[0].toUpperCase() + tag.split(' ').join('-').slice(1)
   const filteredPosts = allCoreContent(
     sortPosts(
-      allBlogs.filter(
-        (post) => !post.draft && post.tags && post.tags.map((t) => slug(t)).includes(tag)
-      )
+      allBlogs
+        .filter((post) => !post.draft && post.tags && post.tags.map((t) => slug(t)).includes(tag))
+        .map(resolveBlogContentAssets)
     )
   )
   if (filteredPosts.length === 0) {

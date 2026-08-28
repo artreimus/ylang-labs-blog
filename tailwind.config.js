@@ -93,11 +93,11 @@ module.exports = {
         DEFAULT: {
           css: {
             a: {
-              color: theme('colors.primary.500'),
+              color: theme('colors.primary.700'),
               '&:hover': {
-                color: `${theme('colors.primary.600')}`,
+                color: `${theme('colors.primary.800')}`,
               },
-              code: { color: theme('colors.primary.400') },
+              code: { color: theme('colors.primary.800') },
             },
             'h1,h2': {
               fontWeight: '700',
@@ -107,18 +107,21 @@ module.exports = {
               fontWeight: '600',
             },
             code: {
-              color: theme('colors.indigo.500'),
+              color: theme('colors.primary.800'),
             },
           },
         },
         invert: {
           css: {
             a: {
-              color: theme('colors.primary.500'),
+              color: theme('colors.primary.300'),
               '&:hover': {
-                color: `${theme('colors.primary.400')}`,
+                color: `${theme('colors.primary.200')}`,
               },
-              code: { color: theme('colors.primary.400') },
+              code: { color: theme('colors.primary.200') },
+            },
+            code: {
+              color: theme('colors.primary.200'),
             },
             'h1,h2,h3,h4,h5,h6': {
               color: theme('colors.gray.100'),

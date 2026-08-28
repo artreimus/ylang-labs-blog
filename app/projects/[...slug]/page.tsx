@@ -2,14 +2,19 @@ import 'css/prism.css'
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
+import { MDXLayoutRenderer } from 'pliny/mdx-components.js'
+import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer.js'
 import { allProjects, allAuthors } from 'contentlayer/generated'
 import type { Authors, Project } from 'contentlayer/generated'
 import ProjectLayout from '@/layouts/ProjectLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
+import { parseProjectHeroMedia } from '@/lib/content/project-hero-media'
+import {
+  resolveAuthorContentAssets,
+  resolveProjectContentAssets,
+} from '@/lib/assets/content.server'
 
 const publishedProjects = allProjects.filter((project) => !project.draft)
 
@@ -20,11 +25,12 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const resolvedParams = await params
   const slug = decodeURI(resolvedParams.slug.join('/'))
-  const project = publishedProjects.find((p) => p.slug === slug)
+  const rawProject = publishedProjects.find((p) => p.slug === slug)
+  const project = rawProject ? resolveProjectContentAssets(rawProject) : undefined
   const authorList = project?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    return coreContent(resolveAuthorContentAssets(authorResults as Authors))
   })
   if (!project) {
     return
@@ -33,10 +39,9 @@ export async function generateMetadata({
   const publishedAt = new Date(project.date).toISOString()
   const modifiedAt = new Date(project.lastmod || project.date).toISOString()
   const authors = authorDetails.map((author) => author.name)
-  let imageList = [siteMetadata.socialBanner]
-  if (project.image) {
-    imageList = [project.image]
-  }
+  const heroMedia = parseProjectHeroMedia((project as Project & { heroMedia?: unknown }).heroMedia)
+  const socialImage = heroMedia?.type === 'video' ? heroMedia.poster : heroMedia?.src
+  const imageList = [socialImage ?? project.image ?? siteMetadata.socialBanner]
   const ogImages = imageList.map((img) => {
     return {
       url: img.includes('http') ? img : siteMetadata.siteUrl + img,
@@ -80,7 +85,9 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
   const resolvedParams = await params
   const slug = decodeURI(resolvedParams.slug.join('/'))
   // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(publishedProjects))
+  const sortedCoreContents = allCoreContent(
+    sortPosts(publishedProjects).map(resolveProjectContentAssets)
+  )
   const projectIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
   if (projectIndex === -1) {
     return notFound()
@@ -88,11 +95,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string[
 
   const prev = sortedCoreContents[projectIndex + 1]
   const next = sortedCoreContents[projectIndex - 1]
-  const project = publishedProjects.find((p) => p.slug === slug) as Project
+  const project = resolveProjectContentAssets(
+    publishedProjects.find((p) => p.slug === slug) as Project
+  )
   const authorList = project?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
+    return coreContent(resolveAuthorContentAssets(authorResults as Authors))
   })
   const mainContent = coreContent(project)
 

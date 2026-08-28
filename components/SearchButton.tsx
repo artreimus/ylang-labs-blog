@@ -1,4 +1,4 @@
-import { KBarButton } from 'pliny/search/KBarButton'
+import { KBarButton } from 'pliny/search/KBarButton.js'
 import siteMetadata from '@/data/siteMetadata'
 
 const SearchButton = ({ mobile = false }: { mobile?: boolean }) => {

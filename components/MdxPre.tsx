@@ -1,5 +1,5 @@
 import React from 'react'
-import Pre from 'pliny/ui/Pre'
+import Pre from 'pliny/ui/Pre.js'
 import MermaidDiagram from './MermaidDiagram'
 
 function extractText(node: React.ReactNode): string {

@@ -1,7 +1,6 @@
 import { writeFileSync, mkdirSync, readFileSync } from 'fs'
 import path from 'path'
 import { slug } from 'github-slugger'
-import { escape } from 'pliny/utils/htmlEscaper.js'
 import siteMetadata from '../data/siteMetadata.js'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
 import { allBlogs } from '../.contentlayer/generated/index.mjs'
@@ -15,44 +14,56 @@ const outputFolder = process.env.EXPORT ? 'out' : 'public'
 
 const getPostUrl = (config, post) => `${config.siteUrl}/${post.path || `blogs/${post.slug}`}`
 
-const generateRssItem = (config, post) => {
+export const escapeXml = (value) =>
+  String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;')
+
+export const generateRssItem = (config, post) => {
   const postUrl = getPostUrl(config, post)
   return `
   <item>
-    <guid>${postUrl}</guid>
-    <title>${escape(post.title)}</title>
-    <link>${postUrl}</link>
-    ${post.summary && `<description>${escape(post.summary)}</description>`}
+    <guid>${escapeXml(postUrl)}</guid>
+    <title>${escapeXml(post.title)}</title>
+    <link>${escapeXml(postUrl)}</link>
+    ${post.summary && `<description>${escapeXml(post.summary)}</description>`}
     <pubDate>${new Date(post.date).toUTCString()}</pubDate>
-    <author>${config.email} (${config.author})</author>
-    ${post.tags && post.tags.map((t) => `<category>${t}</category>`).join('')}
+    <author>${escapeXml(config.email)} (${escapeXml(config.author)})</author>
+    ${post.tags && post.tags.map((t) => `<category>${escapeXml(t)}</category>`).join('')}
   </item>
 `
 }
 
-const generateRss = (config, posts, page = 'feed.xml') => `
+export const generateRss = (config, posts, page = 'feed.xml') => {
+  const sortedPosts = sortPosts(posts)
+  const lastBuildDate = sortedPosts[0]
+    ? `<lastBuildDate>${new Date(sortedPosts[0].date).toUTCString()}</lastBuildDate>`
+    : ''
+
+  return `
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title>${escape(config.title)}</title>
-      <link>${config.siteUrl}/blogs</link>
-      <description>${escape(config.description)}</description>
-      <language>${config.language}</language>
-      <managingEditor>${config.email} (${config.author})</managingEditor>
-      <webMaster>${config.email} (${config.author})</webMaster>
-      <lastBuildDate>${new Date(posts[0].date).toUTCString()}</lastBuildDate>
-      <atom:link href="${config.siteUrl}/${page}" rel="self" type="application/rss+xml"/>
-      ${posts.map((post) => generateRssItem(config, post)).join('')}
+      <title>${escapeXml(config.title)}</title>
+      <link>${escapeXml(config.siteUrl)}/blogs</link>
+      <description>${escapeXml(config.description)}</description>
+      <language>${escapeXml(config.language)}</language>
+      <managingEditor>${escapeXml(config.email)} (${escapeXml(config.author)})</managingEditor>
+      <webMaster>${escapeXml(config.email)} (${escapeXml(config.author)})</webMaster>
+      ${lastBuildDate}
+      <atom:link href="${escapeXml(`${config.siteUrl}/${page}`)}" rel="self" type="application/rss+xml"/>
+      ${sortedPosts.map((post) => generateRssItem(config, post)).join('')}
     </channel>
   </rss>
 `
+}
 
-async function generateRSS(config, allBlogs, page = 'feed.xml') {
+export async function generateRSS(config, allBlogs, page = 'feed.xml') {
   const publishPosts = allBlogs.filter((post) => post.draft !== true)
-  // RSS for blog post
-  if (publishPosts.length > 0) {
-    const rss = generateRss(config, sortPosts(publishPosts))
-    writeFileSync(`./${outputFolder}/${page}`, rss)
-  }
+  const rss = generateRss(config, publishPosts)
+  writeFileSync(`./${outputFolder}/${page}`, rss)
 
   if (publishPosts.length > 0) {
     for (const tag of Object.keys(tagData)) {
@@ -61,7 +72,7 @@ async function generateRSS(config, allBlogs, page = 'feed.xml') {
       )
       if (filteredPosts.length === 0) continue
 
-      const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`)
+      const rss = generateRss(config, sortPosts(filteredPosts), `tags/${tag}/${page}`)
       const rssPath = path.join(outputFolder, 'tags', tag)
       mkdirSync(rssPath, { recursive: true })
       writeFileSync(path.join(rssPath, page), rss)
@@ -69,8 +80,8 @@ async function generateRSS(config, allBlogs, page = 'feed.xml') {
   }
 }
 
-const rss = () => {
-  generateRSS(siteMetadata, allBlogs)
+const rss = async () => {
+  await generateRSS(siteMetadata, allBlogs)
   console.log('RSS feed generated...')
 }
 export default rss

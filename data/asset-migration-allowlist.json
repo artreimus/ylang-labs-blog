@@ -1,0 +1,50 @@
+[
+  {
+    "assetId": "/static/images/projects/auto-diagram/demo.gif",
+    "sha256": "252b00ae01c3f44b8e10977bec1a2164b347e0b5e03f216ba62e45b171ef2fec",
+    "reason": "Temporary rollback fallback while the project demo is converted to WebM and MP4.",
+    "owner": "ylang-labs",
+    "expiresAt": "2026-08-12",
+    "removeAfter": "PR5"
+  },
+  {
+    "assetId": "/static/images/projects/davincis-notebook/demo.gif",
+    "sha256": "800e62564c428d88a1b64fc1e3411a377fdef2bdb052c36adcb5931caac93784",
+    "reason": "Temporary rollback fallback while the project demo is converted to WebM and MP4.",
+    "owner": "ylang-labs",
+    "expiresAt": "2026-08-12",
+    "removeAfter": "PR5"
+  },
+  {
+    "assetId": "/static/images/projects/deep-agent-studio/demo.gif",
+    "sha256": "5d1f34872fcfe504a5527b93aefd51ed16c1f350010b8c596c1720580e116e4b",
+    "reason": "Temporary rollback fallback while the project demo is converted to WebM and MP4.",
+    "owner": "ylang-labs",
+    "expiresAt": "2026-08-12",
+    "removeAfter": "PR5"
+  },
+  {
+    "assetId": "/static/images/projects/langgraph-react-agent-studio/demo.gif",
+    "sha256": "fe23ffae4e8008fe4b05e11b38d58d71a56d6c9d2884bcaaf7e2043746af82bf",
+    "reason": "Temporary rollback fallback while the project demo is converted to WebM and MP4.",
+    "owner": "ylang-labs",
+    "expiresAt": "2026-08-12",
+    "removeAfter": "PR5"
+  },
+  {
+    "assetId": "/static/images/projects/open-deep-research-ui/demo.gif",
+    "sha256": "f5942856c0bf404f34f6289923ee55409a6dcf993b728a613d7358117e06ccc3",
+    "reason": "Temporary rollback fallback while the project demo is converted to WebM and MP4.",
+    "owner": "ylang-labs",
+    "expiresAt": "2026-08-12",
+    "removeAfter": "PR5"
+  },
+  {
+    "assetId": "/static/images/projects/textura/demo.gif",
+    "sha256": "2e441f983fa749de7cd8a054549bde58fa4d092fa8c0ab0883b58943ef12dbea",
+    "reason": "Temporary rollback fallback while the project demo is converted to WebM and MP4.",
+    "owner": "ylang-labs",
+    "expiresAt": "2026-08-12",
+    "removeAfter": "PR5"
+  }
+]

@@ -4,7 +4,7 @@ import Link from '@/components/Link'
 import EmptyView from '@/components/EmptyView'
 import BlogCard from '@/components/BlogCard'
 import ProjectCard from '@/components/ProjectCard'
-import { motion, Variants } from 'motion/react'
+import { motion, useReducedMotion, Variants } from 'motion/react'
 import NextLink from 'next/link'
 
 const container: Variants = {
@@ -32,22 +32,24 @@ const item: Variants = {
 }
 
 export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <>
       {/* Hero Section */}
       <motion.div
         className="relative flex min-h-[70vh] flex-col items-center justify-center text-center"
         variants={container}
-        initial="hidden"
+        initial={shouldReduceMotion ? false : 'hidden'}
         animate="show"
       >
         <motion.div variants={item} className="max-w-4xl space-y-6 px-4">
-          <h1 className="font-serif text-5xl tracking-tighter text-secondary-500 dark:text-white sm:text-7xl md:text-8xl">
+          <h1 className="font-serif text-5xl tracking-tighter text-secondary-700 dark:text-white sm:text-7xl md:text-8xl">
             Discover the Best of <br className="hidden sm:block" />
-            <span className="text-primary-400">AI Engineering</span>
+            <span className="text-primary-700 dark:text-primary-300">AI Engineering</span>
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-secondary-500 dark:text-white sm:text-xl md:text-2xl">
+          <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-secondary-700 dark:text-gray-100 sm:text-xl md:text-2xl">
             A curated space to deepen your understanding of artificial intelligence. Simplicity in
             thought, precision in code.
           </p>
@@ -55,11 +57,12 @@ export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
           <div className="flex flex-col items-center justify-center gap-4 pt-8 sm:flex-row">
             <NextLink
               href="/blogs"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-primary-500 px-8 py-3 font-medium text-white transition-[background-color,transform] duration-300 hover:scale-105 hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2"
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-primary-500 px-8 py-3 font-medium text-gray-950 transition-[background-color,transform] duration-300 hover:scale-105 hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
             >
               <span className="mr-2">Start Reading</span>
               <svg
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                aria-hidden="true"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -75,11 +78,12 @@ export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
 
             <NextLink
               href="/projects"
-              className="group inline-flex items-center justify-center rounded-full border border-secondary-700 bg-secondary-600 px-8 py-3 font-medium text-white transition-transform duration-300 hover:scale-105 hover:bg-secondary-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:ring-offset-2"
+              className="group inline-flex items-center justify-center rounded-full border border-secondary-700 bg-secondary-600 px-8 py-3 font-medium text-white transition-[background-color,transform] duration-300 hover:scale-105 hover:bg-secondary-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-600 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
             >
               <span className="mr-2">View Projects</span>
               <svg
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                aria-hidden="true"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -99,10 +103,10 @@ export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
       {/* Latest Blogs */}
       <motion.div
         className="divide-y divide-gray-200 dark:divide-gray-700"
-        initial={{ opacity: 0, y: 80 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 80 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: 'easeOut' }}
       >
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
           <h2 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
@@ -135,7 +139,7 @@ export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
         <div className="mt-1 flex justify-end text-base font-medium leading-6">
           <Link
             href="/blogs"
-            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+            className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
             aria-label="All posts"
           >
             All Posts &rarr;
@@ -146,10 +150,14 @@ export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
       {/* Projects Section */}
       <motion.div
         className="divide-y divide-gray-200 dark:divide-gray-700"
-        initial={{ opacity: 0, y: 80 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 80 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+        transition={{
+          duration: shouldReduceMotion ? 0 : 0.8,
+          ease: 'easeOut',
+          delay: shouldReduceMotion ? 0 : 0.2,
+        }}
       >
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
           <h2 className="text-2xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl sm:leading-10 md:text-4xl md:leading-14">
@@ -182,7 +190,7 @@ export default function Home({ posts, projects, hasMorePosts, hasProjects }) {
         <div className="mt-1 flex justify-end text-base font-medium leading-6">
           <Link
             href="/projects"
-            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+            className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
             aria-label="All projects"
           >
             All Projects &rarr;

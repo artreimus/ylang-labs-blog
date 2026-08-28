@@ -1,10 +1,11 @@
 import { Authors, allAuthors } from 'contentlayer/generated'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
+import { MDXLayoutRenderer } from 'pliny/mdx-components.js'
 import AuthorLayout from '@/layouts/AuthorLayout'
-import { coreContent } from 'pliny/utils/contentlayer'
+import { coreContent } from 'pliny/utils/contentlayer.js'
 import { genPageMetadata } from 'app/seo'
 import { notFound } from 'next/navigation'
 import TEAM_MEMBERS from '@/data/teamMembers'
+import { resolveAuthorContentAssets } from '@/lib/assets/content.server'
 
 interface Props {
   params: Promise<{
@@ -48,7 +49,7 @@ export default async function Page({ params }: Props) {
     notFound()
   }
 
-  const mainContent = coreContent(author)
+  const mainContent = coreContent(resolveAuthorContentAssets(author))
 
   return (
     <AuthorLayout content={mainContent}>

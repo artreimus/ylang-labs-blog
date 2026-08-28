@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Play, RotateCcw, ArrowRight, Clock, ShieldCheck, Activity } from 'lucide-react'
+import { useReducedMotion } from 'motion/react'
 
 const Step: React.FC<{ label: string; color: string; delay?: number; active?: boolean }> = ({
   label,
@@ -11,7 +12,7 @@ const Step: React.FC<{ label: string; color: string; delay?: number; active?: bo
 }) => {
   return (
     <div
-      className={`relative transform rounded-xl border-2 px-4 py-2 transition-all duration-700 ${active ? 'translate-x-0 scale-100 opacity-100' : '-translate-x-4 scale-95 opacity-0'} ${color}`}
+      className={`relative transform rounded-xl border-2 px-4 py-2 transition-[opacity,transform] duration-700 motion-reduce:transform-none motion-reduce:transition-none ${active ? 'translate-x-0 scale-100 opacity-100' : '-translate-x-4 scale-95 opacity-0'} ${color}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       <span className="text-xs font-bold uppercase tracking-wide">{label}</span>
@@ -20,6 +21,7 @@ const Step: React.FC<{ label: string; color: string; delay?: number; active?: bo
 }
 
 const ProcessFlow = () => {
+  const shouldReduceMotion = useReducedMotion()
   const [isRunning, setIsRunning] = useState(false)
   const [step, setStep] = useState(0)
 
@@ -44,17 +46,22 @@ const ProcessFlow = () => {
   }
 
   const start = () => {
-    setStep(1)
-    setIsRunning(true)
+    if (shouldReduceMotion) {
+      setStep(8)
+      setIsRunning(false)
+    } else {
+      setStep(1)
+      setIsRunning(true)
+    }
   }
 
   return (
-    <div className="not-prose mx-auto w-full max-w-6xl p-4 duration-700 animate-in fade-in slide-in-from-bottom-4 md:p-8">
+    <div className="not-prose mx-auto w-full max-w-6xl p-4 duration-700 animate-in fade-in slide-in-from-bottom-4 motion-reduce:animate-none md:p-8">
       <div className="mb-12 text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           Latency Optimization Strategies
         </h2>
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
           Comparing synchronous 'Hot Path' execution with asynchronous background processing.
         </p>
 
@@ -62,13 +69,13 @@ const ProcessFlow = () => {
           <button
             onClick={start}
             disabled={isRunning && step < 8}
-            className="flex items-center gap-2 rounded-full bg-primary-500 px-6 py-2 font-bold text-white shadow-lg shadow-primary-900/20 transition-all hover:bg-primary-600 disabled:opacity-50"
+            className="flex min-h-11 items-center gap-2 rounded-full bg-primary-500 px-6 py-2 font-bold text-gray-950 shadow-lg shadow-primary-900/20 transition-colors duration-200 hover:bg-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-gray-950"
           >
             <Play size={18} /> Run Simulation
           </button>
           <button
             onClick={reset}
-            className="flex items-center gap-2 rounded-full bg-secondary-500 px-6 py-2 font-bold text-white transition-all hover:bg-secondary-600"
+            className="flex min-h-11 items-center gap-2 rounded-full bg-secondary-600 px-6 py-2 font-bold text-white transition-colors duration-200 hover:bg-secondary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-600 focus-visible:ring-offset-2 motion-reduce:transition-none dark:focus-visible:ring-secondary-400 dark:focus-visible:ring-offset-gray-950"
           >
             <RotateCcw size={18} /> Reset
           </button>
@@ -119,7 +126,7 @@ const ProcessFlow = () => {
                 </span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
-                <div className="h-full w-[90%] bg-primary-500 transition-all duration-1000"></div>
+                <div className="h-full w-[90%] bg-primary-500 transition-[width] duration-1000 motion-reduce:transition-none"></div>
               </div>
               <p className="mt-2 text-[10px] text-gray-500">
                 Wait time = Processing + Storage latency
@@ -173,7 +180,7 @@ const ProcessFlow = () => {
               </span>
               <div className="mt-20 flex w-full flex-col items-center">
                 <div
-                  className={`mb-4 flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-[10px] text-gray-500 transition-all duration-700 dark:bg-gray-700 dark:text-gray-400 ${step >= 6 ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}
+                  className={`mb-4 flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-[10px] text-gray-600 transition-[opacity,transform] duration-700 motion-reduce:transform-none motion-reduce:transition-none dark:bg-gray-700 dark:text-gray-300 ${step >= 6 ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}
                 >
                   <Clock size={12} /> 30 minutes later...
                 </div>
@@ -203,7 +210,7 @@ const ProcessFlow = () => {
               </span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
-              <div className="h-full w-[20%] bg-secondary-500 transition-all duration-1000"></div>
+              <div className="h-full w-[20%] bg-secondary-500 transition-[width] duration-1000 motion-reduce:transition-none"></div>
             </div>
             <p className="mt-2 text-[10px] text-gray-500">Wait time = Processing latency only</p>
           </div>

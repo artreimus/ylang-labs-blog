@@ -80,8 +80,8 @@ const ThemeSwitch = ({ mobile = false }: { mobile?: boolean }) => {
             aria-label="Theme switcher"
             className={
               mobile
-                ? 'flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gray-50 dark:bg-white/5'
-                : ''
+                ? 'flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2 dark:bg-white/5 dark:focus-visible:ring-primary-300 dark:focus-visible:ring-offset-gray-950'
+                : 'flex h-10 w-10 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-300 dark:focus-visible:ring-offset-gray-950'
             }
           >
             {mounted ? resolvedTheme === 'dark' ? <Moon /> : <Sun /> : <Blank />}
@@ -92,10 +92,10 @@ const ThemeSwitch = ({ mobile = false }: { mobile?: boolean }) => {
         </div>
         <Transition
           as={Fragment}
-          enter="transition ease-out duration-100"
+          enter="transition ease-out duration-100 motion-reduce:transition-none"
           enterFrom="transform opacity-0 scale-95"
           enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
+          leave="transition ease-in duration-75 motion-reduce:transition-none"
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
@@ -110,9 +110,9 @@ const ThemeSwitch = ({ mobile = false }: { mobile?: boolean }) => {
                       aria-current={theme === value ? 'true' : undefined}
                       className={`${
                         active || theme === value
-                          ? 'bg-primary-600 text-white'
+                          ? 'bg-primary-500 text-gray-950'
                           : 'text-gray-900 dark:text-gray-100'
-                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-700 dark:focus-visible:ring-primary-300`}
                     >
                       <span className="mr-2">
                         <Icon />

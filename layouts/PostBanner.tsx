@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import Image from '@/components/Image'
-import Bleed from 'pliny/ui/Bleed'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import Bleed from 'pliny/ui/Bleed.js'
+import { CoreContent } from 'pliny/utils/contentlayer.js'
 import type { Blog, Authors } from 'contentlayer/generated'
 import Comments from '@/components/Comments'
 import Link from '@/components/Link'
@@ -15,6 +15,7 @@ import PostNavigation from '@/components/PostNavigation'
 import Author from '@/components/Author'
 import Callout from '@/components/Callout'
 import MarkdownContent from '@/components/MarkdownContent'
+import { getBlogImage } from '@/lib/content/blog-images'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -25,10 +26,9 @@ interface LayoutProps {
 }
 
 export default function PostBanner({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { slug, title, images, tags, date, path, filePath, summary, tldr } = content
+  const { slug, title, tags, date, path, filePath, summary, tldr } = content
   const basePath = path.split('/')[0]
-  const displayImage =
-    images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
+  const displayImage = getBlogImage(content, 'article-banner')
 
   return (
     <SectionContainer>
@@ -36,20 +36,22 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
       <article>
         <div>
           <div className="space-y-1 text-center dark:border-gray-700">
-            <div className="w-full">
-              <Bleed>
-                <div className="relative aspect-[2/1] w-full">
-                  <Image
-                    src={displayImage}
-                    alt={title}
-                    fill
-                    sizes="100vw"
-                    preload
-                    className="object-cover"
-                  />
-                </div>
-              </Bleed>
-            </div>
+            {displayImage && (
+              <div className="w-full">
+                <Bleed>
+                  <div className="relative aspect-[2/1] w-full">
+                    <Image
+                      src={displayImage}
+                      alt={title}
+                      fill
+                      sizes="100vw"
+                      preload
+                      className="object-cover"
+                    />
+                  </div>
+                </Bleed>
+              </div>
+            )}
             <div className="relative pt-10">
               <PageTitle>{title}</PageTitle>
               <dl className="mt-4 space-y-10">
@@ -109,7 +111,7 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
                         <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                           Previous Article
                         </h2>
-                        <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <div className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200">
                           <Link href={`/${prev.path}`}>{prev.title}</Link>
                         </div>
                       </div>
@@ -119,7 +121,7 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
                         <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                           Next Article
                         </h2>
-                        <div className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <div className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200">
                           <Link href={`/${next.path}`}>{next.title}</Link>
                         </div>
                       </div>
@@ -130,7 +132,7 @@ export default function PostBanner({ content, authorDetails, next, prev, childre
               <div className="pt-4">
                 <Link
                   href={`/${basePath}`}
-                  className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                  className="text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
                   aria-label="Back to the blog"
                 >
                   &larr; Back to the blog

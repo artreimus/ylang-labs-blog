@@ -1,0 +1,65 @@
+[
+  {
+    "assetId": "/static/images/blogs/bad-tool-design-token-tax/source-artwork.png",
+    "sha256": "76cf7ffd259f67c86c2abe330efe854d6ec94cfef8c706cbf55e603eb438ddb7",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-engineering-production-claude-agents/source-image.png",
+    "sha256": "2a1555d860bdbb116a0d1a299c6587cc98cdede06da7fa759d6aa43865890268",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/context-graphs-ai-trillion-dollar-opportunity/source-artwork.png",
+    "sha256": "f410c1ed30c454383db62dacbbeca2db779abdaa811fb7df4939f66eae0a12d1",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/gemma-4-open-models-edge-agent-workflows/source-artwork.png",
+    "sha256": "2820e7ce265317bb2e52a1f80a32418ebf0dfe127161fe9563f595d35832d067",
+    "reason": "The published Gemma article still references this legacy source image; keep it local until the article-specific replacement lands separately.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/source-artwork.png",
+    "sha256": "53b1d8c0cc837bc3527c8edaabac2147f2227e5396db3dafa84d81c2c97bfbb3",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/how-to-build-an-ai-native-software-factory/source-card-robot-factory.png",
+    "sha256": "578294982824d1358607144893fff703e4155a47d9e0c7d8caef81ab03bacc31",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/openclaw-on-aws/source-artwork.png",
+    "sha256": "97f501dd0e326f189112b58c45907cb62e91fae101a4e28c3dad159328848cb6",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/the-unreasonable-effectiveness-of-html-for-agent-output/source-image.png",
+    "sha256": "6ac79e7dad8f2f556450fd931aaa48282a7932f2bf651020ba358559c6def464",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  },
+  {
+    "assetId": "/static/images/blogs/xllm-cluster-architecture-ai-inference/source-artwork.png",
+    "sha256": "5d4ed6071d2c5b341c21d0746a88b1803aae9e1d4734c41132a427d2bf701544",
+    "reason": "This reusable master remains in public only until the private Vercel Blob source migration is completed.",
+    "owner": "Ylang Labs",
+    "expiresAt": "2026-08-12"
+  }
+]
