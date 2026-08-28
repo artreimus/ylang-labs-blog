@@ -1,0 +1,188 @@
+---
+title: 'How to Create Agent Loops for Software Engineering'
+date: '2026-06-17'
+tags: ['AI/ML', 'Agents', 'Context Engineering']
+draft: false
+summary: 'A practical guide to turning a repeated software-engineering workflow into an agent loop: pick a bounded task, write the loop contract, attach project context, add state, run read-only, and grant one narrow write action.'
+tldr: |
+  - Start with a repeated engineering workflow, not a bigger prompt.
+  - A useful loop needs a trigger, context, action, checker, state, and escalation rule.
+  - Write the loop contract before the prompt: what it may read, what it may change, how it checks work, and when it stops.
+  - Run the loop read-only first, then grant one narrow write action once the reports are consistently useful.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/software-engineering-agent-loops/cardImage.png'
+images: ['/static/images/blogs/software-engineering-agent-loops/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+Boris Cherny and Peter Steinberger are pointing at a shift that is easy to misread. The useful lesson is not "write a better prompt." It is "turn the repeated software-engineering workflow into a loop the agent can run."
+
+That is a different design problem. A prompt asks for one result. A loop finds the next unit of work, gathers context, asks an agent to act, checks the result, records state, and decides whether to stop or continue.
+
+If you want to create your own loops, start with that control system. Optimization comes later.
+
+## Start with a workflow you already repeat
+
+The best first loop is work you already do by hand.
+
+Look for the small recurring tasks around your engineering process: checking failed PR builds, summarizing reviewer comments, finding stale issues, classifying dependency updates, collecting customer feedback into bugs, or opening a maintenance branch for a narrow lint failure.
+
+These are good candidates because the shape is already known. You know what starts the work, which files or tools matter, which checks should run, and where the result should be reported.
+
+Avoid broad feature work for your first loop. "Build the billing dashboard" is not a starter loop. "When a PR has a formatting failure, run the formatter in an isolated worktree and leave the diff for review" is.
+
+## A software-engineering loop has six moving parts
+
+Strip away the product names. A practical loop needs six parts.
+
+<MermaidDiagram>
+  {`
+    flowchart LR
+      Trigger["Trigger"] --> Context["Context"]
+      Context --> Action["Agent action"]
+      Action --> Checker{"Checker"}
+      Checker -->|passes| State["State"]
+      Checker -->|fails| Escalate["Escalation"]
+      State --> Trigger
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  The loop is the control system around the agent: trigger, context, action, checker, state, and
+  escalation.
+</DiagramSubtitle>
+
+The trigger starts the run. It might be a schedule, a webhook, a failed CI job, a new PR comment, or a manually started task.
+
+The context tells the agent what matters. For software engineering, this usually means the issue, the diff, project instructions, relevant docs, test commands, and any previous state from earlier runs.
+
+The action is the work the agent is allowed to do. Keep this narrow at first: inspect, summarize, classify, draft, run a command, or edit a bounded set of files.
+
+The checker rejects bad work. It can be deterministic tests, lint, type checks, a browser smoke test, a second agent, or a human reviewer.
+
+State is the memory outside the chat. It records what was inspected, what changed, which checks ran, and what should happen next.
+
+Escalation is the stop rule. It tells the loop when to ask a human instead of trying again.
+
+## Write the loop contract before the prompt
+
+Most failed loops are vague prompts with a schedule attached. Write the contract first.
+
+```text
+Loop name: PR CI triage
+
+Trigger:
+- Run every weekday morning, or when a PR check fails.
+
+Context:
+- Read open PRs assigned to me.
+- Read the latest failing CI job.
+- Read AGENTS.md and the package-specific test instructions.
+
+Allowed actions:
+- Report only in the first version.
+- After approval, create a worktree for one narrow fix.
+- Edit only files already touched by the PR unless the failure clearly points elsewhere.
+
+Checker:
+- The report names the failing job, likely package, reproduction command, and risk.
+- For write mode, the previously failing check passes locally.
+- The diff is limited to the failure being fixed.
+
+State:
+- Append a short note to refs/loop-state/pr-ci-triage.md:
+  PR, failure, classification, attempted commands, result, next action.
+
+Escalation:
+- Stop if the fix changes product behavior, touches auth, changes data shape, or fails twice.
+- Report what was tried instead of continuing.
+```
+
+That contract is more important than the exact wording of the prompt. It gives the loop boundaries a reviewer can understand.
+
+## Put project context where the loop can reuse it
+
+A loop should not rediscover your project on every run.
+
+Put durable instructions in files the agent will read every time: `AGENTS.md`, `SKILL.md`, `VISION.md`, package runbooks, test notes, fixture docs, and small state logs. The names matter less than the fact that they live outside the chat.
+
+This is one reason the "loop engineering" idea is showing up now. Modern agent tools have converged on the same pieces: project instructions, skills, tool connectors, isolated workspaces, scheduled runs, and a way to persist state. OpenClaw's agent-loop documentation describes the same broad lifecycle: resolve workspace context, build the prompt, run the model, execute tools, stream events, persist results, and expose hook points.
+
+You do not need a complex platform to start. A markdown state file and a repo instruction file are enough for a useful first loop.
+
+## Run read-only first
+
+The first version of a loop should usually not edit files. Let it produce a report for a few runs.
+
+```text
+Inspect open PRs with failed checks. For each one, identify the first failing job,
+the likely owner package, the smallest command that reproduces it, and whether the
+failure looks flaky, environment-related, or caused by the PR. Do not edit files.
+Write the report to refs/loop-state/ci-report.md.
+```
+
+Read-only mode tells you whether the loop can choose good work, gather the right context, and explain its reasoning. If the reports are noisy, narrow the trigger or improve the context before giving it write access.
+
+<MermaidDiagram>
+  {`
+    flowchart TD
+      Manual["Manual repeated workflow"] --> Contract["Write loop contract"]
+      Contract --> ReadOnly["Run read-only reports"]
+      ReadOnly --> Useful{"Reports useful?"}
+      Useful -->|no| Narrow["Narrow trigger or context"]
+      Narrow --> ReadOnly
+      Useful -->|yes| OneWrite["Grant one write action"]
+      OneWrite --> Check{"Checker passes?"}
+      Check -->|yes| Review["Leave diff for review"]
+      Check -->|no| Stop["Stop and escalate"]
+  `}
+</MermaidDiagram>
+
+<DiagramSubtitle>
+  Create loops by promotion: manual workflow, explicit contract, read-only reports, then one narrow
+  write action.
+</DiagramSubtitle>
+
+## Grant one write action at a time
+
+Once the reports are useful, give the loop one narrow action. Not "fix CI." Something closer to:
+
+```text
+If the failing check is a formatting failure and the formatter changes only files
+already touched by the PR, apply the formatter in a worktree, rerun the same check,
+and leave the diff for human review.
+```
+
+That is a real loop because it can act, check, persist state, and stop. It is still bounded enough that a reviewer can trust the process.
+
+Add more authority only when the previous authority is boring. Boring is the goal. A good loop should make the same small decision the same way every time.
+
+## Three loops worth building first
+
+Start with loops that sit around your existing engineering workflow.
+
+A PR comment triage loop can watch open pull requests, group unresolved review comments, identify which ones are still actionable, and draft a patch plan. The first version should only report. The write version can fix one low-risk comment in a worktree and leave the diff.
+
+A CI failure loop can classify failed checks by package, command, and likely cause. The write version can handle formatting, snapshot, or dependency-lock fixes where the verifier is deterministic.
+
+A maintenance intake loop can read recent issues, commits, and customer feedback, then propose small tasks with a clear verifier. It should not edit files. Its job is to find loop-shaped work.
+
+These loops are not glamorous. That is why they are useful. They sit close to tests, diffs, issues, and review, so they can be checked.
+
+## The loop is the engineering interface
+
+Cherny's "my job is to write loops" line and Steinberger's "designing loops" framing are not a reason to abdicate engineering judgment. They are a hint about where that judgment moves.
+
+You decide what work is safe to repeat. You define the context. You set the checker. You choose the stop rule. You decide when a read-only report has earned one write action.
+
+The agent is still doing the task. The loop is how you make the task repeatable enough to trust.
+
+## References
+
+1. Addy Osmani, ["Loop Engineering"](https://addyosmani.com/blog/loop-engineering/), June 7, 2026.
+2. WorkOS, ["Boris Cherny: Claude Code & the Future of Engineering"](https://www.youtube.com/watch?v=RkQQ7WEor7w), June 2, 2026.
+3. WorkOS, ["Key takeaways from Boris Cherny on building Claude Code"](https://workos.com/blog/boris-cherny-claude-code-acquired-interview-takeaways), June 2, 2026.
+4. OpenClaw, ["VISION.md"](https://github.com/openclaw/openclaw/blob/main/VISION.md).
+5. OpenClaw Docs, ["Agent loop"](https://docs.openclaw.ai/concepts/agent-loop).
+6. Blake Crosley, ["Loop Engineering: Loops Win Where Verification Is Cheap"](https://blakecrosley.com/blog/loops-win-where-verification-is-cheap), June 9, 2026.
