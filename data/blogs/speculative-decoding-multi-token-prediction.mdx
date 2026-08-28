@@ -1,0 +1,99 @@
+---
+title: 'Speculative Decoding Is a Protocol. MTP Can Be Its Draft Engine.'
+date: '2026-07-18'
+tags: ['AI/ML', 'Generative AI']
+draft: false
+summary: 'Speculative decoding only pays when cheap proposals survive verification. Learn where multi-token prediction fits and how to measure whether the combination improves production inference.'
+tldr: |
+  - Speculative decoding is an inference protocol: propose several tokens, verify them with the target model, then commit only an accepted prefix.
+  - Multi-token prediction is a training and architecture technique that can supply a native proposer, but it does not replace target-model verification.
+  - Exact speculative sampling preserves the target distribution, not necessarily the same random token sequence from one run.
+  - Measure committed tokens per verifier call, end-to-end step cost, tail inter-token latency, and SLO-bounded goodput before enabling speculation in production.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/speculative-decoding-multi-token-prediction/cardImage.png'
+images: ['/static/images/blogs/speculative-decoding-multi-token-prediction/blogHeader.png']
+imageTheme: 'black'
+layout: 'PostBanner'
+---
+
+Speculative decoding and multi-token prediction are often discussed as if they were two names for the same speedup. They are not.
+
+Speculative decoding is the inference-time protocol. A proposer drafts several tokens, the target model verifies them in parallel, and the decoder commits only what the target allows. Multi-token prediction, or MTP, changes training or model architecture so one checkpoint can learn to predict several future tokens. Those retained prediction modules can become the proposer, but the verifier and the production workload decide whether the system gets faster.
+
+## Speculation changes the decoding loop, not the target model
+
+Standard autoregressive decoding runs the target model once per generated token. Speculation tries to amortize that expensive call:
+
+1. A cheaper proposer drafts a short continuation.
+2. The target model scores the proposed positions in one verification pass.
+3. The decoder accepts a valid prefix and handles the first rejection with the protocol's correction rule.
+4. Generation resumes from the last committed token.
+
+The target model remains the authority. A fast but inaccurate proposer creates more rejected work. A highly accurate proposer that costs almost as much as the verifier can also lose. The useful quantity is not draft speed alone. It is how many tokens the system commits for the total cost of proposing and verifying them.
+
+<Image
+  alt="Conceptual speculative decoding flow showing candidate tokens verified as a block, three accepted tokens, a rejected fourth proposal, and a corrected target token committed in its place"
+  src="/static/images/blogs/speculative-decoding-multi-token-prediction/speculative-decoding-protocol.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  A proposer drafts ahead. The target accepts a prefix, rejects the next proposal, and supplies the
+  correction token before decoding continues. Conceptual illustration; not benchmark data.
+</DiagramSubtitle>
+
+The exactness claim needs care. With the appropriate rejection-sampling correction, speculative sampling preserves the target model's output distribution within numerical limits. It does not promise the same random token sequence as a non-speculative run with the same nominal seed. The two algorithms can consume random values differently, and batching or floating-point effects can introduce more variation.
+
+The reported speedups are substantial but scoped. Leviathan and colleagues report 2x to 3x acceleration on T5-XXL under their setup while preserving the target distribution. Chen and colleagues report 2x to 2.5x on distributed Chinchilla 70B using modified rejection sampling. Neither result is a universal multiplier for another model, server, or traffic pattern.
+
+## MTP can move the proposer inside the checkpoint
+
+At each context position, the standard next-token objective supervises the immediately following token. Gloeckle and colleagues instead attach `n` independent future-token heads to a shared trunk and train each head on a different offset. This gives the model native signals for drafting multiple future positions.
+
+That is one MTP topology, not the definition of all of them. DeepSeek-V3 uses an MTP objective with retained MTP modules, while newer runtime integrations can use other recursive or model-specific heads. The common production requirement is explicit: the checkpoint must retain compatible proposal modules, and the serving runtime must know how to execute them and feed their drafts into verification. MTP training alone does not make ordinary token-by-token inference faster.
+
+<Image
+  alt="Conceptual target-model diagram with native multi-token prediction machinery proposing several tokens for the verifier before one output stream"
+  src="/static/images/blogs/speculative-decoding-multi-token-prediction/mtp-draft-engine.png"
+  width={1536}
+  height={1024}
+  className="mx-auto rounded-md bg-white"
+/>
+
+<DiagramSubtitle>
+  Native MTP can provide draft tokens from within a target checkpoint, but the verifier still
+  decides what is committed. Exact topology varies by model family. Conceptual illustration; not
+  benchmark data.
+</DiagramSubtitle>
+
+MTP can also affect model quality. The 13B models in Gloeckle et al. solve 12% more HumanEval problems and 17% more MBPP problems than comparable next-token baselines. In a separate greedy self-speculative test on 7B models, their four-head setup reports 3.0x speedup on code and roughly 2.7x on Wikipedia and books. The same paper finds non-uniform results on natural-language evaluations, so MTP is not universally better training.
+
+DeepSeek-V3 makes the runtime connection concrete. Its technical report uses MTP as a training objective, and the official repository says the MTP module can support speculative decoding. That is capability, not an automatic serving result.
+
+## The verifier and traffic shape decide the production result
+
+Current vLLM documentation positions speculation for medium-to-low QPS, memory-bound workloads and says gains depend on the model family, traffic, hardware, and sampling settings. It identifies MTP as a strong starting point when the target model has native support.
+
+A speedup is not guaranteed.
+
+Benchmark the full loop, not a proposer in isolation. For each verifier call, record proposed tokens, accepted draft tokens, and total committed tokens. Measure proposal time, verification time, rejection handling, cache and memory overhead, and scheduler effects together.
+
+Then sweep concurrency using a representative mix of prompt lengths, output lengths, temperatures, and structured-output constraints. Compare baseline decoding against each speculation depth using p95 and p99 inter-token latency plus SLO-bounded goodput. A configuration that improves a single-stream demo but completes fewer SLO-compliant tokens under load is a regression.
+
+## Where the speedup disappears
+
+Poor acceptance wastes proposal work. Longer drafts can raise the number of tokens verified per call while increasing the chance that later tokens are discarded. High concurrency can keep the target accelerator busy enough that extra proposal and verification work reduces throughput. Memory pressure, unsupported sampling paths, and runtime incompatibilities can remove the option entirely.
+
+The practical decision is simple: treat speculative decoding as a protocol, MTP as one possible draft engine, and the verifier as the final authority. Keep the combination only when it improves tail latency or goodput across the concurrency range your service must actually handle.
+
+## References
+
+1. Leviathan, Kalman, and Matias, ["Fast Inference from Transformers via Speculative Decoding"](https://arxiv.org/abs/2211.17192), 2022.
+2. Chen et al., ["Accelerating Large Language Model Decoding with Speculative Sampling"](https://arxiv.org/abs/2302.01318), 2023.
+3. Gloeckle et al., ["Better & Faster Large Language Models via Multi-token Prediction"](https://arxiv.org/abs/2404.19737), 2024.
+4. DeepSeek-AI et al., ["DeepSeek-V3 Technical Report"](https://arxiv.org/abs/2412.19437), 2024.
+5. DeepSeek-AI, [DeepSeek-V3 repository](https://github.com/deepseek-ai/DeepSeek-V3).
+6. vLLM, ["Speculative Decoding"](https://docs.vllm.ai/en/stable/features/speculative_decoding/).
+7. vLLM Project, ["MTP (Multi-Token Prediction)"](https://docs.vllm.ai/projects/speculators/en/latest/user_guide/algorithms/mtp/).
