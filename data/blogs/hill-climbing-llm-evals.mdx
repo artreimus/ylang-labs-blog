@@ -1,13 +1,13 @@
 ---
-title: 'Hill Climbing for LLM Agents, One Change at a Time'
+title: 'Build Better, Cheaper LLM Agents with Hill Climbing'
 date: '2026-11-08'
 tags: ['AI/ML', 'Agents']
 draft: false
-summary: 'Use a late refund to build an eval, tune an LLM agent against fresh tickets, and find cheaper settings that preserve accuracy.'
+summary: 'Use hill climbing to turn failed traces into measured gains in agent quality and cost. Reuse the same eval when the next model arrives.'
 tldr: |
-  - Use traces to find redundant instructions and missed cache hits before you tune.
-  - Turn real tasks into a repeatable eval that scores decisions and outcomes.
-  - Change one thing per round, compare on the same cases, and check the winner on fresh tickets.
+  - Turn failed traces into small, testable edits. Each accepted edit becomes the starting point for the next round.
+  - Tune decision quality and cost per ticket on the same eval, then check the winner on fresh cases.
+  - Keep the eval and best configuration so the next model upgrade starts from a measured baseline.
 authors: ['arthur-reimus']
 cardImage: '/static/images/blogs/hill-climbing-llm-evals/cardImage.png'
 images: ['/static/images/blogs/hill-climbing-llm-evals/blogHeader.png']
@@ -15,9 +15,11 @@ imageTheme: 'white'
 layout: 'PostBanner'
 ---
 
-In our support demo, a customer asks for a refund 42 days after buying. The policy sends requests after day 30 to manual review. The baseline router approves it anyway. A fix has to catch that ticket and still approve refunds on day 30.
+Hill climbing can improve agent quality and cut costs in the same tuning run. In Anthropic’s support benchmark, decision accuracy rose from **78.6% to 90.5%** on 14 held-out tickets at about **one fifth of the baseline token cost**. [Support benchmark](https://claude.com/resources/articles/reducing-cost-and-improving-performance-with-claude-platform#effort)
 
-Hill climbing turns that bug into a loop. The support agent handles tickets. An editor reads its failures and proposes a change to the prompt, tools, or model settings. An eval runner scores the candidate against the current best. Keep a change when it improves the result within the limits you set.
+An eval makes that kind of tuning repeatable. An editor reads a failed trace and proposes one change. Run the candidate and the current best on the same cases. The next round starts from the version that scored best within your limits. That gives teams a way to improve the prompts, tools, and settings around an LLM between model releases.
+
+In our support demo, a customer asks for a refund 42 days after buying. The policy sends requests after day 30 to manual review. The baseline router approves it anyway. A fix has to catch that ticket and still approve refunds on day 30.
 
 Use our Python demo to compare two versions of the router. To run the full loop with your own agent, load the skill folders in your client or give a coding agent their `SKILL.md` files. [Agent Optimization Skills and runnable demo](https://github.com/Ylang-Labs/agent-optimization-skills)
 
@@ -105,7 +107,7 @@ Give `hill-climb` the eval command and a narrow brief.
 
 > Edit the support prompt to improve decision accuracy. Keep the refund policy intact. Stop after five rounds.
 
-Let the editor inspect training traces and propose one change per round. Compare each candidate with the current best using the same cases, repeats, and grader. Give the editor aggregate validation scores and keep the validation traces separate. A change that sends every refund to review may fix the day 42 failure, but it fails the tickets inside the policy window.
+Let the editor inspect training traces and propose one change per round. Compare each candidate with the current best using the same cases, repeats, and grader. Give the editor aggregate validation scores and keep the validation traces separate. When a candidate wins, build the next edit on top of it. A change that sends every refund to review may fix the day 42 failure, but it fails the tickets inside the policy window.
 
 <figure>
   <Image
@@ -168,13 +170,13 @@ Once the agent routes tickets reliably, switch the objective to cost per ticket.
 | 3    | Sonnet 5, low effort                                   |                      88.9% |                    1¢ |
 | 4    | Sonnet 5, low effort, revised routing and refund rules |                      98.9% |              About 1¢ |
 
-Step 2 bundles three changes. The last two steps compare prompts on the same model and effort. On 14 held-out tickets, Anthropic reported **90.5% decision accuracy**, up from **78.6%**, at about **one fifth of the baseline token cost**. [Baseline in the eval playbook](https://claude.dev/blog/automating-eval-design-and-hillclimbing/#examples) · [Opus 5 cost path](https://claude.com/resources/articles/reducing-cost-and-improving-performance-with-claude-platform#effort)
+Step 2 bundles three changes. Steps 3 and 4 hold the model and effort fixed. A prompt revision gained 10 percentage points on the training cases while token cost stayed around 1¢ per ticket. The result at the top of the post comes from the separate set of 14 tickets held out from tuning. [Baseline in the eval playbook](https://claude.dev/blog/automating-eval-design-and-hillclimbing/#examples) · [Opus 5 cost path](https://claude.com/resources/articles/reducing-cost-and-improving-performance-with-claude-platform#effort)
 
 ## Make longer runs recoverable
 
 After each round, record the candidate, model settings, eval version, score, and keep or reject decision. Save the best revision and remaining budget outside the runner’s scratch space. If a run stops midway, you can resume from the last completed round and know which comparison still needs to run.
 
-Once the refund review works, put its steps and checks in `refund-review/SKILL.md`. When the next model upgrade changes how the agent follows the prompt, you have a procedure and an eval you can run again.
+Keep the eval and the best measured configuration together. Save the refund review steps in `refund-review/SKILL.md`. When a new model arrives, run it and the current best on the same versioned eval. You can see whether the upgrade earns its cost and start the next climb from whichever setup performs best.
 
 ## References
 
