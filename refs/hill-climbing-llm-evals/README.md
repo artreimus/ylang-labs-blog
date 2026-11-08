@@ -1,0 +1,28 @@
+# Hill climbing for LLM agents
+
+Sources reviewed on November 8, 2026.
+
+- Lance Martin, _Your Old Prompts Are Making Claude Worse_, AI Engineer. The talk supplied the sequence and reference frames for the five figures. The article uses Ylang Labs’ own support demo to explain the workflow. The Q&A discusses editing skills and saving repeat procedures. [Full talk](https://www.youtube.com/watch?v=ys6YQ2yfBpM) · [Q&A at 27:34](https://www.youtube.com/watch?v=ys6YQ2yfBpM&t=1654s)
+- Lance Martin, _Automating eval design and hillclimbing with Claude_, September 28, 2026. It documents the 30 search tickets and 14 held-out tickets, the separate holdout comparison, and the task and grader repairs in the Claude API skill example. [Developer playbook](https://claude.dev/blog/automating-eval-design-and-hillclimbing/#examples)
+- Lance Martin, _Reducing cost and improving performance with Claude Platform_, September 8, 2026, later updated. It documents the prompt audit example, exact prefix caching, and the same Opus 5 step as the video’s cost climb. The developer playbook describes an Opus 5.5 probe and gives the baseline point. Both articles report the holdout cost at about one fifth of baseline. [Platform cost experiment](https://claude.com/resources/articles/reducing-cost-and-improving-performance-with-claude-platform#effort)
+- Anthropic and OpenAI’s prompt caching docs describe eligible prefixes, cache availability, and billing for reads and writes. The article’s 72% example assumes 8,000 reused tokens, 2,000 new tokens, and a read rate of one tenth of the regular input price. The comparison is against fully uncached input billed at the regular rate. [Claude Platform Docs](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) · [OpenAI API Docs](https://developers.openai.com/api/docs/guides/prompt-caching)
+- Anthropic’s `claude-api` eval guidance. The hill-climb guide describes the split, baseline repetitions, and optional untouched confirmation set. The cost guide describes the quality band, cost margin, and mechanism checks. [Eval audit](https://github.com/anthropics/skills/blob/main/skills/claude-api/shared/evals/eval-audit.md) · [Hill-climb guide](https://github.com/anthropics/skills/blob/main/skills/claude-api/shared/evals/eval-hillclimb.md) · [Cost guide](https://github.com/anthropics/skills/blob/main/skills/claude-api/shared/evals/cost-hillclimb.md) · [Build eval](https://github.com/anthropics/skills/blob/main/skills/claude-api/shared/evals/build-eval.md)
+- Ylang Labs’ Agent Optimization Skills repo contains the original workflow instructions and the deterministic support demo. The baseline routes a day-42 refund incorrectly. The candidate adds a 30-day cutoff and moves from three to four correct decisions on both validation and test. [Example and runner](https://github.com/Ylang-Labs/agent-optimization-skills/tree/main/examples/support-routing) · [Agent Skills specification](https://agentskills.io/specification)
+- Lance Martin and CJ Avilla, _Building effective agent automations_, October 8, 2026. It documents the scheduled GitHub and Slack brief and how session history is kept outside its sandbox. [Scheduled agent tutorial](https://claude.dev/blog/building-effective-agent-automations/)
+
+## Image references
+
+The two diagrams on prompt auditing and caching are original illustrations made with built-in ImageGen. Both use the post’s hill climb loop diagram as a visual style reference. The five redraws below use frames from the talk. The plots are schematics, with measured values in the article text and table.
+
+| Original illustration    | What it shows                                                                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt-audit-trace.png` | In the illustrative refund trace, a second prompt instruction triggers a duplicate order lookup. The edited prompt makes one lookup.                                            |
+| `prompt-cache-cost.png`  | A cache hit lowers the input charge for the reusable prefix when reads are discounted. Both requests have the same prompt length and the same charge for the fresh ticket data. |
+
+| Generated figure             | Video frame                                                  | What the redraw preserves                                                    |
+| ---------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `climbable-eval.png`         | [09:50](https://www.youtube.com/watch?v=ys6YQ2yfBpM&t=590s)  | Three ordered curves, short error bars, and headroom below the ceiling       |
+| `benchmark-shortcuts.png`    | [12:38](https://www.youtube.com/watch?v=ys6YQ2yfBpM&t=758s)  | Two sources of overfitting and a distinct dashed arrow for leakage           |
+| `hill-climb-loop.png`        | [27:35](https://www.youtube.com/watch?v=ys6YQ2yfBpM&t=1655s) | Both scores reach the decision, and training traces alone reach the analyzer |
+| `skill-climb-trajectory.png` | [15:58](https://www.youtube.com/watch?v=ys6YQ2yfBpM&t=958s)  | Three phases and a late round of grader repairs                              |
+| `cost-quality-path.png`      | [17:47](https://www.youtube.com/watch?v=ys6YQ2yfBpM&t=1067s) | Four numbered training-split points and their relative directions            |

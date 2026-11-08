@@ -1,0 +1,187 @@
+---
+title: 'Hill Climbing for LLM Agents, One Change at a Time'
+date: '2026-11-08'
+tags: ['AI/ML', 'Agents']
+draft: false
+summary: 'Use a late refund to build an eval, tune an LLM agent against fresh tickets, and find cheaper settings that preserve accuracy.'
+tldr: |
+  - Use traces to find redundant instructions and missed cache hits before you tune.
+  - Turn real tasks into a repeatable eval that scores decisions and outcomes.
+  - Change one thing per round, compare on the same cases, and check the winner on fresh tickets.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/hill-climbing-llm-evals/cardImage.png'
+images: ['/static/images/blogs/hill-climbing-llm-evals/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+In our support demo, a customer asks for a refund 42 days after buying. The policy sends requests after day 30 to manual review. The baseline router approves it anyway. A fix has to catch that ticket and still approve refunds on day 30.
+
+Hill climbing turns that bug into a loop. The support agent handles tickets. An editor reads its failures and proposes a change to the prompt, tools, or model settings. An eval runner scores the candidate against the current best. Keep a change when it improves the result within the limits you set.
+
+Use our Python demo to compare two versions of the router. To run the full loop with your own agent, load the skill folders in your client or give a coding agent their `SKILL.md` files. [Agent Optimization Skills and runnable demo](https://github.com/Ylang-Labs/agent-optimization-skills)
+
+## Trace a repeated call back to the prompt
+
+Imagine the LLM version calls `lookup_order` twice for the same refund. Give `prompt-audit` the trace, tool description, and support prompt. Compare the arguments and results of both calls. If both fetch the same order state and the prompt says to check it twice, you have a specific edit to try.
+
+<figure>
+  <Image
+    alt="Before the edit, Check order and Check again each lead to an order lookup. After the edit, Check order leads to one lookup."
+    src="/static/images/blogs/hill-climbing-llm-evals/prompt-audit-trace.png"
+    width={1672}
+    height={941}
+    sizes="(max-width: 768px) 100vw, 1024px"
+    className="mx-auto rounded-md"
+  />
+  <figcaption>
+    An illustrative trace. Removing the repeated instruction can save a tool call on each affected
+    ticket.
+  </figcaption>
+</figure>
+
+Remove the repeated check and replay the ticket with the same model and tools. Look for one call to fetch the order and the same eligibility decision. Try a day 30 refund too. The call count tells you whether the edit saves work. The decision tells you whether it preserved policy.
+
+## Check the prompt cache on repeated turns
+
+A prompt prefix is the sequence of tokens at the start of a request. An eligible first request can cache the work of processing that prefix. Later requests can reuse it if the prefix still matches and the cache entry is available. Put stable tool definitions and refund policy first. Append ticket data and timestamps, and set a breakpoint after the stable prefix if your API requires one.
+
+<figure>
+  <Image
+    alt="An uncached request and a cache hit have equal prompt lengths. On a hit, the policy and tools cost less while the ticket data costs the same."
+    src="/static/images/blogs/hill-climbing-llm-evals/prompt-cache-cost.png"
+    width={1672}
+    height={941}
+    sizes="(max-width: 768px) 100vw, 1024px"
+    className="mx-auto rounded-md"
+  />
+  <figcaption>
+    Schematic input charges on a provider that discounts cache reads. The prompt stays the same
+    length. The new ticket still bills at the regular input rate.
+  </figcaption>
+</figure>
+
+For example, suppose 8,000 tokens are reusable policy and tools and 2,000 are new ticket data. At one tenth of the regular price for cache reads, a hit costs the equivalent of 800 regular tokens for the prefix plus 2,000 for the ticket. Compared with processing all 10,000 tokens at the regular rate, that’s **72% less input cost on the hit**. Give `cost-optimize` the request code and usage logs. Compare billed cost per ticket across the same workload, including cache writes and misses.
+
+## Build an eval with room to improve
+
+Give `build-eval` approved support traces and the refund policy. Include refunds on days 29, 30, and 31, plus login and billing tickets to catch routing regressions. Give each case an ID, the ticket input, and an expected action. Replay order lookups and use a simulated refund tool that records the decision. The grader compares that record with its answer key, which stays outside the agent’s inputs.
+
+Run the current agent several times with the same settings to see how much its score varies. Probe with a stronger model or higher effort to see whether the eval can register better decisions. If nearly every case passes, add harder cases that still resemble real tickets. If a case looks correct but fails, inspect its expected action and grader before changing the prompt.
+
+<figure>
+  <Image
+    alt="Three model tiers improve with more tokens. Error bars are short, and all scores stay below the ceiling."
+    src="/static/images/blogs/hill-climbing-llm-evals/climbable-eval.png"
+    width={1672}
+    height={941}
+    sizes="(max-width: 768px) 100vw, 1024px"
+    className="mx-auto rounded-md"
+  />
+  <figcaption>
+    Illustrative scores at different token budgets. A useful eval leaves room to improve.
+  </figcaption>
+</figure>
+
+## Hill climb on training failures
+
+If every late refund in training is 42 days old, the editor can hardcode that age and miss the cutoff. Vary the dates and wording, and keep versions of the same ticket together when splitting cases.
+
+<figure>
+  <Image
+    alt="OCR-heavy cases and repeated phrasing encourage shortcuts. A dashed arrow shows leakage from a public answer key."
+    src="/static/images/blogs/hill-climbing-llm-evals/benchmark-shortcuts.png"
+    width={1672}
+    height={941}
+    sizes="(max-width: 768px) 100vw, 1024px"
+    className="mx-auto rounded-md"
+  />
+  <figcaption>
+    Repeated patterns reward shortcuts. The dashed path shows what happens when the answers leak.
+  </figcaption>
+</figure>
+
+Give `hill-climb` the eval command and a narrow brief.
+
+> Edit the support prompt to improve decision accuracy. Keep the refund policy intact. Stop after five rounds.
+
+Let the editor inspect training traces and propose one change per round. Compare each candidate with the current best using the same cases, repeats, and grader. Give the editor aggregate validation scores and keep the validation traces separate. A change that sends every refund to review may fix the day 42 failure, but it fails the tickets inside the policy window.
+
+<figure>
+  <Image
+    alt="The app runs the candidate on both splits. Both scores inform the decision. Training failure traces feed an analyzer that proposes one patch."
+    src="/static/images/blogs/hill-climbing-llm-evals/hill-climb-loop.png"
+    width={1672}
+    height={941}
+    sizes="(max-width: 768px) 100vw, 1024px"
+    className="mx-auto rounded-md"
+  />
+  <figcaption>Training failures guide edits. Validation scores guide selection.</figcaption>
+</figure>
+
+Adding the cutoff rule takes the deterministic demo from three to four correct decisions on both validation and test, with four tickets per split. In a live agent eval, keep validation gains that clear normal run variation. Set aside an untouched test set before tuning and use it at the end to compare the original baseline with the winner. With too few cases to split, treat gains as exploratory.
+
+## Use the same loop to improve a skill
+
+If your agent loads refund guidance from a skill, you can tune that file with the same ticket eval. Give `hill-climb` the runner and limit edits to the skill’s `SKILL.md`. Hold the model and tools fixed so the comparison tells you what the skill change did.
+
+If scores stall, read a few failures before expanding the instructions. In Anthropic’s `claude-api` skill eval, one task asked for one error type and the grader required at least three. A prompt edit could have taught the agent to satisfy the grader at the expense of the task. After a grader repair, rescore saved outputs from both versions. If the task changes, rerun both versions on the revised inputs. [API skill experiment](https://claude.dev/blog/automating-eval-design-and-hillclimbing/#examples)
+
+<figure>
+  <Image
+    alt="The skill benchmark’s pass rate rises across three phases, with small reversals before a final phase that includes grader repairs."
+    src="/static/images/blogs/hill-climbing-llm-evals/skill-climb-trajectory.png"
+    width={1672}
+    height={941}
+    sizes="(max-width: 768px) 100vw, 1024px"
+    className="mx-auto rounded-md"
+  />
+  <figcaption>
+    Anthropic reported a climb from 66.1% to 87.9% by round 24. The final score includes task and
+    grader repairs alongside skill edits.
+  </figcaption>
+</figure>
+
+## Cut token cost while protecting accuracy
+
+Once the agent routes tickets reliably, switch the objective to cost per ticket. Set a floor at baseline accuracy and require late refunds to reach review. A cheap model that handles login tickets well can still fail that policy check. Test model, effort, and prompt changes one at a time on the same eval. Count all model requests for the ticket, including retries and cache charges.
+
+<figure>
+  <Image
+    alt="Four training checkpoints: accuracy rises as cost falls, then dips before recovering at the lowest cost."
+    src="/static/images/blogs/hill-climbing-llm-evals/cost-quality-path.png"
+    width={1672}
+    height={941}
+    sizes="(max-width: 768px) 100vw, 1024px"
+    className="mx-auto rounded-md"
+  />
+  <figcaption>
+    Four training checkpoints on the Opus 5 path from Anthropic’s support benchmark. Left is
+    cheaper. Up is more accurate.
+  </figcaption>
+</figure>
+
+| Step | Configuration                                          | Training decision accuracy | Token cost per ticket |
+| ---- | ------------------------------------------------------ | -------------------------: | --------------------: |
+| 1    | Opus 4.8, high effort                                  |                      74.4% |                  4.6¢ |
+| 2    | Opus 5, low effort, audited prompt                     |                      98.9% |                  2.6¢ |
+| 3    | Sonnet 5, low effort                                   |                      88.9% |                    1¢ |
+| 4    | Sonnet 5, low effort, revised routing and refund rules |                      98.9% |              About 1¢ |
+
+Step 2 bundles three changes. The last two steps compare prompts on the same model and effort. On 14 held-out tickets, Anthropic reported **90.5% decision accuracy**, up from **78.6%**, at about **one fifth of the baseline token cost**. [Baseline in the eval playbook](https://claude.dev/blog/automating-eval-design-and-hillclimbing/#examples) · [Opus 5 cost path](https://claude.com/resources/articles/reducing-cost-and-improving-performance-with-claude-platform#effort)
+
+## Make longer runs recoverable
+
+After each round, record the candidate, model settings, eval version, score, and keep or reject decision. Save the best revision and remaining budget outside the runner’s scratch space. If a run stops midway, you can resume from the last completed round and know which comparison still needs to run.
+
+Once the refund review works, put its steps and checks in `refund-review/SKILL.md`. When the next model upgrade changes how the agent follows the prompt, you have a procedure and an eval you can run again.
+
+## References
+
+1. Lance Martin, [“Your Old Prompts Are Making Claude Worse”](https://www.youtube.com/watch?v=ys6YQ2yfBpM), AI Engineer. Reference for the five diagrams from eval design through the cost experiment.
+2. Anthropic, [“Automating eval design and hillclimbing with Claude”](https://claude.dev/blog/automating-eval-design-and-hillclimbing/#examples).
+3. Anthropic, [“Reducing cost and improving performance with Claude Platform”](https://claude.com/resources/articles/reducing-cost-and-improving-performance-with-claude-platform#effort).
+4. Anthropic, [“Prompt caching”](https://platform.claude.com/docs/en/build-with-claude/prompt-caching), Claude Platform Docs.
+5. OpenAI, [“Prompt caching”](https://developers.openai.com/api/docs/guides/prompt-caching), API Docs.
+6. Anthropic, [“Claude API eval skill guides”](https://github.com/anthropics/skills/tree/main/skills/claude-api/shared/evals).
+7. Ylang Labs, [Agent Optimization Skills](https://github.com/Ylang-Labs/agent-optimization-skills), with the support routing demo.
