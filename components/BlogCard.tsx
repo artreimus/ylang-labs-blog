@@ -5,7 +5,7 @@ import React from 'react'
 
 export default function BlogCard({ post, variant = 'default' }) {
   const { slug, title, tags, cardImage, summary, readingTime, images } = post
-  const displayImage = (Array.isArray(images) && images.length > 0 && images[0]) || cardImage
+  const headerImage = Array.isArray(images) ? images[0] : undefined
 
   if (variant === 'grid') {
     return (
@@ -14,7 +14,7 @@ export default function BlogCard({ post, variant = 'default' }) {
           {/* Image Container */}
           <div className="relative aspect-[16/10] overflow-hidden">
             <Image
-              src={displayImage}
+              src={headerImage || cardImage}
               alt={title}
               fill
               sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
@@ -62,7 +62,7 @@ export default function BlogCard({ post, variant = 'default' }) {
       <article className="relative h-full w-full overflow-hidden rounded-lg bg-gray-900">
         {/* Image */}
         <Image
-          src={displayImage}
+          src={cardImage || headerImage}
           alt={title}
           fill
           sizes="240px"
