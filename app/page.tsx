@@ -19,6 +19,7 @@ export default function Page() {
       projects={projects}
       hasMorePosts={sortedPosts.length > MAX_DISPLAY}
       hasProjects={sortedProjects.length > 0}
+      basePath={process.env.BASE_PATH || ''}
     />
   )
 }

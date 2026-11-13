@@ -3,7 +3,13 @@ const prettierPlugin = require('eslint-plugin-prettier')
 
 module.exports = [
   {
-    ignores: ['node_modules/**', '.next/**', '.contentlayer/**', 'next-env.d.ts'],
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      '.contentlayer/**',
+      'next-env.d.ts',
+      'public/ascii/ylang-garden/vendor/**',
+    ],
   },
   ...nextConfig,
   {
