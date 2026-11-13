@@ -1,2 +1,5 @@
 # Next.js regenerates this file with framework-owned formatting.
 next-env.d.ts
+
+# Preserve pinned third-party source verbatim.
+public/ascii/ylang-garden/vendor/
