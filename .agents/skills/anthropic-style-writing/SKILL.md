@@ -1,222 +1,102 @@
 ---
 name: anthropic-style-writing
-description: "Write, revise, or critique Ylang Labs blog posts in an Anthropic-like voice: calm, precise, evidence-led, research-lab prose with clear claims, plain-language technical explanation, concrete examples, caveats, limitations, safety or values framing, and practical next steps. Use when asked to write in Anthropic's style, make a draft more Anthropic-like, create an Anthropic-style prompt/template, or turn AI engineering, product, research, or policy notes into a measured blog post."
+description: 'Write, revise, or critique Ylang Labs AI research and technical explainers with calm, connected, evidence-led prose. Pair with blog-writing-guide for progressive explanations, beginner accessibility, original writing, purposeful diagrams, and precise limits. Use for technical explainers by default, explicit Anthropic-style requests, or drafts that feel fragmented, jargon-heavy, or hard to follow.'
 ---
 
-# Anthropic-Style Writing
+# Anthropic-Style Technical Writing
 
-Use this skill as a writing-style layer for Ylang Labs blog work. Pair it with `.agents/skills/blog-mdx-authoring/SKILL.md` when creating MDX files, and with `.agents/skills/blog-publishing-workflow/SKILL.md` when the user wants the full post, images, social copy, validation, and PR flow.
+Use this companion to `blog-writing-guide` for AI research and technical explainers. The primary guide owns the shared editorial standard; this skill develops the explanatory approach. Use `blog-mdx-authoring` for file and component contracts and `blog-publishing-workflow` for packaging or publication.
 
-Do not claim the post is written by Anthropic or affiliated with Anthropic. Use the observed style as inspiration: calm, clear, evidence-led, and transparent about limits. Do not copy Anthropic passages except for short attributed quotes when the user explicitly needs quotation.
+Aim for a thoughtful technical author explaining a mechanism to an intelligent generalist. Keep the prose original. Do not copy Anthropic passages, impersonate its authors, imply affiliation, or claim work that Ylang Labs did not perform.
 
-## Core Voice
+## Establish The Central Question
 
-Write like a thoughtful research lead explaining something important to an intelligent generalist.
+Open with the question, mechanism, or tension the reader needs to understand. Define the scope and explain its consequence in a few connected paragraphs. An evergreen explanation does not need a trend paragraph or a claim about why everything changed recently.
 
-- Sound confident, but cautious.
-- Be technical, but not academic.
-- Be mission-driven, but grounded in concrete mechanisms.
-- Use plain sentences for important claims.
-- Prefer evidence, examples, and limitations over hype.
-- Connect technical choices to helpfulness, trust, safety, reliability, user value, or operational clarity when the connection is real.
+For example, a guide to model training can organize itself around how different objectives change behavior. It does not need an unrelated pricing problem, fictional customer, or dramatic opening anecdote to provide a story.
 
-Avoid:
+Read a user-supplied editorial reference before adapting its approach. Distinguish its explanatory choices from its subject-specific claims: a clear architecture article can guide the structure of a training explainer without supplying evidence about training methods.
 
-- Hype without evidence.
-- Clever marketing language.
-- Buzzword stacking.
-- Dense academic phrasing.
-- Unsupported certainty.
-- Long adjective chains.
-- Vague claims like "revolutionary", "unprecedented", "game-changing", or "seamless" unless quoting someone else.
+## Choose A Structure That Matches The Evidence
 
-## Structure Patterns
+### Conceptual Or Process Explainer
 
-Choose one pattern based on the post type.
+Start with the core loop or mechanism. Then introduce its components and advanced variants in the order that makes their dependencies understandable. Show what each stage receives, what it changes, and what the next stage can use. Explain the limits and end with a concrete way to apply or evaluate the idea.
 
-### Research Or Technical Explainer
+Use a small number of main sections with information-bearing headings. Add subsections when they answer distinct questions. The process supplies the narrative; a particular chapter count, a recurring fictional project, or a heading for every definition is unnecessary.
 
-Use this for interpretability, agents, evaluations, RAG, ML infrastructure, or technical lessons.
+### Original Research Or Engineering Results
 
-1. Open with the big question, mystery, or tension.
-2. Explain why it matters now.
-3. Define the key concept in simple language.
-4. Show the approach or method in enough detail that the reader understands what was actually done.
-5. Present 3 to 5 findings with evidence, examples, or concrete observations.
-6. Explain what the findings suggest.
-7. State what the work does not prove.
-8. End with implications and next steps.
+Describe the problem, what was actually done, the observations, the interpretation, and the limits of the evidence. Name the baseline and conditions when comparing results. Use findings sections and first-person research claims only when the author has that work to report.
 
-Useful section headings:
+A synthesis of published papers should name the researchers and explain their methods and results. It should not become an invented "our approach" or "what we found" story.
 
-- `The problem`
-- `Our approach`
-- `What we found`
-- `What this means`
-- `Limitations`
-- `What comes next`
+### Announcement Or Policy Explanation
 
-### Product Or Model Announcement
+State the change or position, explain the mechanism or decision behind it, give the relevant evidence, and describe its practical consequences and limits. Include availability, next steps, or a meaningful tradeoff when relevant. Do not force a research-paper template onto an announcement.
 
-Use this for releases, tools, demos, or project announcements.
+## Explain One Dependency At A Time
 
-1. Open with a clear positioning claim.
-2. Explain the broader shift or user need.
-3. Describe what is new.
-4. Provide evidence: benchmarks, examples, customer/user scenarios, demos, or internal evaluation results.
-5. Discuss safety, reliability, failure modes, or constraints.
-6. Explain how to use it: availability, setup, docs, pricing, API names, migration notes, or repo links.
-7. Recommend who should adopt it and why.
+Move from the reader's question to a plain-language explanation, introduce the technical term, then show how it works and why it matters. Treat this as a teaching sequence, not a rigid paragraph template.
 
-Strong claims require a proof surface. If there are no benchmarks or examples, weaken the claim.
+- Introduce the whole system before listing its internal parts.
+- Explain a term's role before relying on it. An acronym expansion alone may still leave the concept unexplained.
+- Define vocabulary before it appears in takeaways, figures, or captions as well as in body text.
+- Use a short example of the actual operation when an abstraction needs grounding: one update, one sequence, one comparison, or one handoff.
+- Keep prerequisite explanations in the main text. Use optional panels for depth a reader can safely skip.
+- State the missing connection when moving to an advanced method. Explain what problem it addresses that the earlier method leaves open.
 
-### Policy Or Values Post
+Avoid teaching several new terms inside a qualification. If a precise caveat introduces a second technical lesson, explain it separately or narrow the claim so the extra lesson is unnecessary.
 
-Use this for company principles, product boundaries, trust, safety, or platform decisions.
+For a training guide, for example, distinguishing gradient calculation from the optimizer's update is necessary. A derivation of every optimization variant may be optional. Preserve the mechanism while choosing the level of detail deliberately.
 
-1. Open with a clear moral or product stance.
-2. Acknowledge why a reasonable person might choose differently.
-3. State the principle behind the decision.
-4. Show a concrete example of the tradeoff.
-5. Explain the policy or decision.
-6. End with what will still be supported or explored.
+## Write Connected Paragraphs
 
-## Complexity Sequence
+Use paragraphs of roughly 2–5 sentences. Start with a clear topic sentence, develop the idea, and connect it to the next handoff. Use familiar verbs and concrete objects.
 
-When explaining a hard idea, sequence the reader through it.
+A contrast can stay in the same paragraph when it completes the thought. Avoid automatic breaks at "but" or "however," long runs of single-sentence paragraphs, and dramatic fragments. Use lists for real parallel choices or sequences, not as a substitute for the explanation.
 
-1. Start with a human question.
-2. Give the plain-language explanation.
-3. Introduce the technical term.
-4. Give a concrete example.
-5. Explain the method or mechanism.
-6. State what changed or what was observed.
-7. State what it means.
-8. State what it does not prove.
+Prefer direct statements for established facts. Qualify interpretations where the evidence requires it; do not weaken every sentence with "might" or "we believe." Use "we observed" only for an observation the author can substantiate.
 
-Use transition phrases sparingly:
+Use headings to reveal the argument. A title such as **How large language models are trained** can be more useful than an unsupported contrarian claim. Precise explanation does not require a provocative headline, a metric in the opening, or a promotional closing.
 
-- `At a high level,`
-- `Put another way,`
-- `In practice,`
-- `Consider a concrete example.`
-- `This suggests`
-- `One limitation is`
-- `We still do not know`
+## Keep Examples And Sources In Their Proper Roles
 
-## Sentence And Paragraph Style
+Use original, self-contained prose and examples. A brief illustration should make the mechanism easier to understand. Reuse it only while it continues to teach something; remove a running scenario when the reader has to learn a second domain just to follow the main one.
 
-- Use medium-length paragraphs, usually 2 to 5 sentences.
-- Start sections with simple topic sentences.
-- Use questions as transitions when they genuinely frame the next idea.
-- Put concrete examples after abstractions.
-- Prefer careful verbs: `suggests`, `indicates`, `we found`, `we observed`, `we believe`, `might`, `could`, `we expect`.
-- Reserve stronger verbs for benchmark-backed or directly demonstrated claims.
-- Use bullets for findings, caveats, availability details, or reader actions.
+Do not borrow a source video's analogy or reproduce its chapter order as the article's default structure. A user-requested case study can use the source's real example, with attribution and enough explanation to stand alone.
 
-## Evidence Rules
+For standalone explainers, place source and inspiration links in the final `## References` section by default. Keep named attribution near claims when it matters and preserve the detailed source-to-claim map in `refs/<slug>/README.md`. Follow explicit inline-citation or bibliography requirements when applicable. Credit an editorial reference as editorial inspiration, not technical evidence for an unrelated topic.
 
-For each major claim, include at least one of:
+Separate original illustrations, measured results, source-reported findings, and interpretations. Never turn a toy example into evidence of production performance or describe an unexecuted demonstration as tested code.
 
-- A concrete example.
-- A benchmark or measurement.
-- A system behavior observed in testing.
-- A user or customer scenario.
-- A code path, architecture detail, or implementation mechanism.
-- A citation to a primary source.
+## Integrate Diagrams With The Narrative
 
-If evidence is weak, say so directly. Prefer "This suggests..." over "This proves..." unless the evidence actually proves the point.
+Plan each figure around one question that the prose has made understandable. Introduce its terms first, then place the image beside the mechanism it explains. The article should still make sense through its prose, caption, and alt text.
 
-## Caveat Rules
+Use captions to decode relationships and explain important omissions or schematic scale. Keep exact results and their conditions in text or repo-native charts. A conceptual generated image does not establish a measurement or prove correctness.
 
-Every substantial post should include a real limitations section or caveat paragraph.
+Check the image at its actual desktop and mobile display widths. Reduce oversized figures that interrupt a short aside, simplify unreadable labels, and provide a full-resolution view when useful. Check the complete reading column for excessive margins as well as overflow. Native image inspection alone does not establish rendered readability.
 
-Good caveats name the boundary:
+Follow the image-generation and independent image-review skills for producing and checking assets. Reuse an approved diagram only after checking its fit with the revised explanation and caption.
 
-- What the method does not measure.
-- What the example does not generalize to.
-- What could be an artifact of the setup.
-- What failure modes remain.
-- What depends on future validation.
-- What tradeoffs the team is accepting.
+## Calibrate Claims And Limits
 
-Do not add decorative humility. The caveat should change how the reader interprets the claim.
+Explain what the method optimizes or measures and why that differs from the outcome the reader ultimately cares about. An objective can encourage better behavior without guaranteeing it on every example or preserving every other skill.
 
-## Rewrite Pattern
+Put a meaningful limit close to the claim it qualifies. Name what was checked, what remains unknown, or what additional evidence is needed. A separate limitations section is useful when it has a distinct job; it is not a mandatory container for scattered caveats.
 
-When making a draft more Anthropic-like:
+Do not claim universal or "100%" accuracy. Verify material claims with primary sources, check arithmetic and scope, and report any unresolved factual question. Refer to `blog-factuality-review` for the evidence audit.
 
-1. Replace broad claims with specific problems.
-2. Replace hype with mechanisms.
-3. Move from abstraction to example.
-4. Add evidence before impact claims.
-5. Add a limitation after the strongest claim.
-6. End with what readers can do, use, test, or watch next.
+## Revise For Comprehension
 
-Less Anthropic-like:
+When a draft is hard to follow, check the causal outline before polishing sentences or generating more images. Find the first undefined concept, unexplained transition, or unnecessary detour. Repair that point and read onward from it.
 
-```text
-Our revolutionary agent framework unlocks unprecedented productivity through autonomous reasoning and real-time orchestration.
-```
+A simulated beginner review should explain the central mechanism in its own words, trace what moves between stages, distinguish easily confused concepts, state what the evidence cannot prove, and identify a useful next action. It should use only the draft to test comprehension, with source checking performed separately.
 
-More Anthropic-like:
+Review the revised text, not an earlier approved snapshot. Distinguish source-based factuality, simulated reader comprehension, image accuracy, and browser validation. Do not describe an agent's teach-back as a test with actual human readers.
 
-```text
-AI agents are beginning to do useful work across software, research, and operations. But building reliable agents remains difficult: they need to plan over long tasks, use tools safely, and recover when their assumptions are wrong. In this post, we explain how our agent framework approaches these problems, what it does well today, and where it still falls short.
-```
+## References And Local Quality Example
 
-## Draft Template
-
-Use this when the user asks for a new Anthropic-style blog draft.
-
-```markdown
-# [Clear title about the core idea]
-
-[Start with the central question, claim, or tension.]
-
-[Explain why this matters now.]
-
-[Define the key concept in simple terms.]
-
-## The problem
-
-[Describe the real problem. Use one concrete example.]
-
-## Our approach
-
-[Explain what was built, studied, tested, or observed. Use plain language before technical terms.]
-
-## What we found
-
-[Finding 1: explain simply, then give evidence.]
-
-[Finding 2: explain simply, then give evidence.]
-
-[Finding 3: explain simply, then give evidence.]
-
-## What this means
-
-[Explain the implication without overclaiming.]
-
-## Limitations
-
-[State what this does not prove, where the work is incomplete, or what could go wrong.]
-
-## What comes next
-
-[Explain next steps, availability, future research, or how readers can use it.]
-```
-
-## Quality Checklist
-
-Before finalizing, check that:
-
-- The opening starts with a question, claim, or tension rather than generic context.
-- The reader knows why the topic matters by the end of the first two paragraphs.
-- Technical terms are introduced after plain-language explanations.
-- Concrete examples appear before or immediately after abstract claims.
-- Strong claims have evidence.
-- The post includes real caveats or limitations.
-- The ending gives implications, availability, next steps, or a practical recommendation.
-- The voice stays calm, precise, and transparent.
-- The draft still fits Ylang Labs' practical AI engineering audience.
+- [Building always-on agents](https://claude.com/resources/articles/building-always-on-agents), William Hu / Anthropic: editorial reference for explaining a core cycle before its primitives, connecting paragraphs, and placing diagrams beside mechanisms. Use the teaching approach without copying prose or importing its agent-specific claims.
+- `data/blogs/how-to-train-llms.mdx`: the approved local example of progressive explanation, brief mechanism-level examples, precise limits, and integrated figures. Its length, section count, and topic-specific sequence are not a universal template.

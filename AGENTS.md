@@ -23,7 +23,7 @@ This repo is the Ylang Labs content platform: a Next.js App Router site backed b
   - `blue-terminal-ascii-image-generator` when asked for blue terminal, ASCII-like, dot-matrix, CRT, monospace glyph, or command-line poster generated images.
   - `technical-blog-image-review` when asked to independently review generated technical blog images for factuality, technical accuracy, readability, crop safety, or design quality.
   - `blog-social-copy` when asked for social copy tied to a post or project.
-  - `anthropic-style-writing` when asked to write, revise, or critique Ylang Labs content in an Anthropic-like voice.
+  - `anthropic-style-writing` alongside `blog-writing-guide` for AI research and technical explainers, or when explicitly asked for an Anthropic-like voice. Use its connected, evidence-led explanation style without copying prose or implying affiliation.
 - Repo-owned skills live under `.agents/skills/<name>/SKILL.md`. Use clear kebab-case names in the form `<domain>-<job>[-<artifact-or-mode>]`, avoid abbreviations such as `gen`, and keep the directory name aligned with the `name:` frontmatter.
 - Do not rename lockfile-managed imported skills unless intentionally forking them. When renaming a skill, update its directory, `name:` frontmatter, cross-skill references, and this skill list in the same change.
 - Research before planning. Inspect the current files, schemas, layouts, and local docs before writing a plan or changing code.
@@ -134,21 +134,26 @@ Blog asset standards:
 Blog writing standards:
 
 - The publication focuses on AI engineering, agents, LLM systems, RAG, evaluation, ML infrastructure, and practical implementation lessons.
-- The default blog writing standard is The Pragmatic Engineer by Gergely Orosz. Use it as the editorial reference for inside-view engineering writing: practical, source-backed, numbers-forward, specific about how teams and systems work, and useful to engineers and engineering leaders. Do not imitate Gergely Orosz's exact prose, recurring phrasing, or author persona.
-- Default to a Pragmatic Engineer-inspired voice: direct, concrete, technically sharp, and written by someone who has shipped the work and understands the failure modes. Prefer useful judgment, named systems, operational tradeoffs, and industry context over banter, hype, or detached research prose.
-- Be ambitious in the blog body and packaging. Titles, summaries, TLDR bullets, openings, and social posts should sell the strongest defensible thesis, tension, payoff, or shift in the article instead of merely naming the topic.
+- Use `blog-writing-guide` as the primary editorial standard. For AI research and technical explainers, pair it with `anthropic-style-writing`: calm, connected, precise prose that introduces concepts progressively and remains understandable to an intelligent beginner.
+- Retain The Pragmatic Engineer's practical specificity for engineering stories: named systems, operational constraints, evidence, and tradeoffs. Use first-person experience only when supported by the author's actual work. Editorial references guide the approach; do not copy prose, impersonate an author, or invent experiments.
+- In process explainers, build the explanation around one central question and the system's causal sequence. Introduce the core loop before its advanced variants, and explain what each stage receives, changes, and passes to the next. A process can supply the story; a fictional running project is optional.
+- Prefer connected paragraphs of roughly 2–5 sentences, a small number of main sections, and subsections with distinct jobs. Avoid automatic paragraph breaks at every contrast, one-sentence fragments, numbered micro-chapters, or optional panels that contain prerequisites for understanding the main text.
+- Define terms and acronyms before relying on them, including in takeaways, figures, and captions. Prefer a brief example of the mechanism itself, such as a parameter update, over an unrelated domain analogy. Do not add a recurring scenario solely to make the article seem original.
+- Keep the article self-contained and original. For standalone explainers, default to a final `## References` section for source and inspiration links, retain named attribution where a claim needs it, and keep a source-to-claim map in `refs/<slug>/README.md`. Follow explicit inline-citation or bibliography requirements when applicable.
+- Place each diagram beside the mechanism it explains, after introducing its vocabulary. Give it one teaching job, a concise caption, useful alt text, and readable desktop/mobile sizing. Conceptual generated art should not carry exact benchmark evidence. See `blog-writing-guide` for the full writing and visual rubric.
+- Make titles, summaries, TLDR bullets, and openings convey the central question or strongest defensible payoff. Direct explanatory titles are appropriate for technical guides; use a bolder claim or contrast when the article establishes it.
 - Ambition must remain evidence-backed. Every bold title, hook, or claim needs support from a mechanism, example, number, tradeoff, caveat, source, or implementation detail in the article.
 - Default blog posts to 5 minutes or less unless the user explicitly asks for or approves a longer post. If a topic needs more depth, narrow the scope, split follow-up posts, or confirm the longer format before drafting past the default.
 - Prefer concrete technical explanations, architecture diagrams, examples, and citations over generic marketing prose.
 - Use post-type structures rather than one universal article template:
   - Engineering deep dive: problem, mechanism, architecture, tradeoffs, failure modes, practical application, references.
   - Migration/build story: outcome metrics, old system, constraints, migration design, validation, results, what changed in hindsight.
-  - AI research/explainer: definition, why now, how it works, evaluation, limitations, practical guidance, references.
+  - AI research/explainer: central question, core mechanism, components and advanced variants, evidence or evaluation, limitations, practical guidance, references. Add timely context when it matters.
   - Opinion/strategy essay: claim, tension, principle, examples, implications, closing stance.
 - Use information-bearing headings. Avoid generic placeholders such as `Introduction`, `Background`, `Section 1`, and `Conclusion` unless the topic makes that wording genuinely useful.
 - Do not add a manual "Key Takeaways" section to the article body when using `PostBanner`; the layout already renders `tldr` or `summary` as "Key Takeaways".
 - For formal references, add entries to `data/references-data.bib`, set `bibliography: references-data.bib`, and cite with `[@citationKey]`.
-- Manual `## References` sections are acceptable for simpler posts.
+- A final manual `## References` section is the default for standalone explainers; use formal citations when requested or otherwise needed.
 - Keep `summary` concise for listing/search/SEO. Use `tldr` for multi-bullet takeaways in `PostBanner`.
 
 ## Project Standards
@@ -266,7 +271,7 @@ For content-only changes:
 - Confirm frontmatter matches `contentlayer.config.ts`.
 - Confirm referenced images exist under `public/static/images/...`.
 - Confirm blog drafts stay at 5 minutes or less by default, or explicitly note that the user approved a longer post.
-- Before finalizing any new or materially changed blog post, use an available sub-agent to run an independent `blog-factuality-review` pass, then address or explicitly report the review findings.
+- Before finalizing any new or materially changed blog post, use an available sub-agent to run an independent `blog-factuality-review` pass, then address or explicitly report the review findings. For beginner-facing explainers, include a teach-back of the mechanisms, transitions, and figure fit; label simulated comprehension reviews honestly. Recheck fixes against the final draft rather than reusing approval of an earlier version.
 - Run `pnpm build` when feasible, especially for new MDX, citations, components, or route-visible content.
 
 For code/layout changes:

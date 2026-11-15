@@ -19,7 +19,7 @@ Read and apply these skills in this order:
    - Purpose: create or update the content-calendar issue and Project item with content type, tags, target date, end date, slug, stage, and description.
 3. `blog-writing-guide`
    - Path: `.agents/skills/blog-writing-guide/SKILL.md`
-   - Purpose: apply the primary Pragmatic Engineer-inspired voice, ambition-without-hype standard, structure, technical quality bar, banned-language rules, title guidance, and review checklist before the MDX draft is finalized.
+   - Purpose: apply the primary editorial standard, progressive explanation, claim calibration, title guidance, and review checklist before the MDX draft is finalized. Pair with `anthropic-style-writing` for AI research and technical explainers.
 4. `blog-mdx-authoring`
    - Path: `.agents/skills/blog-mdx-authoring/SKILL.md`
    - Purpose: create the MDX file, frontmatter, slug, asset directory, and content structure.
@@ -52,7 +52,7 @@ Derive missing details from the provided blog whenever possible instead of block
 - Target date and end date when the user wants scheduling metadata.
 - Publication date. Default to today's date in `YYYY-MM-DD`.
 - Draft status. Default to `draft: false` unless the user asks for a draft article.
-- Style direction. Default to `blog-writing-guide` for all blog prose. The Pragmatic Engineer-inspired standard is the default.
+- Style direction. Use `blog-writing-guide` for all blog prose and `anthropic-style-writing` for AI research and technical explainers. Preserve practical engineering specificity and follow the user's requested voice.
 - Reading time. Default to 5 minutes or less unless the user explicitly asks for or approves a longer post.
 - Any external references or canonical URL.
 - Reference topic slug for `refs/<topic>/`. Default to the final blog slug when the user does not provide one.
@@ -118,18 +118,19 @@ Use `blog-mdx-authoring` to:
 - Choose the body scaffold by post type:
   - Engineering deep dive: problem, mechanism, architecture, tradeoffs, failure modes, practical application, references.
   - Migration/build story: outcome metrics, old system, constraints, migration design, validation, results, hindsight.
-  - AI research/explainer: definition, why now, how it works, evaluation, limitations, practical guidance, references.
+  - AI research/explainer: central question, core mechanism, components and advanced variants, evidence or evaluation, limitations, practical guidance, references. Add timely context when it matters.
   - Opinion/strategy essay: claim, tension, principle, examples, implications, closing stance.
 
 Keep the article concrete and technical. Prefer implementation details, architecture, tradeoffs, and citations over generic marketing language.
 
 Apply `blog-writing-guide` before finalizing the MDX draft:
 
-- Use the Pragmatic Engineer-inspired voice: direct, concrete, technically sharp, inside-view, source-backed, and grounded in shipped-work judgment.
-- Sell the strongest defensible thesis through the title, opening, summary, and TLDR.
+- Use the voice selected by `blog-writing-guide`. Technical explainers should use connected, evidence-led prose with concepts introduced before jargon; engineering stories should retain concrete operational judgment without inventing first-hand experience.
+- Make the title, opening, summary, and TLDR convey the central question or strongest defensible payoff. A clear explanatory title is appropriate for a conceptual guide.
 - Keep the draft at 5 minutes or less by default unless the user explicitly asked for or approved a longer post.
 - Open by stating the problem or conclusion in the first 2-3 sentences.
 - Structure the article around the reader's questions: problem, mechanics, tradeoffs, implementation, failed attempts, and known limitations where relevant.
+- Explain the central mechanism before adding advanced variants. Keep prerequisite explanations in the main reading path and use brief mechanism-level examples when they resolve a gap.
 - Make section headings specific and information-bearing.
 - Remove generic placeholders such as `Introduction`, `Background`, `Section 1`, and `Conclusion` unless that exact wording is genuinely the clearest heading.
 - Do not add a manual "Key Takeaways" section when `layout: 'PostBanner'`; `tldr` already renders as "Key Takeaways".
@@ -137,7 +138,7 @@ Apply `blog-writing-guide` before finalizing the MDX draft:
 - Remove banned language, vague superlatives, AI-prose tells, and unsupported hype.
 - End with something useful: docs, source code, an implementation path, or a concrete next step.
 
-After the first MDX draft exists, run one revision pass against `blog-writing-guide` before generating images and social copy. Keep the writing pass focused on prose, structure, title, technical quality, and claim calibration; do not let it change frontmatter, asset paths, or repo workflow conventions owned by `blog-mdx-authoring`.
+After the first MDX draft exists, run one revision pass against `blog-writing-guide` before generating images and social copy. Check causal progression, first-use definitions, example discipline, and paragraph flow. Plan each diagram's teaching purpose from that explanation, then recheck vocabulary, captions, and rendered sizing after the images are integrated. Keep frontmatter, asset paths, and repo workflow conventions under `blog-mdx-authoring`.
 
 ### 4. Create The Visual Assets
 

@@ -102,6 +102,8 @@ Assess whether the post works for Ylang Labs' audience: practical AI engineering
 
 Apply `.agents/skills/blog-writing-guide/SKILL.md` as the primary editorial rubric.
 
+For AI research and technical explainers, also apply `anthropic-style-writing`: connected paragraphs, a causal progression from the core mechanism to advanced variants, and vocabulary introduced before use. Do not require a fictional running example, a provocative title, or first-person research findings from a synthesis of public work.
+
 Run a simplicity pass before judging voice or polish. A post can be accurate and still fail because the reader has to carry too much abstract structure.
 
 Check for simplicity failures:
@@ -113,6 +115,9 @@ Check for simplicity failures:
 - Abstract label-plus-noun-pile sentences, such as "The output is a context packet: referenced files, invariants, hazards, examples to preserve, and open questions."
 - Sentences that name more than three abstract nouns when a direct verb would be clearer.
 - Terms like "contract", "packet", "surface", "artifact", "machinery", or "framework" used before the post has earned them.
+- Undefined terms or acronyms in the main text, takeaways, diagrams, or captions; an acronym expansion can still leave its purpose unexplained.
+- Advanced variants introduced before the core loop, missing handoffs between stages, or prerequisites hidden in optional panels.
+- Fragmented paragraphs, a heading for every term, forced analogies, or oversized figures that interrupt the argument.
 
 When this appears, quote the weak sentence and give a simpler rewrite. Prefer operational wording:
 
@@ -134,6 +139,10 @@ Then check the broader editorial bar:
 - No unnecessary marketing prose, vague superlatives, or buzzword stacking.
 - A conclusion that explains implications, next steps, or practical use.
 
+For beginner-facing explainers, run a teach-back using only the draft: explain the central mechanism, trace what each stage receives and changes, distinguish the concepts most likely to be confused, and state what the evidence does not establish. Identify the first sentence that requires missing outside knowledge. Then verify technical claims against sources separately, so expert knowledge does not silently repair gaps in the draft.
+
+Report this as a simulated comprehension review when performed by an agent, not a study with real readers. Recheck corrections against the final version; an earlier approval does not validate a rewritten argument. When figures are included, check that their terms are introduced before the image and that captions match the final prose. Browser checks remain necessary for actual reading widths, figure size, and mobile usability.
+
 ### 5. Check Citations And References
 
 For sourced posts:
@@ -143,6 +152,7 @@ For sourced posts:
 - If using BibTeX citations, confirm `bibliography: references-data.bib` is present and keys used in MDX exist in `data/references-data.bib`.
 - Do not accept a citation just because it exists. Check that the cited source supports the sentence attached to it.
 - Avoid long copied excerpts. Use short quotes only when needed and preserve attribution.
+- For standalone explainers, check the final References section and source-to-claim map. Preserve named attribution where needed and honor explicit inline-citation requirements; do not confuse an editorial inspiration with technical evidence.
 
 ## Severity Guide
 
@@ -214,6 +224,7 @@ Before finalizing a review, confirm:
 - Factual claims were separated from editorial judgments.
 - `blog-writing-guide` was used as the primary editorial rubric.
 - A simplicity pass checked for over-explaining, repeated examples, noun piles, and unnecessary abstract terminology.
+- Beginner-facing explainers were checked for teach-back, causal handoffs, first-use definitions, and figure vocabulary; simulated reviews were labeled honestly.
 - The draft is 5 minutes or less by default, or the review explicitly notes that the user approved a longer post.
 - High-risk claims were verified against primary or current sources.
 - Unsupported claims were explicitly marked instead of silently accepted.
