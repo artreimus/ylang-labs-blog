@@ -171,6 +171,28 @@ Conversations need a consistent representation. A **chat template** places the u
 
 Many SFT recipes calculate loss on the assistant’s response while excluding the user’s prompt from the loss. The prompt still provides context. For each response position, the model sees the preceding recorded tokens and learns to predict the next recorded token. It also learns the appropriate token for ending a turn; the generation program stops when it encounters a configured stopping condition or reaches its token limit.
 
+<figure className="mx-auto max-w-xl">
+  <a
+    href="/static/images/blogs/how-to-train-llms/learning-from-demonstrations.png"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <Image
+      src="/static/images/blogs/how-to-train-llms/learning-from-demonstrations.png"
+      alt="Prompt tokens P and Q and recorded reply token A feed a model. Its next-token distribution and desired target B meet at loss; later reply token C has no input connection."
+      width={1254}
+      height={1254}
+      sizes="(max-width: 768px) 100vw, 576px"
+      className="h-auto w-full rounded-md"
+    />
+  </a>
+  <figcaption>
+    One position in response-only SFT: P, Q, and the recorded reply token A provide context for
+    predicting B. The demonstration supplies B as the target; C is not visible to that prediction.
+    Probabilities are schematic.
+  </figcaption>
+</figure>
+
 Demonstrations can teach useful behavior, but they cannot cover every request the model will encounter. They also inherit mistakes and biases in the desired responses. Feedback provides another way to tell the model which responses should be favored.
 
 ### Learning from preferences
