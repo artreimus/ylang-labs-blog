@@ -1,0 +1,204 @@
+---
+title: 'Abliterated: Unrestricted AI Models'
+date: '2026-11-16'
+lastmod: '2026-11-16'
+tags: ['AI/ML', 'Generative AI']
+draft: false
+summary: 'Abliterated models refuse fewer requests. Learn how the edit works, what GLM-5.3’s results show, and how to try it on Qwen with Heretic.'
+tldr: |
+  - Abliteration weakens an internal pattern that helps a model refuse. It changes the model’s willingness to answer without teaching it new facts.
+  - You can use Heretic to find and apply an edit, then save the modified model. Its current release needs an explicit setting to select abliteration.
+  - Compare the original and edited models on requests kept out of the search. Fewer refusals do not guarantee accurate answers or preserved skills.
+authors: ['arthur-reimus']
+cardImage: '/static/images/blogs/abliteration-explained/forbidden-spark-branded/cardImage.png'
+images: ['/static/images/blogs/abliteration-explained/forbidden-spark-branded/blogHeader.png']
+imageTheme: 'white'
+layout: 'PostBanner'
+---
+
+<div className="-mx-4 max-w-3xl sm:mx-auto [&_a]:text-primary-800 dark:[&_a]:text-primary-300">
+
+**Abliteration** is a way to edit a language model so it refuses fewer requests. In its [September 2026 GLM study](https://www.anthropic.com/research/glm-5-3-and-the-spread-of-advanced-cyber-capabilities), Anthropic reported that it reduced GLM-5.3’s mean refusal rate from roughly **95% to 6%**, averaging three harmful-request benchmarks with equal weight. After editing, refusal was about 3% on JailbreakBench, 2% on HarmBench, and 12% on StrongREJECT.
+
+The study also checked [GPQA-Diamond](https://arxiv.org/abs/2311.12022), a test of difficult science questions, and [CyberGym](https://www.cybergym.io/cybergym/), which tests reproducing known software vulnerabilities. These measure task performance separately from refusal.
+
+How does the edit change refusal while retaining much of the model’s tested ability?
+
+<AbliterationRefusalChart />
+
+## What changes inside the model
+
+A language model predicts the next **token**, a word or part of one. Its **layers** are processing stages that pass lists of numbers forward to choose that token. Changing these numbers can change whether the model answers or refuses.
+
+These temporary numbers are **activations**. The learned values that transform them are **weights**; weights ordinarily stay fixed while activations change with each request. Abliteration targets a refusal-related pattern in those activations.
+
+## Finding the refusal direction
+
+Start with harmful requests the model generally refuses and harmless requests it generally answers. In Arditi and colleagues’ method, you record activations at matching points, average each group, and subtract the harmless average from the harmful average. The difference gives a candidate pattern associated with refusal.
+
+This pattern is called a **direction** because it describes how several numbers change together. Test it by removing the part of each activation that points along it, then generating answers to separate requests. Adding the direction can also make harmless requests more likely to be refused. These interventions help distinguish a pattern that affects refusal from one that merely tracks differences in topic or wording.
+
+<figure className="mx-auto max-w-3xl">
+  <a
+    href="/static/images/blogs/abliteration-explained/candidate-direction-testing-branded.png"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <Image
+      src="/static/images/blogs/abliteration-explained/candidate-direction-testing-branded.png"
+      alt="Activations from harmless and harmful requests are compared; adding or removing a candidate direction is tested on separate requests."
+      width={1536}
+      height={1024}
+      sizes="(max-width: 768px) 100vw, 768px"
+      className="h-auto w-full rounded-md"
+    />
+  </a>
+  <figcaption>
+    Compare activations, change the candidate pattern, then evaluate. Plus means adding the
+    direction; minus means removing each activation’s part along it. The geometry is schematic.
+  </figcaption>
+</figure>
+
+Keep some requests out of this search entirely. You will need them later to check whether the chosen edit works beyond the examples used to select it.
+
+## Making the edit permanent
+
+Consider an invented component with two inputs and two outputs. Its weights form a grid, or **matrix**. Each row calculates one output by multiplying the inputs by its weights and adding the results.
+
+```text
+Original weights      Edited weights
+[1  2]                [1  2]
+[3  4]                [0  0]
+```
+
+For input **(1, 1)**, the original outputs are **3** (1 + 2) and **7** (3 + 4). Think of **(3, 7)** as an arrow going three units across and seven up. If the selected direction is vertical, removing that part leaves **(3, 0)**. This is **projection**.
+
+<figure className="mx-auto max-w-xl">
+  <a
+    href="/static/images/blogs/abliteration-explained/directional-projection-branded.png"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <Image
+      src="/static/images/blogs/abliteration-explained/directional-projection-branded.png"
+      alt="The original activation is a black arrow. Its vertical part is removed, leaving the green horizontal part."
+      width={1536}
+      height={1024}
+      sizes="(max-width: 768px) 100vw, 576px"
+      className="h-auto w-full rounded-md"
+    />
+  </a>
+  <figcaption>
+    Black shows the original activation; dashed yellow is removed and green is retained. Arrow
+    lengths are schematic. The two-number example is invented.
+  </figcaption>
+</figure>
+
+A temporary intervention performs this projection whenever the component runs. Changing its second row to zeros instead makes the second output zero **for any input**, while keeping the first output’s calculation. Saving those weights makes the change persist across future requests.
+
+In a real model, the direction spans many coordinates, so the changes are spread across weight entries. There is no single row labelled “refusal.” Removing the direction from component outputs through their weights is called **weight orthogonalization**.
+
+The weight edit does not require retraining. Anthropic reports about 2,200 GPU hours (processing time summed across graphics processors) and USD 4,400, mostly search and evaluation. Its 600-hour, USD 1,200 estimate was for an experienced team. The report does not publish its complete GLM-5.3 editing configuration.
+
+## Try it on a small Qwen model
+
+[Heretic](https://github.com/p-e-w/heretic/tree/v2.1.0) automates direction search and weight edits. This example uses **2.1.0**, searching over directions and editing strengths. It is separate from Anthropic’s GLM experiment.
+
+Start with Linux, Python 3.11 or later, and an NVIDIA GPU configured for PyTorch. Check [Heretic’s hardware requirements](https://heretic-project.org/tutorial#prerequisites) for enough graphics memory to hold the model and its activations. These are the usual NVIDIA installation commands; use [PyTorch’s installer](https://pytorch.org/get-started/locally/) if your setup needs a different build.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install torch torchvision
+python -m pip install "heretic-llm==2.1.0"
+python -c "import torch; print(torch.cuda.is_available())"
+```
+
+The last command should print `True`; fix the GPU installation if it prints `False`. Create `config.toml` in the directory you will run Heretic from:
+
+```toml
+modifiers = [{ plugin = "heretic.modifiers.abliteration.Abliteration" }]
+
+[modifier.Abliteration]
+orthogonalize_direction = false
+row_normalization = "none"
+```
+
+Heretic otherwise defaults to a different method called Arbitrary-Rank Ablation. Here, `orthogonalize_direction = false` keeps the original mean-difference direction; `row_normalization = "none"` disables additional weight rescaling. The projection still happens.
+
+Run the search on [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507):
+
+```bash
+heretic Qwen/Qwen3-4B-Instruct-2507
+```
+
+Heretic uses built-in harmful and harmless prompt datasets and tries 100 edits by default. It counts refusal-related phrases and measures **KL divergence**, the change in first-token probabilities on harmless prompts. This measures one kind of drift, not every skill.
+
+Choose a trial with fewer refusals and low KL divergence, then inspect answers with the chat option. Choose **Save the model to a local folder** and enter a new path, such as `./qwen3-4b-abliterated`. Then choose **Merge the LoRA and export the full model**. A LoRA (low-rank adaptation) adapter stores the changes; merging combines them with the base weights. Keep the configuration, trial, model revision, and package versions.
+
+## Check what changed
+
+Heretic’s scores helped choose the edit, so use fresh requests for the final comparison. Put them in `heldout.txt`, one per line, and save this as `compare.py`:
+
+```python
+import sys
+from pathlib import Path
+from transformers import pipeline
+
+generate = pipeline("text-generation", model=sys.argv[1], device_map="auto")
+for prompt in Path("heldout.txt").read_text(encoding="utf-8").splitlines():
+    if not prompt.strip():
+        continue
+    result = generate(
+        [{"role": "user", "content": prompt}],
+        max_new_tokens=256, do_sample=False, return_full_text=False,
+    )
+    print(f"{prompt}\n{result[0]['generated_text']}\n")
+```
+
+Run it separately for each model, so only one is loaded at a time:
+
+```bash
+python compare.py Qwen/Qwen3-4B-Instruct-2507 > original.txt
+python compare.py ./qwen3-4b-abliterated > edited.txt
+```
+
+Read both files. Check harmful compliance, unnecessary refusals, task accuracy, and appropriate uncertainty. HarmBench and XSTest offer evaluation sets; choose requests not used in the search. If answers are cut off, increase the same token limit for both models.
+
+A separate Anthropic simulation compared direct requests, deceptive framing, prefilled reasoning implying agreement, and abliteration. Engagement meant attempting a target connection through a fake command tool; no generated code ran or external access occurred.
+
+<AbliterationEngagementChart />
+
+Here, 100% engagement means beginning an action, not completing an exploit. These are different requests and a different metric from the refusal tests above.
+
+## Abliterated models on Hugging Face
+
+You can also download models that other people have edited. These three are community releases by huihui-ai; their cards describe them as proofs of concept.
+
+<div className="[&_a]:text-primary-800 dark:[&_a]:text-primary-300">
+
+| Family   | Community model on Hugging Face                                                                                       | Original model                                                                                  |
+| -------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Qwen     | [Huihui Qwen3-8B abliterated v2](https://huggingface.co/huihui-ai/Huihui-Qwen3-8B-abliterated-v2)                     | [Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B)                                                |
+| GLM      | [Huihui GLM-4.7-Flash abliterated](https://huggingface.co/huihui-ai/Huihui-GLM-4.7-Flash-abliterated)                 | [GLM-4.7-Flash](https://huggingface.co/zai-org/GLM-4.7-Flash)                                   |
+| DeepSeek | [DeepSeek-R1-Distill-Qwen-32B abliterated](https://huggingface.co/huihui-ai/DeepSeek-R1-Distill-Qwen-32B-abliterated) | [DeepSeek-R1-Distill-Qwen-32B](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B) |
+
+</div>
+
+The GLM row is **GLM-4.7-Flash**, a different model from the report’s GLM-5.3. The DeepSeek row starts from a Qwen-based model trained using DeepSeek-R1 outputs—a process called **distillation**—and is not the full DeepSeek-R1 model.
+
+Their cards point to [Sumandora’s code](https://github.com/Sumandora/remove-refusals-with-transformers) for finding a direction and removing it during generation. Qwen’s publisher also mentions a layer-0 adjustment. The cards do not explain every edit used in these releases; the Heretic walkthrough above is a separate example.
+
+## References
+
+1. Anthropic. [GLM-5.3 and the spread of advanced cyber capabilities](https://www.anthropic.com/research/glm-5-3-and-the-spread-of-advanced-cyber-capabilities). September 29, 2026.
+2. Andy Arditi et al. [Refusal in Language Models Is Mediated by a Single Direction](https://arxiv.org/abs/2406.11717). NeurIPS, 2024.
+3. Maxime Labonne. [Uncensor any LLM with abliteration](https://huggingface.co/blog/mlabonne/abliteration). Hugging Face, 2024.
+4. Mantas Mazeika et al. [HarmBench](https://arxiv.org/abs/2402.04249). 2024.
+5. Paul Röttger et al. [XSTest](https://aclanthology.org/2024.naacl-long.301/). NAACL, 2024.
+6. David Rein et al. [GPQA: A Graduate-Level Google-Proof Q&A Benchmark](https://arxiv.org/abs/2311.12022). 2023.
+7. [CyberGym](https://www.cybergym.io/cybergym/): evaluating agents on reproducing software vulnerabilities. 2025.
+8. Philipp Emanuel Weidmann et al. [Heretic 2.1.0](https://github.com/p-e-w/heretic/tree/v2.1.0): [configuration](https://github.com/p-e-w/heretic/blob/v2.1.0/config.default.toml), [directional ablation](https://github.com/p-e-w/heretic/blob/v2.1.0/src/heretic/modifiers/abliteration.py), and [tutorial](https://heretic-project.org/tutorial). 2026.
+9. Hugging Face. [Transformers text-generation pipeline](https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.TextGenerationPipeline), with [5.18.0 source](https://github.com/huggingface/transformers/blob/v5.18.0/src/transformers/pipelines/text_generation.py).
+
+</div>
