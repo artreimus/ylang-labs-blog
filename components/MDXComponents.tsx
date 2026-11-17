@@ -53,6 +53,10 @@ import MemoryArchitecture from './blogs/context-engineering-for-ai-agents/Memory
 import ProcessFlow from './blogs/context-engineering-for-ai-agents/ProcessFlow'
 import HtmlMarkdownArtifactExperience from './blogs/the-unreasonable-effectiveness-of-html-for-agent-output/HtmlMarkdownArtifactExperience'
 import XllmBenchmarkCharts from './blogs/xllm-cluster-architecture-ai-inference/XllmBenchmarkCharts'
+import {
+  AbliterationRefusalChart,
+  AbliterationEngagementChart,
+} from './blogs/abliteration-explained/AbliterationCharts'
 
 // Core MDX Components
 const coreMDXComponents = {
@@ -125,6 +129,11 @@ const xllmBlogComponents = {
   XllmBenchmarkCharts,
 }
 
+const abliterationBlogComponents = {
+  AbliterationRefusalChart,
+  AbliterationEngagementChart,
+}
+
 export const components: MDXComponents = {
   ...coreMDXComponents,
   ...dspyBlogComponents,
@@ -136,4 +145,5 @@ export const components: MDXComponents = {
   ...contextEngineeringBlogComponents,
   ...htmlVsMarkdownBlogComponents,
   ...xllmBlogComponents,
+  ...abliterationBlogComponents,
 }
