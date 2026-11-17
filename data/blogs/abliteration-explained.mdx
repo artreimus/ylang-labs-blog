@@ -22,9 +22,19 @@ layout: 'PostBanner'
 
 The study also checked [GPQA-Diamond](https://arxiv.org/abs/2311.12022), a test of difficult science questions, and [CyberGym](https://www.cybergym.io/cybergym/), which tests reproducing known software vulnerabilities. These measure task performance separately from refusal.
 
-How does the edit change refusal while retaining much of the model’s tested ability?
-
 <AbliterationRefusalChart />
+
+## Three ways to reduce refusals
+
+You can change the request or change the model. The model’s **weights** are the learned numbers that govern its calculations.
+
+| Approach         | What you change                                                                | Tradeoff                                                              |
+| ---------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| Prompt jailbreak | Reword the prompt or conversation to bypass a refusal. The weights stay fixed. | Success can vary across requests and model updates.                   |
+| Fine-tuning      | Train the model further on examples, updating its weights.                     | Requires training data and compute; other behavior can change too.    |
+| Abliteration     | Edit weights directly to weaken a refusal-related pattern, without retraining. | Capability can decline alongside refusal; preservation needs testing. |
+
+Fine-tuning can improve useful skills, and abliteration can also damage them. Check refusal and task performance separately.
 
 ## What changes inside the model
 
@@ -98,19 +108,18 @@ A temporary intervention performs this projection whenever the component runs. C
 
 In a real model, the direction spans many coordinates, so the changes are spread across weight entries. There is no single row labelled “refusal.” Removing the direction from component outputs through their weights is called **weight orthogonalization**.
 
-The weight edit does not require retraining. Anthropic reports about 2,200 GPU hours (processing time summed across graphics processors) and USD 4,400, mostly search and evaluation. Its 600-hour, USD 1,200 estimate was for an experienced team. The report does not publish its complete GLM-5.3 editing configuration.
+The edit needs no retraining. Anthropic reports about 2,200 GPU hours (time summed across graphics processors) and USD 4,400, mostly search and evaluation. Its 600-hour, USD 1,200 figure estimates an experienced team’s effort. The complete GLM-5.3 editing configuration is not published.
 
-## Try it on a small Qwen model
+## Use Heretic to automate the edit
 
-[Heretic](https://github.com/p-e-w/heretic/tree/v2.1.0) automates direction search and weight edits. This example uses **2.1.0**, searching over directions and editing strengths. It is separate from Anthropic’s GLM experiment.
+[Heretic](https://heretic-project.org/) automates the search for weight edits, scoring refusal and changes in output. This example uses [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B) from its official quickstart and settings checked against **Heretic 2.1.0**. It is separate from Anthropic’s GLM experiment.
 
-Start with Linux, Python 3.11 or later, and an NVIDIA GPU configured for PyTorch. Check [Heretic’s hardware requirements](https://heretic-project.org/tutorial#prerequisites) for enough graphics memory to hold the model and its activations. These are the usual NVIDIA installation commands; use [PyTorch’s installer](https://pytorch.org/get-started/locally/) if your setup needs a different build.
+Use Linux, Python 3.11+, and an NVIDIA GPU with [enough memory](https://heretic-project.org/tutorial#prerequisites) for the model and its activations. Check [PyTorch’s installer](https://pytorch.org/get-started/locally/) for your hardware before using these NVIDIA setup commands.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install torch torchvision
-python -m pip install "heretic-llm==2.1.0"
 python -c "import torch; print(torch.cuda.is_available())"
 ```
 
@@ -124,34 +133,43 @@ orthogonalize_direction = false
 row_normalization = "none"
 ```
 
-Heretic otherwise defaults to a different method called Arbitrary-Rank Ablation. Here, `orthogonalize_direction = false` keeps the original mean-difference direction; `row_normalization = "none"` disables additional weight rescaling. The projection still happens.
+This selects directional abliteration instead of Heretic’s default, Arbitrary-Rank Ablation. The other settings retain the original mean-difference direction and disable extra weight rescaling; projection still happens.
 
-Run the search on [Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507):
+Then install Heretic and run the search:
 
 ```bash
-heretic Qwen/Qwen3-4B-Instruct-2507
+pip install -U heretic-llm
+heretic Qwen/Qwen3.5-4B
 ```
+
+The install command selects the latest stable release. To repeat the checked version, use `pip install heretic-llm==2.1.0` instead.
 
 Heretic uses built-in harmful and harmless prompt datasets and tries 100 edits by default. It counts refusal-related phrases and measures **KL divergence**, the change in first-token probabilities on harmless prompts. This measures one kind of drift, not every skill.
 
-Choose a trial with fewer refusals and low KL divergence, then inspect answers with the chat option. Choose **Save the model to a local folder** and enter a new path, such as `./qwen3-4b-abliterated`. Then choose **Merge the LoRA and export the full model**. A LoRA (low-rank adaptation) adapter stores the changes; merging combines them with the base weights. Keep the configuration, trial, model revision, and package versions.
+Choose a trial with fewer refusals and low KL divergence, then inspect answers with the chat option. Choose **Save the model to a local folder** and enter a new path, such as `./qwen3.5-4b-abliterated`. Then choose **Merge the LoRA and export the full model**. A LoRA (low-rank adaptation) adapter stores the changes; merging combines them with the base weights. Keep the configuration, trial, model revision, and package versions.
 
 ## Check what changed
 
 Heretic’s scores helped choose the edit, so use fresh requests for the final comparison. Put them in `heldout.txt`, one per line, and save this as `compare.py`:
 
+Qwen3.5 also accepts images; use `image-text-to-text` even for our text-only chats. Both runs use the original processor, which formats the conversation, and disable thinking mode.
+
 ```python
 import sys
 from pathlib import Path
-from transformers import pipeline
+from transformers import AutoProcessor, pipeline
 
-generate = pipeline("text-generation", model=sys.argv[1], device_map="auto")
+processor = AutoProcessor.from_pretrained("Qwen/Qwen3.5-4B")
+generate = pipeline(
+    "image-text-to-text", model=sys.argv[1], processor=processor, device_map="auto"
+)
 for prompt in Path("heldout.txt").read_text(encoding="utf-8").splitlines():
     if not prompt.strip():
         continue
+    messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
     result = generate(
-        [{"role": "user", "content": prompt}],
-        max_new_tokens=256, do_sample=False, return_full_text=False,
+        text=messages, enable_thinking=False, return_full_text=False,
+        generate_kwargs={"max_new_tokens": 256, "do_sample": False},
     )
     print(f"{prompt}\n{result[0]['generated_text']}\n")
 ```
@@ -159,8 +177,8 @@ for prompt in Path("heldout.txt").read_text(encoding="utf-8").splitlines():
 Run it separately for each model, so only one is loaded at a time:
 
 ```bash
-python compare.py Qwen/Qwen3-4B-Instruct-2507 > original.txt
-python compare.py ./qwen3-4b-abliterated > edited.txt
+python compare.py Qwen/Qwen3.5-4B > original.txt
+python compare.py ./qwen3.5-4b-abliterated > edited.txt
 ```
 
 Read both files. Check harmful compliance, unnecessary refusals, task accuracy, and appropriate uncertainty. HarmBench and XSTest offer evaluation sets; choose requests not used in the search. If answers are cut off, increase the same token limit for both models.
@@ -198,7 +216,8 @@ Their cards point to [Sumandora’s code](https://github.com/Sumandora/remove-re
 5. Paul Röttger et al. [XSTest](https://aclanthology.org/2024.naacl-long.301/). NAACL, 2024.
 6. David Rein et al. [GPQA: A Graduate-Level Google-Proof Q&A Benchmark](https://arxiv.org/abs/2311.12022). 2023.
 7. [CyberGym](https://www.cybergym.io/cybergym/): evaluating agents on reproducing software vulnerabilities. 2025.
-8. Philipp Emanuel Weidmann et al. [Heretic 2.1.0](https://github.com/p-e-w/heretic/tree/v2.1.0): [configuration](https://github.com/p-e-w/heretic/blob/v2.1.0/config.default.toml), [directional ablation](https://github.com/p-e-w/heretic/blob/v2.1.0/src/heretic/modifiers/abliteration.py), and [tutorial](https://heretic-project.org/tutorial). 2026.
-9. Hugging Face. [Transformers text-generation pipeline](https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.TextGenerationPipeline), with [5.18.0 source](https://github.com/huggingface/transformers/blob/v5.18.0/src/transformers/pipelines/text_generation.py).
+8. Philipp Emanuel Weidmann et al. [Heretic](https://heretic-project.org/): [2.1.0 source](https://github.com/p-e-w/heretic/tree/v2.1.0), [configuration](https://github.com/p-e-w/heretic/blob/v2.1.0/config.default.toml), [directional ablation](https://github.com/p-e-w/heretic/blob/v2.1.0/src/heretic/modifiers/abliteration.py), and [tutorial](https://heretic-project.org/tutorial). 2026.
+9. Hugging Face. [Transformers image-text-to-text pipeline](https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.ImageTextToTextPipeline), with [5.18.0 source](https://github.com/huggingface/transformers/blob/v5.18.0/src/transformers/pipelines/image_text_to_text.py).
+10. Xiangyu Qi et al. [Fine-tuning Aligned Language Models Compromises Safety, Even When Users Do Not Intend To!](https://arxiv.org/abs/2310.03693). 2023.
 
 </div>
